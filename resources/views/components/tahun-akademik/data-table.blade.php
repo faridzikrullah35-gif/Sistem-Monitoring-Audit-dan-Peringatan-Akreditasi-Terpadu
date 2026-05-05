@@ -1,0 +1,99 @@
+<div id="tahunAkademikTableContainer">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tahun Akademik</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Semester</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    
+                    @if($tahunAkademiks->isEmpty())
+                    <!-- KONDISI JIKA DATA MASIH KOSONG -->
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada data tahun akademik</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Silahkan tambahkan data baru menggunakan tombol di atas.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @else
+                    <!-- LOOPING DATA DARI DATABASE -->
+                    @foreach($tahunAkademiks as $ta)
+                    
+                    <!-- Background Baris berubah biru muda jika status Aktif -->
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors {{ $ta->status == 'Aktif' ? 'bg-blue-50/50 dark:bg-blue-900/10' : '' }}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <!-- Icon dinamis: Kilat (biru) jika aktif, Kalender (abu) jika nonaktif -->
+                                <div class="w-10 h-10 rounded-lg {{ $ta->status == 'Aktif' ? 'bg-blue-100 dark:bg-blue-900' : 'bg-gray-100 dark:bg-gray-700' }} flex items-center justify-center">
+                                    @if($ta->status == 'Aktif')
+                                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    @else
+                                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    @endif
+                                </div>
+                                <!-- Font Bold jika aktif, Medium jika nonaktif -->
+                                <span class="text-sm {{ $ta->status == 'Aktif' ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-700 dark:text-gray-300' }}">{{ $ta->tahun_akademik }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm {{ $ta->status == 'Aktif' ? 'text-gray-800 dark:text-gray-200 font-medium' : 'text-gray-600 dark:text-gray-400' }}">{{ $ta->semester }}</td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($ta->status == 'Aktif')
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                                    Aktif
+                                </span>
+                            @else
+                                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                                    Nonaktif
+                                </span>
+                            @endif
+                        </td>
+                        
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                            <button onclick="openModal('edit', {{ $ta->id }})" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200">Edit</button>
+                            
+                            <!-- Tombol Hapus Hanya Muncul Jika Nonaktif -->
+                            @if($ta->status != 'Aktif')
+                                <button type="button"
+                                    data-action="delete"
+                                    data-url="{{ route('tahun-akademik.delete', $ta->id) }}"
+                                    data-method="POST"
+                                    data-confirm="Yakin ingin menghapus tahun akademik ini?"
+                                    data-table-id="#tahunAkademikTableContainer"
+                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200">
+                                    Hapus
+                                </button>
+                            @endif
+                        </td>
+                    </tr>
+                    
+                    @endforeach
+                    @endif
+
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination Dinamis -->
+        <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Menampilkan {{ $tahunAkademiks->firstItem() ?? 0 }} - {{ $tahunAkademiks->lastItem() ?? 0 }} dari {{ $tahunAkademiks->total() }} data
+            </div>
+            
+            <div class="flex items-center gap-1">
+                {{ $tahunAkademiks->links('vendor.pagination.tailwind') }}
+            </div>
+        </div>
+    </div>
+</div>
