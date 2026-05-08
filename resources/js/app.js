@@ -14,6 +14,7 @@ import './confirm-dialog.js';
 import TableRefresh from './modules/table-refresh';
 import { initAjaxForms, refreshSelectBox, refreshSelectBoxes, refreshAllSelectBoxes, registerSelectBox } from './modules/ajax-form';
 import './components/isi-akses-auditor';
+import './components/indikator-modal.js';
 
 /* =========================
    GLOBAL SETUP
@@ -420,6 +421,9 @@ window.refreshStandarTable = () => TableRefresh.refresh('#standarTableContainer'
 window.refreshKriteriaTable = () => TableRefresh.refresh('#kriteria_audit');
 window.refreshAksesAuditorTable = () => TableRefresh.refresh('#akses_auditor_table');
 window.refreshIsiAksesAuditorTable = () => TableRefresh.refresh('#isi_akses_auditor_table');
+window.refreshMatrixTable = () => TableRefresh.refresh('#matrixTableContainer');
+window.refreshIndikatorTable = () => TableRefresh.refresh('#indikatorTableContainer');
+window.refreshPertanyaanAmiProdiTable = () => TableRefresh.refresh('#pertanyaanAmiProdiTableContainer');
 
 // Refresh semua select dengan atribut data-auto-refresh
 window.refreshAllSelectBoxes();

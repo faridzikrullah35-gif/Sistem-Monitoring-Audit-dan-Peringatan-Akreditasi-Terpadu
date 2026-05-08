@@ -58,7 +58,10 @@ const TableRefresh = {
             '#kriteria_audit',
             '#kriteria_page',
             '#akses_auditor_table',
-            '#isi_akses_auditor_table'
+            '#isi_akses_auditor_table',
+            '#matrixTableContainer',
+            '#indikatorTableContainer',
+            '#pertanyaanAmiProdiTableContainer',
         ];
 
         for (const tableId of tables) {

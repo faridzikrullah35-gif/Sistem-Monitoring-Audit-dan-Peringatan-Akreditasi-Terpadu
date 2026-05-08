@@ -65,31 +65,52 @@
         'xl:justify-center' :
         'justify-start px-4'">
         
-        <a href="/dashboard" class="flex items-center gap-3">
+        <a href="/dashboard" class="flex items-center gap-3 w-full">
             
-            <!-- Teks saat sidebar EXPANDED / HOVERED / MOBILE OPEN -->
+            <!-- Tampilan saat sidebar EXPANDED / HOVERED / MOBILE OPEN -->
             <div x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 -translate-x-2"
                 x-transition:enter-end="opacity-100 translate-x-0"
-                class="flex flex-col">
+                class="flex flex-col items-center w-full">
+                
+                <!-- LOGO - Ukuran bisa diatur di sini -->
+                <div class="flex justify-center w-full mb-2">
+                    <img src="{{ asset('images/img/LPM - Logo.png') }}" 
+                        alt="Logo LPM" 
+                        class="logo-sidebar-expanded"
+                        style="max-width: 80%; width: auto; height: auto; max-height: 80px; object-fit: contain;">
+                </div>
+
                 <span class="text-2xl font-bold text-slate-800 dark:text-white whitespace-nowrap tracking-wide">
                     SIMANTAP
                 </span>
-                <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap leading-tight">
+                <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400 whitespace-nowrap leading-tight text-center">
                     Sistem Monitoring Audit & Peringatan Akreditasi Terpadu
                 </span>
             </div>
 
-            <!-- Teks saat sidebar COLLAPSED (hanya inisial) -->
+            <!-- Tampilan saat sidebar COLLAPSED (hanya inisial) -->
             <div x-show="!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen"
                 x-transition:enter="transition ease-out duration-200"
-                class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500">
-                <span class="text-sm font-bold text-white">S</span>
+                class="flex flex-col items-center w-full">
+                
+                <!-- LOGO versi kecil saat collapsed -->
+                <img src="{{ asset('images/img/LPM - Logo.png') }}" 
+                    alt="Logo LPM" 
+                    style="width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px;">
             </div>
 
         </a>
     </div>
+
+    <!-- Optional: Tambahkan style custom di head atau file CSS -->
+    <style>
+        .logo-sidebar-expanded {
+            max-width: 80%;
+            max-height: 80px;
+        }
+    </style>
 
     <!-- Navigation Menu -->
     <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">

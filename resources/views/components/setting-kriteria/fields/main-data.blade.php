@@ -46,11 +46,4 @@
             </div>
         </div>
     </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="sm:col-span-2">
-            <label for="sub_kriteria" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deskripsi Kriteria <span class="text-red-500">*</span></label>
-            <textarea id="sub_kriteria" name="sub_kriteria" rows="3" required class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 resize-none" placeholder="Tuliskan deskripsi indikator penilaian..."></textarea>
-        </div>
-    </div>
 </div>

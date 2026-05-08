@@ -279,6 +279,31 @@ window.deleteAksesAuditor = (id) => {
     );
 };
 
+window.deleteMatrix = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data matrix ini?',
+        () => executeDelete({
+            url: `/matrix/delete/${id}`,
+            tableId: '#matrixTableContainer',
+        })
+    );
+};
+
+// window.deletePertanyaanAmiProdi = (id) => {
+
+//     confirmDelete(
+//         'Konfirmasi Hapus',
+//         'Yakin ingin menghapus indikator ini?',
+//         () => executeDelete({
+//             url: `/pertanyaan-ami-prodi/${id}`,
+//             method: 'DELETE',
+//             tableId: '#pertanyaanAmiProdiTableContainer',
+//         })
+//     );
+
+// };
+
 // ============================================================
 // DOM INIT (SIMPLIFIED)
 // ============================================================

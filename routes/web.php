@@ -11,6 +11,9 @@ use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\StandarController;
 use App\Http\Controllers\SettingAksesAuditorController;
 use App\Http\Controllers\IsiAksesAuditorController;
+use App\Http\Controllers\MatrixPenilaianController;
+use App\Http\Controllers\IndikatorController;
+use App\Http\Controllers\PertanyaanAmiProdiController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -242,3 +245,54 @@ Route::put('/isi-akses-auditor/{id}', [IsiAksesAuditorController::class, 'update
 // DELETE
 Route::delete('/isi-akses-auditor/{id}', [IsiAksesAuditorController::class, 'destroy'])
     ->name('isi-akses-auditor.destroy');
+
+// LIST PAGE (INDEX)
+Route::get('/matriks-penilaian', [MatrixPenilaianController::class, 'index'])
+    ->name('matriks-penilaian.index');
+
+// CREATE / STORE
+Route::post('/matrix/store', [MatrixPenilaianController::class, 'store'])
+    ->name('matrix.store');
+
+// GET SINGLE DATA (FOR EDIT MODAL AJAX)
+Route::get('/matrix/{id}', [MatrixPenilaianController::class, 'show'])
+    ->name('matrix.show');
+
+// UPDATE DATA
+Route::post('/matrix/update/{id}', [MatrixPenilaianController::class, 'update'])
+    ->name('matrix.update');
+
+// DELETE DATA
+Route::post('/matrix/delete/{id}', [MatrixPenilaianController::class, 'destroy'])
+    ->name('matrix.delete');
+
+Route::post('/indikator/store', [IndikatorController::class, 'store'])
+    ->name('indikator.store');
+
+Route::put('/indikator/{id}', [IndikatorController::class, 'update'])
+    ->name('indikator.update');
+
+Route::delete('/indikator/{id}', [IndikatorController::class, 'destroy'])
+    ->name('indikator.destroy');
+
+Route::get('/indikator/by-elemen/{id}', [IndikatorController::class, 'getByElemen']);
+
+// LIST PAGE (INDEX)
+Route::get('/pertanyaan-ami-prodi', [PertanyaanAmiProdiController::class, 'index'])
+    ->name('pertanyaan-ami-prodi.index');
+
+// Store
+Route::post('/pertanyaan-ami-prodi/store', [PertanyaanAmiProdiController::class, 'store'])
+    ->name('pertanyaan-ami-prodi.store');
+
+// Update
+Route::put('/pertanyaan-ami-prodi/{id}', [PertanyaanAmiProdiController::class, 'update'])
+    ->name('pertanyaan-ami-prodi.update');
+
+// Delete
+Route::delete('/pertanyaan-ami-prodi/delete-all', [PertanyaanAmiProdiController::class, 'deleteAll'])
+    ->name('pertanyaan-ami-prodi.delete-all');
+Route::delete('/pertanyaan-ami-prodi/delete-filtered', [PertanyaanAmiProdiController::class, 'destroyFiltered'])
+    ->name('pertanyaan-ami-prodi.delete-filtered');
+Route::delete('/pertanyaan-ami-prodi/{id}', [PertanyaanAmiProdiController::class, 'destroy'])
+    ->name('pertanyaan-ami-prodi.delete');

@@ -157,15 +157,12 @@ export function initAjaxForms() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             
             const response = await fetch(url, {
-                method: 'POST', // tetap POST untuk Laravel spoofing
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.content,
                     'Accept': 'application/json',
                 },
-                body: new URLSearchParams({
-                    _method: method,
-                    ...Object.fromEntries(formData)
-                })
+                body: formData
             });
             
             const data = await response.json();

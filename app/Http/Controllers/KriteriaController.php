@@ -32,7 +32,6 @@ class KriteriaController extends Controller
             'data' => [
                 'id' => $kriteria->id,
                 'standar_id' => $kriteria->standar_id,
-                'sub_kriteria' => $kriteria->sub_kriteria
             ]
         ]);
     }
@@ -44,16 +43,14 @@ class KriteriaController extends Controller
     {
         $request->validate([
             'standar_id'   => 'required|exists:standar,id',
-            'sub_kriteria' => 'required|string'
         ]);
 
         $kriteria = KriteriaAudit::create([
             'standar_id'   => $request->standar_id,
-            'sub_kriteria' => $request->sub_kriteria,
         ]);
 
         return response()->json([
-            'message' => 'Sub-Kriteria berhasil ditambahkan!',
+            'message' => 'Kriteria berhasil ditambahkan!',
             'data'    => $kriteria,
         ]);
     }
@@ -66,18 +63,16 @@ class KriteriaController extends Controller
         
         $request->validate([
             'standar_id'   => 'required|exists:standar,id',
-            'sub_kriteria' => 'required|string'
         ]);
 
         $kriteria = KriteriaAudit::findOrFail($id);
 
         $kriteria->update([
             'standar_id'   => $request->standar_id,
-            'sub_kriteria' => $request->sub_kriteria,
         ]);
 
         return response()->json([
-            'message' => 'Sub-Kriteria berhasil diupdate!',
+            'message' => 'Kriteria berhasil diupdate!',
             'data'    => $kriteria,
         ]);
     }
@@ -91,7 +86,7 @@ class KriteriaController extends Controller
         $kriteria->delete();
 
         return response()->json([
-            'message' => 'Sub-Kriteria berhasil dihapus!',
+            'message' => 'Kriteria berhasil dihapus!',
         ]);
     }
 }

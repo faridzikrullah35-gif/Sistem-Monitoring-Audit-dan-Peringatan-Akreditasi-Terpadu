@@ -10,7 +10,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Akses Auditor</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Atur hak akses auditor terhadap fakultas dan unit kerja tertentu</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Atur hak akses auditor terhadap unit dan sub-unit kerja tertentu</p>
             </div>
         </div>
 

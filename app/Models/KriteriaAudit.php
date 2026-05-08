@@ -10,7 +10,6 @@ class KriteriaAudit extends Model
 
     protected $fillable = [
         'standar_id',
-        'sub_kriteria',
     ];
 
     /**
@@ -19,5 +18,10 @@ class KriteriaAudit extends Model
     public function standar()
     {
         return $this->belongsTo(Standar::class, 'standar_id');
+    }
+
+    public function matrixs()
+    {
+        return $this->hasMany(Matrix::class, 'kriteria_audit_id');
     }
 }

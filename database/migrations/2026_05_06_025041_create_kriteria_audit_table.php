@@ -14,8 +14,6 @@ return new class extends Migration {
                 ->constrained('standar')
                 ->cascadeOnDelete();
 
-            $table->text('sub_kriteria');
-
             $table->timestamps();
         });
     }
