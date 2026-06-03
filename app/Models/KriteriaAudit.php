@@ -17,7 +17,7 @@ class KriteriaAudit extends Model
      */
     public function standar()
     {
-        return $this->belongsTo(Standar::class, 'standar_id');
+        return $this->belongsTo(Standar::class);
     }
 
     public function matrixs()

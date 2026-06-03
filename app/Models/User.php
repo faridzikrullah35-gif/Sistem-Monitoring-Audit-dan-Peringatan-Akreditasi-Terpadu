@@ -46,4 +46,10 @@ class User extends Authenticatable
             ? asset('storage/' . $this->photo)
             : 'https://ui-avatars.com/api/?name=' . urlencode($this->name);
     }
+
+    // Relasi ke auditiee
+    public function auditiees()
+    {
+        return $this->hasMany(Auditiee::class, 'users_id');
+    }
 }

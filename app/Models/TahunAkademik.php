@@ -16,4 +16,10 @@ class TahunAkademik extends Model
         'semester',
         'status',
     ];
+
+    public function auditiees()
+    {
+        return $this->hasMany(Auditiee::class, 'tahun_akademik_id');
+    }
+
 }

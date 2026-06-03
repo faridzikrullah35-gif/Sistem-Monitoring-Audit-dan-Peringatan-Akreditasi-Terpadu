@@ -183,6 +183,13 @@
 
 <x-ui.alert />
 
+@include('layouts.routes.pengguna')
+@include('layouts.routes.data-auditor')
+@include('layouts.routes.tahun-akademik')
+@include('layouts.routes.setting-kriteria')
+@include('layouts.routes.setting-akses-auditor')
+@include('layouts.routes.matrix-penilaian')
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>

@@ -77,7 +77,7 @@
                     @click="deleteFiltered()"
                     class="h-9 px-4 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
                 >
-                    Hapus Hasil Filter
+                    Hapus Data Filter
                 </button>
 
             </div>
@@ -214,7 +214,7 @@ function pertanyaanFilter() {
 
         async deleteAllGlobal() {
 
-            const url = '/pertanyaan-ami-prodi/delete-all';
+            const url = '/admin/pertanyaan-ami-prodi/delete-all';
 
             confirmDelete(
                 '⚠ Hapus Semua Data',

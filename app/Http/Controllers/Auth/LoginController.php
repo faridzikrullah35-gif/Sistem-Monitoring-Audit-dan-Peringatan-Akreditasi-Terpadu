@@ -22,8 +22,27 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-           return redirect()->route('dashboard')
+           if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard')
                 ->with('success', 'Login berhasil!');
+        }
+
+        if (Auth::user()->role === 'auditor') {
+            return redirect()->route('auditor.dashboard')
+                ->with('success', 'Login berhasil!');
+        }
+
+        if (Auth::user()->role === 'prodi') {
+            return redirect()->route('prodi.dashboard')
+                ->with('success', 'Login berhasil!');
+        }
+
+        if (Auth::user()->role === 'unit_kerja') {
+            return redirect()->route('auditor.dashboard')
+                ->with('success', 'Login berhasil!');
+        }
+
+        abort(403);
         }
 
         return redirect()->route('login')

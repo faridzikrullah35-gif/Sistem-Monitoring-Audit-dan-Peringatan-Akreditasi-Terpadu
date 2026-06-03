@@ -215,14 +215,28 @@ class PertanyaanAmiProdiController extends Controller
      */
     public function destroy($id)
     {
-        $data = PertanyaanAmiProdi::findOrFail($id);
-
-        $data->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Indikator berhasil dihapus.'
-        ]);
+        try {
+            $data = PertanyaanAmiProdi::find($id);
+            
+            if (!$data) {
+                return response()->json([
+                    'success' => true,
+                ]);
+            }
+            
+            $data->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil dihapus.'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroyFiltered(Request $request)

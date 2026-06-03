@@ -87,15 +87,23 @@
         document.body.classList.add('overflow-hidden');
 
         // reset
-        form.action = '/matrix/store';
+        form.action = window.routes.matrixPenilaian.store;
         document.getElementById('matrix_id').value = '';
         document.getElementById('kriteria').value = '';
         document.getElementById('elemen').value = '';
 
-        if (type === 'edit') {
+    if (type === 'edit' && id) {
+        try {
             title.innerText = 'Edit Matrix';
 
-            const res = await fetch(`/matrix/${id}`);
+            const url = window.routes.matrixPenilaian.show.replace(':id', id);
+
+            const res = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
             const result = await res.json();
             const data = result;
 
@@ -103,7 +111,15 @@
             document.getElementById('elemen').value = data.elemen ?? '';
             document.getElementById('matrix_id').value = data.id;
 
-            form.action = `/matrix/update/${data.id}`;
+                title.innerText = 'Edit Matrix';
+
+                form.action = window.routes.matrixPenilaian.update.replace(':id', data.id);
+
+            } catch (err) {
+                console.error(err);
+                window.toast?.error('Gagal mengambil data matrix') || alert('Gagal mengambil data matrix');
+                closeModal();
+            }
         } else {
             title.innerText = 'Tambah Matrix';
         }

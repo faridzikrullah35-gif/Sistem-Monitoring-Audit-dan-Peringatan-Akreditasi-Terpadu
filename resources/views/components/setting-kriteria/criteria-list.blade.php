@@ -166,7 +166,7 @@
 
 <script>
 async function loadStandar() {
-    const res = await fetch('/standar', {
+    const res = await fetch('/admin/standar', {
         headers: { 'Accept': 'application/json' }
     });
 
@@ -272,7 +272,7 @@ window.refreshStandarList = async () => {
     } else {
         // Kalo gak ada, panggil langsung
         try {
-            const res = await fetch('/standar', {
+            const res = await fetch('/admin/standar', {
                 headers: { 'Accept': 'application/json' }
             });
             const json = await res.json();
@@ -333,7 +333,7 @@ if (typeof window.confirmDeleteStandar === 'function') {
             async () => {
                 try {
                     const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                    const response = await fetch(`/standar/delete/${id}`, {
+                    const response = await fetch(`/admin/standar/delete/${id}`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': csrfToken.content,
@@ -370,7 +370,7 @@ window.deleteStandarWithRefresh = async (id) => {
                 try {
                     const csrfToken = document.querySelector('meta[name="csrf-token"]');
                     
-                    const response = await fetch(`/standar/delete/${id}`, {
+                    const response = await fetch(`/admin/standar/delete/${id}`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': csrfToken.content,

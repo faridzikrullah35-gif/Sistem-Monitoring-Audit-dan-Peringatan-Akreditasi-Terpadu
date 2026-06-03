@@ -66,7 +66,7 @@ async function handleIndikatorSubmit(e) {
 async function syncIndikatorFromDB() {
     const elemenId = el('indikator_elemen_id')?.value;
 
-    const res = await fetch(`/indikator/by-elemen/${elemenId}`);
+    const res = await fetch(`/admin/indikator/by-elemen/${elemenId}`);
     const result = await res.json();
 
     state.tempIndikators = (result.data || []).map(item => ({
@@ -119,7 +119,7 @@ function saveEditRow(id) {
     const text = el('indikator_input')?.value.trim();
     if (!text) return;
 
-    fetch(`/indikator/${id}`, {
+    fetch(`/admin/indikator/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ function deleteIndikatorRow(id) {
         'Hapus Indikator',
         'Yakin mau hapus indikator ini? Data tidak bisa dikembalikan.',
         () => {
-            fetch(`/indikator/${id}`, {
+            fetch(`/admin/indikator/${id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': getCSRF() },
             })
@@ -275,7 +275,7 @@ async function openIndikatorModal(elemenId, elemenLabel) {
     el('indikator_elemen_id').value = elemenId ?? '';
     el('indikator_elemen_label').textContent = elemenLabel ?? '-';
 
-    form.action = '/indikator/store';
+    form.action = '/admin/indikator/store';
 
     if (elemenId) await syncIndikatorFromDB();
 }

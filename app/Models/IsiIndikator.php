@@ -23,4 +23,9 @@ class IsiIndikator extends Model
     {
         return $this->hasMany(PertanyaanAmiProdi::class, 'isi_indikator_id');
     }
+
+    public function pertanyaanAmiUnit()
+    {
+        return $this->hasMany(PertanyaanAmiUnit::class, 'isi_indikator_id');
+    }
 }

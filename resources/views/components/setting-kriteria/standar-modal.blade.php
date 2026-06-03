@@ -19,6 +19,7 @@
         <form 
             id="formStandar"
             method="POST"
+            action="{{ route('standar.store') }}"
             data-table-id="#standarTableContainer"
         >
             @csrf

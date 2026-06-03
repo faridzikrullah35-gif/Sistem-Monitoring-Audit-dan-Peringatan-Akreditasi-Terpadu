@@ -1,111 +1,77 @@
 <?php
 
 namespace App\Helpers;
+use Illuminate\Support\Facades\Auth;
+use App\Helpers\Menu\AdminMenu;
+use App\Helpers\Menu\AuditorMenu;
+use App\Helpers\Menu\ProdiMenu;
 
 class MenuHelper
 {
-    public static function getMainNavItems()
+    public static function getGlobalItems()
     {
         return [
-            [
-                'icon' => 'dashboard',
-                'name' => 'Dashboard',
-                'path' => '/dashboard',
-            ],
-            [
-                'icon' => 'task',
-                'name' => 'Manajemen Audit',
-                'subItems' => [
-                    ['name' => 'Data Auditor', 'path' => '/data-auditor'],
-                    ['name' => 'Setting Tahun Akademik', 'path' => '/setting-tahun-akademik'],
-                    ['name' => 'Setting Kriteria', 'path' => '/setting-kriteria'],
-                    ['name' => 'Setting Akses Auditor', 'path' => '/setting-akses-auditor'],
-                    ['name' => 'Isi Matriks Penilaian', 'path' => '/matriks-penilaian'],
-                    ['name' => 'Daftar Pertanyaan AMI Prodi', 'path' => '/pertanyaan-ami-prodi'],
-                    ['name' => 'Daftar Pertanyaan AMI Unit', 'path' => '/pertanyaan-ami-unit'],
-                ],
-            ],
-            [
-                'icon' => 'settings',
-                'name' => 'Pengaturan',
-                'subItems' => [
-                    ['name' => 'Tahun Akademik', 'path' => '/settings/tahun'],
-                    ['name' => 'Role & Permission', 'path' => '/settings/role'],
-                    ['name' => 'Konfigurasi Sistem', 'path' => '/settings/system'],
-                ],
-            ],
-            [
-                'icon' => 'forms',
-                'name' => 'Instrumen',
-                'subItems' => [
-                    ['name' => 'Standar Audit', 'path' => '/instrumen/standar'],
-                    ['name' => 'Checklist Pertanyaan', 'path' => '/instrumen/pertanyaan'],
-                    ['name' => 'Kategori Penilaian', 'path' => '/instrumen/kategori'],
-                ],
-            ],
-            [
-                'icon' => 'charts',
-                'name' => 'Hasil Audit',
-                'subItems' => [
-                    ['name' => 'Input Nilai', 'path' => '/hasil/input'],
-                    ['name' => 'Hasil per Unit', 'path' => '/hasil/unit'],
-                    ['name' => 'Rekap Nilai', 'path' => '/hasil/rekap'],
-                ],
-            ],
-            [
-                'icon' => 'pages',
-                'name' => 'Temuan & Tindak Lanjut',
-                'subItems' => [
-                    ['name' => 'Temuan Audit', 'path' => '/temuan'],
-                    ['name' => 'Rekomendasi', 'path' => '/rekomendasi'],
-                    ['name' => 'Tindak Lanjut', 'path' => '/tindak-lanjut'],
-                ],
-            ],
-            [
-                'icon' => 'tables',
-                'name' => 'Laporan',
-                'subItems' => [
-                    ['name' => 'Laporan Audit', 'path' => '/laporan'],
-                    ['name' => 'Export PDF', 'path' => '/laporan/pdf'],
-                    ['name' => 'Export Excel', 'path' => '/laporan/excel'],
-                ],
-            ],
-        ];
-    }
 
-    // FUNGSI BARU UNTUK MENU LAINNYA
-    public static function getOthersItems()
-    {
-        return [
-            [
-                'icon' => 'others',
-                'name' => 'Pengguna',
-                'subItems' => [
-                    // Tambahkan menu lainnya di sini...
-                    ['name' => 'Tambah Pengguna & Pengaturan Pengguna', 'path' => '/others/pengguna'],
-                ],
-            ],
-            // LOGOUT
             [
                 'type' => 'logout',
                 'name' => 'Sign out',
                 'icon' => 'logout',
             ],
+
         ];
     }
 
     public static function getMenuGroups()
     {
+        if (!Auth::check()) {
+            return [];
+        }
+
+        $user = Auth::user();
+
+        $menuItems = [];
+        $otherItems = [];
+
+        switch ($user->role) {
+
+            case 'admin':
+                $menuItems = AdminMenu::get();
+                $otherItems = AdminMenu::getOthers();
+                break;
+
+            case 'auditor':
+            case 'unit_kerja':
+                $menuItems = AuditorMenu::get();
+                break;
+
+            case 'prodi':
+                $menuItems = ProdiMenu::get();
+                break;
+
+            default:
+                $menuItems = [];
+                $otherItems = [];
+                break;
+        }
+
+        // tambahkan global menu
+        $otherItems = array_merge(
+            $otherItems,
+            self::getGlobalItems()
+        );
+
         return [
+
             [
                 'title' => 'Menu',
-                'items' => self::getMainNavItems()
+                'items' => $menuItems
             ],
-            // TAMBAHKAN GRUP BARU INI
+
             [
                 'title' => 'Lainnya',
-                'items' => self::getOthersItems()
+                'items' => $otherItems
             ]
+
         ];
     }
 
@@ -133,9 +99,15 @@ class MenuHelper
             
             'settings' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M19.9391 12.0001C19.9391 12.6234 19.8624 13.2284 19.7176 13.8068L21.6155 15.4034C21.7891 15.5494 21.8276 15.7976 21.7083 15.9894L19.7083 19.2376C19.589 19.4294 19.3525 19.5107 19.1439 19.4312L16.8665 18.5394C16.0198 19.1918 15.0312 19.6647 13.9584 19.9101L13.5369 22.3168C13.4952 22.5305 13.3107 22.6857 13.0933 22.6901H10.0933C9.87587 22.6857 9.69136 22.5305 9.64969 22.3168L9.22822 19.9101C8.15539 19.6647 7.1668 19.1918 6.32005 18.5394L4.04267 19.4312C3.83407 19.5107 3.5976 19.4294 3.4783 19.2376L1.4783 15.9894C1.35899 15.7976 1.39753 15.5494 1.57113 15.4034L3.46902 13.8068C3.3242 13.2284 3.24752 12.6234 3.24752 12.0001C3.24752 11.3768 3.3242 10.7718 3.46902 10.1934L1.57113 8.59678C1.39753 8.45077 1.35899 8.20258 1.4783 8.01076L3.4783 4.76257C3.5976 4.57075 3.83407 4.48945 4.04267 4.56896L6.32005 5.46075C7.1668 4.80837 8.15539 4.33549 9.22822 4.09007L9.64969 1.68336C9.69136 1.46971 9.87587 1.31454 10.0933 1.31006H13.0933C13.3107 1.31454 13.4952 1.46971 13.5369 1.68336L13.9584 4.09007C15.0312 4.33549 16.0198 4.80837 16.8665 5.46075L19.1439 4.56896C19.3525 4.48945 19.589 4.57075 19.7083 4.76257L21.7083 8.01076C21.8276 8.20258 21.7891 8.45077 21.6155 8.59678L19.7176 10.1934C19.8624 10.7718 19.9391 11.3768 19.9391 12.0001ZM17.9391 12.0001C17.9391 11.5572 17.8847 11.1274 17.7817 10.7164L17.5624 9.84073L18.3522 9.17742L19.4783 8.23187L18.2783 6.2271L16.8756 6.75979L16.0474 7.05542L15.366 6.52075C14.7124 5.99809 13.957 5.60941 13.139 5.38258L12.3176 5.15474L12.1286 4.31006H11.058L10.869 5.15474L10.0476 5.38258C9.2296 5.60941 8.47423 5.99809 7.82064 6.52075L7.13927 7.05542L6.31104 6.75979L4.90835 6.2271L3.70835 8.23187L4.8344 9.17742L5.6242 9.84073L5.40488 10.7164C5.30194 11.1274 5.24752 11.5572 5.24752 12.0001C5.24752 12.443 5.30194 12.8728 5.40488 13.2838L5.6242 14.1595L4.8344 14.8228L3.70835 15.7684L4.90835 17.7731L6.31104 17.2404L7.13927 16.9448L7.82064 17.4795C8.47423 18.0021 9.2296 18.3908 10.0476 18.6176L10.869 18.8455L11.058 19.6901H12.1286L12.3176 18.8455L13.139 18.6176C13.957 18.3908 14.7124 18.0021 15.366 17.4795L16.0474 16.9448L16.8756 17.2404L18.2783 17.7731L19.4783 15.7684L18.3522 14.8228L17.5624 14.1595L17.7817 13.2838C17.8847 12.8728 17.9391 12.443 17.9391 12.0001ZM11.5933 15.0001C9.93644 15.0001 8.59331 13.657 8.59331 12.0001C8.59331 10.3432 9.93644 9.00008 11.5933 9.00008C13.2502 9.00008 14.5933 10.3432 14.5933 12.0001C14.5933 13.657 13.2502 15.0001 11.5933 15.0001ZM10.5933 12.0001C10.5933 12.5524 11.041 13.0001 11.5933 13.0001C12.1456 13.0001 12.5933 12.5524 12.5933 12.0001C12.5933 11.4478 12.1456 11.0001 11.5933 11.0001C11.041 11.0001 10.5933 11.4478 10.5933 12.0001Z" fill="currentColor"></path></svg>',
             
-            'pengguna' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C10.067 4.5 8.5 6.067 8.5 8C8.5 9.933 10.067 11.5 12 11.5C13.933 11.5 15.5 9.933 15.5 8C15.5 6.067 13.933 4.5 12 4.5ZM6.5 8C6.5 4.96243 8.96243 2.5 12 2.5C15.0376 2.5 17.5 4.96243 17.5 8C17.5 11.0376 15.0376 13.5 12 13.5C8.96243 13.5 6.5 11.0376 6.5 8ZM5.5 19.5C5.5 17.2909 7.29086 15.5 9.5 15.5H14.5C16.7091 15.5 18.5 17.2909 18.5 19.5C18.5 20.0523 18.0523 20.5 17.5 20.5C16.9477 20.5 16.5 20.0523 16.5 19.5C16.5 18.3954 15.6046 17.5 14.5 17.5H9.5C8.39543 17.5 7.5 18.3954 7.5 19.5C7.5 20.0523 7.05228 20.5 6.5 20.5C5.94772 20.5 5.5 20.0523 5.5 19.5Z" fill="currentColor"></path></svg>',
+            'others' => '<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.948 8.948 0 0 0 12 21Zm3-11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                        </svg>',
         
             'logout' => '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>',
+            
+            'list' => '<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M11 9h6m-6 3h6m-6 3h6M6.996 9h.01m-.01 3h.01m-.01 3h.01M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>
+                        </svg>',
         ];
 
         // Fallback icon kalau nama icon salah ketik

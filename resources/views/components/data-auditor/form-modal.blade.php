@@ -76,28 +76,30 @@
         // ======================
         // MODE EDIT
         // ======================
-        if (type === 'edit') {
+        if (type === 'edit' && id) {
             try {
                 title.innerText = 'Edit Data Auditor';
 
-                // AMBIL DATA FRESH DARI DB (ANTI STALE DATA)
-                const res = await fetch(`/data-auditor/${id}`);
-                const result = await res.json();
+                // pakai route helper (NO HARD CODE)
+                const url = window.routes.dataAuditor.show.replace(':id', id);
 
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await res.json();
                 const auditor = result.data;
 
                 if (!auditor) throw new Error('Data tidak ditemukan');
 
-                // fill form safely
                 const set = (name, value) => {
                     const el = form.querySelector(`[name="${name}"]`);
                     if (el) el.value = value ?? '';
                 };
 
-                const typeSelect = form.querySelector('[name="identity_type"]');
-                if (typeSelect) {
-                    typeSelect.value = auditor.identity_type;
-                }
+                form.querySelector('[name="identity_type"]').value = auditor.identity_type;
 
                 set('identity_number', auditor.identity_number);
                 set('identity_type', auditor.identity_type);
@@ -110,8 +112,8 @@
 
                 document.getElementById('auditor_id').value = auditor.id;
 
-                // switch ke update route
-                form.action = `/data-auditor/update/${auditor.id}`;
+                // update route pakai helper
+                form.action = window.routes.dataAuditor.update.replace(':id', auditor.id);
 
             } catch (err) {
                 console.error(err);
@@ -120,6 +122,9 @@
             }
         } else {
             title.innerText = 'Tambah Data Auditor Baru';
+
+            // optional kalau mau aman
+            form.action = window.routes.dataAuditor.store;
         }
     }
 

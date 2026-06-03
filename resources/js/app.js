@@ -424,6 +424,12 @@ window.refreshIsiAksesAuditorTable = () => TableRefresh.refresh('#isi_akses_audi
 window.refreshMatrixTable = () => TableRefresh.refresh('#matrixTableContainer');
 window.refreshIndikatorTable = () => TableRefresh.refresh('#indikatorTableContainer');
 window.refreshPertanyaanAmiProdiTable = () => TableRefresh.refresh('#pertanyaanAmiProdiTableContainer');
+window.refreshPertanyaanAmiUnitTable = () => TableRefresh.refresh('#pertanyaanAmiUnitTableContainer');
+window.refreshAuditieeTable = () => TableRefresh.refresh('#auditieeTableContainer');
+window.refreshSettingScoreTable = () => TableRefresh.refresh('#settingScoreTableContainer');
+window.refreshFormPeriksaTable = () => TableRefresh.refresh('#formPeriksaTableContainer');
+window.refreshNCRTable = () => TableRefresh.refresh('#tableNCRContainer');
+window.refreshObservationTable = () => TableRefresh.refresh('#observationTableContainer');
 
 // Refresh semua select dengan atribut data-auto-refresh
 window.refreshAllSelectBoxes();

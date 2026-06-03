@@ -57,7 +57,7 @@
         // ======================
         // RESET STATE (WAJIB)
         // ======================
-        form.action = '/setting-kriteria';
+        form.action = '/admin/setting-kriteria';
         methodInput.value = 'POST';
         idInput.value = '';
 
@@ -80,9 +80,15 @@
             try {
                 title.innerText = 'Edit Sub-Kriteria';
 
-                const res = await fetch(`/setting-kriteria/${id}`);
-                const result = await res.json();
+                const url = window.routes.settingKriteria.show.replace(':id', id);
 
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await res.json();
                 const data = result.data;
 
                 if (!data) throw new Error('Data tidak ditemukan');
@@ -97,17 +103,23 @@
 
                 idInput.value = data.id;
 
-                // switch ke update
-                form.action = `/setting-kriteria/${data.id}`;
-                methodInput.value = 'PUT';
+                // switch ke update pakai route helper
+                form.action = window.routes.settingKriteria.update.replace(':id', data.id);
+
+                const methodInput = form.querySelector('input[name="_method"]');
+                if (methodInput) {
+                    methodInput.value = 'PUT';
+                }
 
             } catch (err) {
                 console.error(err);
-                alert('Gagal ambil data kriteria');
+                window.toast?.error('Gagal ambil data kriteria') || alert('Gagal ambil data kriteria');
                 closeModal();
             }
         } else {
             title.innerText = 'Tambah Sub-Kriteria';
+
+            form.action = window.routes.settingKriteria.store;
         }
     }
 

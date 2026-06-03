@@ -220,16 +220,18 @@ const confirmDelete = (title, message, action) => {
 // ENTITY DELETE ACTIONS
 // ============================================================
 
-window.confirmDeleteTahunAkademik = (id) => {
+window.deleteTahunAkademik = (id) => {
+
     confirmDelete(
         'Konfirmasi Hapus',
         'Yakin ingin menghapus tahun akademik ini?',
         () => executeDelete({
-            url: `/setting-tahun-akademik/delete/${id}`,
+            url: `/admin/setting-tahun-akademik/delete/${id}`,
+            method: 'DELETE',
             tableId: '#tahunAkademikTableContainer',
-            successMessage: 'Tahun akademik berhasil dihapus',
         })
     );
+
 };
 
 window.confirmDeleteAuditor = (id) => {
@@ -237,7 +239,8 @@ window.confirmDeleteAuditor = (id) => {
         'Konfirmasi Hapus',
         'Yakin ingin menghapus data auditor ini?',
         () => executeDelete({
-            url: `/data-auditor/delete/${id}`,
+            url: `/admin/data-auditor/delete/${id}`,
+            method: 'DELETE',
             tableId: '#auditorTableContainer',
         })
     );
@@ -248,7 +251,7 @@ window.confirmDeleteStandar = (id) => {
         'Konfirmasi Hapus',
         'Yakin ingin menghapus standar ini?',
         () => executeDelete({
-            url: `/standar/delete/${id}`,
+            url: `/admin/standar/delete/${id}`,
             tableId: '#standarTableContainer',
             refreshSelects: 'standar_id',
         })
@@ -260,7 +263,7 @@ window.confirmDeleteKriteria = (id) => {
         'Konfirmasi Hapus',
         'Yakin ingin menghapus sub kriteria ini?',
         () => executeDelete({
-            url: `/setting-kriteria/${id}`,
+            url: `/admin/setting-kriteria/${id}`,
             tableId: '#kriteria_audit',
             refreshSelects: 'standar_id',
         })
@@ -272,7 +275,8 @@ window.deleteAksesAuditor = (id) => {
         'Konfirmasi Hapus',
         'Yakin ingin menghapus data auditor ini?',
         () => executeDelete({
-            url: `/setting-akses-auditor/${id}`,
+            url: `/admin/setting-akses-auditor/${id}`,
+            method: 'DELETE',
             tableId: '#akses_auditor_table',
             refreshSelects: 'user_id',
         })
@@ -284,25 +288,95 @@ window.deleteMatrix = (id) => {
         'Konfirmasi Hapus',
         'Yakin ingin menghapus data matrix ini?',
         () => executeDelete({
-            url: `/matrix/delete/${id}`,
+            url: `/admin/matrix/delete/${id}`,
+            method: 'DELETE',
             tableId: '#matrixTableContainer',
         })
     );
 };
 
-// window.deletePertanyaanAmiProdi = (id) => {
+window.deletePertanyaanAmiProdi = (id) => {
 
-//     confirmDelete(
-//         'Konfirmasi Hapus',
-//         'Yakin ingin menghapus indikator ini?',
-//         () => executeDelete({
-//             url: `/pertanyaan-ami-prodi/${id}`,
-//             method: 'DELETE',
-//             tableId: '#pertanyaanAmiProdiTableContainer',
-//         })
-//     );
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus indikator ini?',
+        () => executeDelete({
+            url: `/admin/pertanyaan-ami-prodi/${id}`,
+            method: 'DELETE',
+            tableId: '#pertanyaanAmiProdiTableContainer',
+        })
+    );
 
-// };
+};
+
+window.deleteAuditiee = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data auditiee ini?',
+        () => executeDelete({
+            url: `/auditor/isi-data-auditiee/${id}`,
+            method: 'DELETE',
+            tableId: '#auditieeTableContainer',
+        })
+    );
+
+};
+
+window.deleteSettingScore = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data setting score ini?',
+        () => executeDelete({
+            url: `/admin/setting-score/delete/${id}`,
+            method: 'DELETE',
+            tableId: '#settingScoreTableContainer',
+        })
+    );
+
+};
+
+window.deletePertanyaan = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data pertanyaan ini?',
+        () => executeDelete({
+            url: `/auditor/form-daftar-periksa/${id}`,
+            method: 'DELETE',
+            tableId: '#formPeriksaTableContainer',
+        })
+    );
+
+};
+
+window.openModalHapusNCR = (id, noNcr) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        `Yakin ingin menghapus data NCR ${noNcr ?? ''}?`,
+        () => executeDelete({
+            url: `/auditor/form-ketidaksesuaian-ncr/${id}`,
+            method: 'DELETE',
+            tableId: '#tableNCRContainer',
+        })
+    );
+};
+
+window.deleteObservation = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data observasi ini?',
+        () => executeDelete({
+            url: `/auditor/form-observasi/${id}`,
+            method: 'DELETE',
+            tableId: '#observationTableContainer',
+        })
+    );
+
+};
 
 // ============================================================
 // DOM INIT (SIMPLIFIED)

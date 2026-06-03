@@ -19,4 +19,9 @@ class Standar extends Model
     {
         return $this->hasMany(KriteriaAudit::class, 'standar_id');
     }
+
+    public function kriteriaAudit()
+    {
+        return $this->hasMany(KriteriaAudit::class);
+    }
 }

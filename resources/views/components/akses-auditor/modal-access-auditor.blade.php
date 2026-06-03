@@ -55,6 +55,14 @@
 </div>
 
 <script>
+window.routes = {
+    aksesAuditorShow: "{{ route('akses-auditor.show', ':id') }}",
+    aksesAuditorStore: "{{ route('akses-auditor.store') }}",
+    aksesAuditorUpdate: "{{ route('akses-auditor.update', ':id') }}"
+};
+</script>
+
+<script>
 let fpInstance = null;
 
 async function openModal(type = 'create', id = null) {
@@ -107,7 +115,7 @@ async function openModal(type = 'create', id = null) {
     // ======================
     // DEFAULT STATE
     // ======================
-    form.action = '/setting-akses-auditor';
+    form.action = '/admin/setting-akses-auditor';
     form.setAttribute('data-method', 'POST');
     removeMethod();
 
@@ -131,13 +139,19 @@ async function openModal(type = 'create', id = null) {
         try {
             title.innerText = 'Loading data...';
 
-            const res = await fetch(`/setting-akses-auditor/${id}`);
+            const url = window.routes.aksesAuditor.show.replace(':id', id);
+
+            const res = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
             if (!res.ok) throw new Error('Fetch gagal');
 
             const data = await res.json();
             console.log('DATA:', data);
 
-            // delay kecil biar DOM & option pasti ready
             setTimeout(() => {
                 setSelect('unit', data.unit_id);
                 setSelect('tahun_akademik', data.tahun_akademik_id);
@@ -147,23 +161,29 @@ async function openModal(type = 'create', id = null) {
                 }
             }, 50);
 
-            // switch ke update
             title.innerText = 'Edit Akses Auditor';
-            form.action = `/setting-akses-auditor/${id}`;
 
-            const method = document.createElement('input');
-            method.type = 'hidden';
-            method.name = '_method';
-            method.value = 'PUT';
-            form.appendChild(method);
+            // 🔥 FIX: pakai route helper
+            form.action = window.routes.aksesAuditor.update.replace(':id', id);
+
+            const method = form.querySelector('input[name="_method"]');
+            if (method) method.remove();
+
+            const newMethod = document.createElement('input');
+            newMethod.type = 'hidden';
+            newMethod.name = '_method';
+            newMethod.value = 'PUT';
+            form.appendChild(newMethod);
 
         } catch (err) {
             console.error(err);
-            alert('Gagal mengambil data');
+            window.toast?.error('Gagal mengambil data') || alert('Gagal mengambil data');
             closeModal();
         }
     } else {
         title.innerText = 'Tambah Akses Auditor';
+
+        form.action = window.routes.aksesAuditor.store;
     }
 }
 

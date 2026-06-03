@@ -69,7 +69,7 @@ window.loadAuditorTable = function (id) {
         </tr>
     `;
 
-    fetch(`/ajax/isi-akses/${id}`)
+    fetch(`/admin/ajax/isi-akses/${id}`)
         .then(res => res.json())
         .then(data => {
             if (id != window.currentAksesId) return;
@@ -276,7 +276,7 @@ window.saveAuditor = function (id) {
         `input[name="edit-posisi-${id}"]:checked`
     )?.value;
 
-    fetch(`/isi-akses-auditor/${id}`, {
+    fetch(`/admin/isi-akses-auditor/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -344,7 +344,7 @@ window.deleteAuditor = function (id) {
         'Yakin mau hapus auditor ini?',
         () => {
 
-            fetch(`/isi-akses-auditor/${id}`, {
+            fetch(`/admin/isi-akses-auditor/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content

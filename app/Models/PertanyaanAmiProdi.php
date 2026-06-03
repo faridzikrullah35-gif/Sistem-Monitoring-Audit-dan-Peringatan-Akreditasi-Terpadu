@@ -16,12 +16,23 @@ class PertanyaanAmiProdi extends Model
     // Relasi ke IsiIndikator
     public function isiIndikator()
     {
-        return $this->belongsTo(IsiIndikator::class);
+        return $this->belongsTo(
+            IsiIndikator::class,
+            'isi_indikator_id'
+        );
     }
 
     // Relasi ke Tahun Akademik
     public function tahunAkademik()
     {
         return $this->belongsTo(TahunAkademik::class);
+    }
+
+    public function indikator()
+    {
+        return $this->belongsTo(
+            IsiIndikator::class,
+            'isi_indikator_id'
+        );
     }
 }

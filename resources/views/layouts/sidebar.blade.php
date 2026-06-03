@@ -4,7 +4,7 @@
     $menuGroups = MenuHelper::getMenuGroups();
 
     // Get current path
-    $currentPath = request()->path();
+    $currentPath = '/' . request()->path();
 @endphp
 
 <aside id="sidebar"
@@ -16,38 +16,44 @@
             this.initializeActiveMenus();
         },
         initializeActiveMenus() {
-            const currentPath = '{{ $currentPath }}';
+            const currentPath = window.location.pathname;
+
+            // reset semua submenu dulu
+            this.openSubmenus = {};
 
             @foreach ($menuGroups as $groupIndex => $menuGroup)
                 @foreach ($menuGroup['items'] as $itemIndex => $item)
                     @if (isset($item['subItems']))
-                        // Check if any submenu item matches current path
                         @foreach ($item['subItems'] as $subItem)
-                            if (currentPath === '{{ ltrim($subItem['path'], '/') }}' ||
-                                window.location.pathname === '{{ $subItem['path'] }}') {
-                                this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
-                            } @endforeach
-            @endif
-            @endforeach
+                            if (currentPath === '{{ $subItem['path'] }}') {
+                                this.openSubmenus = {
+                                    '{{ $groupIndex }}-{{ $itemIndex }}': true
+                                };
+                            }
+                        @endforeach
+                    @endif
+                @endforeach
             @endforeach
         },
         toggleSubmenu(groupIndex, itemIndex) {
             const key = groupIndex + '-' + itemIndex;
-            const newState = !this.openSubmenus[key];
 
-            // Close all other submenus when opening a new one
-            if (newState) {
+            // kalau submenu yg sama diklik → toggle
+            if (this.openSubmenus[key]) {
                 this.openSubmenus = {};
+            } else {
+                // tutup semua lalu buka yg dipilih
+                this.openSubmenus = {
+                    [key]: true
+                };
             }
-
-            this.openSubmenus[key] = newState;
         },
         isSubmenuOpen(groupIndex, itemIndex) {
             const key = groupIndex + '-' + itemIndex;
             return this.openSubmenus[key] || false;
         },
         isActive(path) {
-            return window.location.pathname === path || '{{ $currentPath }}' === path.replace(/^\//, '');
+            return window.location.pathname === path;
         }
     }"
     :class="{

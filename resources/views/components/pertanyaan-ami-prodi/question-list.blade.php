@@ -49,15 +49,9 @@
                                 <!-- Delete -->
                                 <button 
                                     type="button"
-                                    data-action="delete"
-                                    data-url="{{ route('pertanyaan-ami-prodi.delete', $item->id) }}"
-                                    data-method="DELETE"
-                                    data-confirm="Yakin ingin menghapus indikator ini?"
-                                    data-table-id="#pertanyaanAmiProdiTableContainer"
-                                    data-reload="true"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 rounded-lg transition"
+                                    onclick="deletePertanyaanAmiProdi({{ $item->id }})"
+                                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200"
                                 >
-                                    <!-- Icon -->
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path 
                                             stroke-linecap="round" 
@@ -67,7 +61,7 @@
                                         />
                                     </svg>
 
-                                    Hapus
+                                    <span>Hapus</span>
                                 </button>
 
                             </td>

@@ -45,7 +45,7 @@ function matrixFilter() {
 
         async fetchData() {
             try {
-                let url = '/matriks-penilaian';
+                let url = '/admin/matriks-penilaian';
 
                 if (this.kriteria) {
                     url += `?kriteria_id=${this.kriteria}`;

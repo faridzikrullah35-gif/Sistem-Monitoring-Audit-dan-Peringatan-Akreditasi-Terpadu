@@ -62,6 +62,12 @@ const TableRefresh = {
             '#matrixTableContainer',
             '#indikatorTableContainer',
             '#pertanyaanAmiProdiTableContainer',
+            '#pertanyaanAmiUnitTableContainer',
+            '#auditieeTableContainer',
+            '#settingScoreTableContainer',
+            '#formPeriksaTableContainer',
+            '#tableNCRContainer',
+            '#observationTableContainer',
         ];
 
         for (const tableId of tables) {

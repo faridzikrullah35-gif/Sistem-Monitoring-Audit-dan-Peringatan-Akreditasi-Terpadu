@@ -58,9 +58,15 @@
             title.innerText = 'Edit Tahun Akademik';
 
             try {
-                const res = await fetch(`/setting-tahun-akademik/${id}`);
-                const result = await res.json();
+                const url = window.routes.tahunAkademik.show.replace(':id', id);
 
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await res.json();
                 const data = result.data;
 
                 // ISI FORM
@@ -90,20 +96,21 @@
                     value.value = 'Non Aktif';
                 }
 
-                // UBAH ACTION KE UPDATE
-                form.action = `/setting-tahun-akademik/update/${id}`;
+                // UPDATE ACTION (PAKAI ROUTE HELPER)
+                form.action = window.routes.tahunAkademik.update.replace(':id', id);
 
             } catch (err) {
                 console.error(err);
-                if (window.toast) {
-                    window.toast.error('Gagal mengambil data');
-                } else {
-                    toastr.error('Gagal mengambil data');
-                }
+
+                window.toast?.error('Gagal mengambil data')
+                || toastr.error('Gagal mengambil data');
             }
 
         } else {
             title.innerText = 'Tambah Periode Baru';
+
+            // optional biar aman
+            form.action = window.routes.tahunAkademik.store;
         }
     }
 

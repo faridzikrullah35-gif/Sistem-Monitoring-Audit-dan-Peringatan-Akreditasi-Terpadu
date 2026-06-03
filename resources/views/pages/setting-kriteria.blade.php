@@ -55,11 +55,11 @@ function openModalStandar(mode = 'create', id = null, nama = '') {
     const form = document.getElementById('formStandar');
     
     if (mode === 'edit') {
-        form.action = `/standar/update/${id}`;
+        form.action = `/admin/standar/update/${id}`;
         const methodInput = document.getElementById('methodStandar');
         if (methodInput) methodInput.remove();
     } else {
-        form.action = '/standar/store';
+        form.action = '/admin/standar/store';
         const methodInput = document.getElementById('methodStandar');
         if (methodInput) methodInput.remove();
     }

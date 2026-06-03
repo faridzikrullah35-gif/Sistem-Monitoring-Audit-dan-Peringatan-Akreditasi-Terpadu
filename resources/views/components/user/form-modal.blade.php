@@ -85,24 +85,30 @@ async function openModal(type, id = null) {
     clearFormErrors();
     document.getElementById('user_id').value = '';
 
-    // Reset action ke store
-    form.action = "{{ route('pengguna.store') }}";
+    // Reset ke STORE default
+    form.action = window.routes.penggunaStore;
     form.method = "POST";
-    
-    // Remove any PUT method override if exists
-    const methodField = form.querySelector('input[name="_method"]');
-    if (methodField) methodField.remove();
+
+    // hapus method override lama kalau ada
+    const oldMethod = form.querySelector('input[name="_method"]');
+    if (oldMethod) oldMethod.remove();
 
     if (type === 'edit' && id) {
         modalTitle.innerText = 'Edit Pengguna';
-        
+
         try {
-            const response = await fetch(`/others/pengguna/${id}`);
+            const url = window.routes.pengguna.show.replace(':id', id);
+
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
             if (!response.ok) throw new Error('Gagal mengambil data');
-            
+
             const user = await response.json();
 
-            // Isi form
             document.getElementById('user_id').value = user.id;
             form.querySelector('[name="name"]').value = user.name || '';
             form.querySelector('[name="email"]').value = user.email || '';
@@ -110,35 +116,35 @@ async function openModal(type, id = null) {
             form.querySelector('[name="unit"]').value = user.unit || '';
             form.querySelector('[name="sub_unit"]').value = user.sub_unit || '';
 
-            // Untuk edit, kita perlu method PUT/PATCH
+            // method spoofing Laravel
             const methodInput = document.createElement('input');
             methodInput.type = 'hidden';
             methodInput.name = '_method';
-            methodInput.value = 'POST';
+            methodInput.value = 'PUT';
+
             form.appendChild(methodInput);
-            
-            form.action = `/others/pengguna/update/${user.id}`;
+
+            // tetap POST
+            form.method = 'POST';
+
+            form.action = window.routes.pengguna.update.replace(':id', id);
 
         } catch (err) {
             console.error(err);
-            if (window.toast) {
-                window.toast.error('Gagal mengambil data pengguna');
-            } else {
-                alert('Gagal mengambil data pengguna');
-            }
+            window.toast?.error('Gagal mengambil data pengguna') || alert('Gagal mengambil data pengguna');
             closeModal();
             return;
         }
     } else {
         modalTitle.innerText = 'Tambah Pengguna Baru';
-        form.action = "{{ route('pengguna.store') }}";
+        form.action = window.routes.pengguna.store;
     }
 
-    // Tampilkan modal dengan animasi
+    // tampilkan modal
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent scroll
-    
-    // Focus ke input pertama
+    document.body.style.overflow = 'hidden';
+
+    // focus input pertama
     setTimeout(() => {
         const firstInput = form.querySelector('input:not([type="hidden"]), select');
         if (firstInput) firstInput.focus();
@@ -149,8 +155,7 @@ function closeModal() {
     const modal = document.getElementById('userModal');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
-    
-    // Reset form saat tutup
+
     const form = document.getElementById('userForm');
     if (form) {
         form.reset();
@@ -161,14 +166,16 @@ function closeModal() {
 function clearFormErrors() {
     const form = document.getElementById('userForm');
     if (!form) return;
-    
-    form.querySelectorAll('.is-invalid, .border-red-500, .ring-red-500').forEach(el => {
-        el.classList.remove('is-invalid', 'border-red-500', 'ring-red-500');
-    });
+
+    form.querySelectorAll('.is-invalid, .border-red-500, .ring-red-500')
+        .forEach(el => {
+            el.classList.remove('is-invalid', 'border-red-500', 'ring-red-500');
+        });
+
     form.querySelectorAll('.error-message').forEach(el => el.remove());
 }
 
-// Close modal dengan ESC key
+// ESC close modal
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         const modal = document.getElementById('userModal');
@@ -177,6 +184,4 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
-
-// Klik backdrop nutup modal (sudah ada onclick di HTML)
 </script>
