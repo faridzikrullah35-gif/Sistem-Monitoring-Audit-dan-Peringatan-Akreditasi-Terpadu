@@ -36,4 +36,30 @@
         </svg>
         <span>Reset</span>
     </button>
+
+    {{-- Tombol Print --}}
+    <a
+        x-show="selectedTahun !== ''"
+        x-transition.opacity.duration.200ms
+        :href="`{{ route('auditee.ptk.print') }}?tahun_akademik_id=${selectedTahun}`"
+        target="_blank"
+        class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+        style="display: none;"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none">
+            <path
+                d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            />
+        </svg>
+        <span>Cetak</span>
+    </a>
+
 </div>

@@ -106,7 +106,17 @@ window.loadAuditorTable = function (id) {
                                 ${
                                     item.posisi === 'lead_auditor'
                                     ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Lead Auditor</span>`
-                                    : `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Anggota</span>`
+
+                                    : item.posisi === 'anggota'
+                                    ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Anggota</span>`
+
+                                    : item.posisi === 'posisi_kepala_bidang_internal'
+                                    ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Kepala Bidang Internal</span>`
+
+                                    : item.posisi === 'posisi_kepala_lembaga_penjaminan_mutu'
+                                    ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Kepala Lembaga Penjaminan Mutu</span>`
+
+                                    : `<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">${item.posisi}</span>`
                                 }
                             </td>
 

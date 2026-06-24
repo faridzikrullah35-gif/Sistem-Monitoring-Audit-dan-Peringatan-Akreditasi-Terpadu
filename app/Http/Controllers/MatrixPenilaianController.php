@@ -10,7 +10,8 @@ class MatrixPenilaianController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Matrix::with('kriteriaAudit.standar')->latest();
+        $query = Matrix::with('kriteriaAudit.standar')
+            ->orderBy('created_at', 'asc');
 
         if ($request->kriteria_id) {
             $query->where('kriteria_audit_id', $request->kriteria_id);

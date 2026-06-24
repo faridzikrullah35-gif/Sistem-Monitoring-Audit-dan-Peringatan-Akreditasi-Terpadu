@@ -26,6 +26,14 @@ use App\Http\Controllers\AuditeeDaftarPeriksaController;
 use App\Http\Controllers\FormPtkController;
 use App\Http\Controllers\AuditeeObservasiController;
 use App\Http\Controllers\CetakRekapitulasiController;
+use App\Http\Controllers\CetakRekapitulasiAuditeeController;
+use App\Http\Controllers\FormTerpenuhiController;
+use App\Http\Controllers\AuditeeTerpenuhiController;
+use App\Http\Controllers\HasilAuditDaftarPeriksaController;
+use App\Http\Controllers\HasilAuditPtkController;
+use App\Http\Controllers\HasilAuditObservasiController;
+use App\Http\Controllers\HasilAuditTerpenuhiController;
+use App\Http\Controllers\HasilAuditRekapitulasiController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -62,19 +70,15 @@ Route::middleware(['auth', 'role:admin'])
     // Data Auditor - list page
     Route::get('/data-auditor', [DataAuditorController::class, 'index'])
         ->name('data-auditor.index');
-
     // Store auditor baru
     Route::post('/data-auditor/store', [DataAuditorController::class, 'store'])
         ->name('data-auditor.store');
-
     // Show detail auditor
     Route::get('/data-auditor/{id}', [DataAuditorController::class, 'show'])
         ->name('data-auditor.show');
-
     // Update auditor
     Route::post('/data-auditor/update/{id}', [DataAuditorController::class, 'update'])
         ->name('data-auditor.update');
-
     // Delete auditor
     Route::delete('/data-auditor/delete/{id}', [DataAuditorController::class, 'destroy'])
         ->name('data-auditor.delete');
@@ -82,39 +86,30 @@ Route::middleware(['auth', 'role:admin'])
     // Setting Tahun Akademik - list page
     Route::get('/setting-tahun-akademik', [TahunAkademikController::class, 'index'])
         ->name('tahun-akademik.index');
-
     // Store tahun akademik baru
     Route::post('/setting-tahun-akademik/store', [TahunAkademikController::class, 'store'])
         ->name('tahun-akademik.store');
-
     // Show detail tahun akademik
     Route::get('/setting-tahun-akademik/{id}', [TahunAkademikController::class, 'show'])
         ->name('tahun-akademik.show');
-
     // Update tahun akademik
     Route::post('/setting-tahun-akademik/update/{id}', [TahunAkademikController::class, 'update'])
         ->name('tahun-akademik.update');
-
     // Delete tahun akademik
     Route::delete('/setting-tahun-akademik/delete/{id}', [TahunAkademikController::class, 'destroy'])
         ->name('tahun-akademik.delete');
-
     // LIST
     Route::get('/setting-kriteria', [KriteriaController::class, 'index'])
         ->name('setting-kriteria.index');
-
     // STORE
     Route::post('/setting-kriteria', [KriteriaController::class, 'store'])
         ->name('setting-kriteria.store');
-
     // UPDATE (PUT)
     Route::put('/setting-kriteria/{id}', [KriteriaController::class, 'update'])
         ->name('setting-kriteria.update');
-
     // DELETE
     Route::delete('/setting-kriteria/{id}', [KriteriaController::class, 'destroy'])
         ->name('setting-kriteria.delete');
-
     // SHOW (TARUH PALING BAWAH BIAR GAK TABRAKAN)
     Route::get('/setting-kriteria/{id}', [KriteriaController::class, 'show'])
         ->name('setting-kriteria.show');
@@ -122,21 +117,16 @@ Route::middleware(['auth', 'role:admin'])
         // List standar
     Route::get('/standar', [StandarController::class, 'index'])
         ->name('standar.index');
-
     // Store standar baru
     Route::post('/standar/store', [StandarController::class, 'store'])
         ->name('standar.store');
-
     Route::get('/standar/data', [StandarController::class, 'getData'])->name('standar.data');
-
     // Show detail standar
     Route::get('/standar/{id}', [StandarController::class, 'show'])
         ->name('standar.show');
-
     // Update standar
     Route::post('/standar/update/{id}', [StandarController::class, 'update'])
         ->name('standar.update');
-
     // Delete standar
     Route::post('/standar/delete/{id}', [StandarController::class, 'destroy'])
         ->name('standar.delete');
@@ -148,33 +138,26 @@ Route::middleware(['auth', 'role:admin'])
     // STORE
     Route::post('/setting-akses-auditor', [SettingAksesAuditorController::class, 'store'])
         ->name('akses-auditor.store');
-
     // SHOW (ambil data buat edit modal)
     Route::get('/setting-akses-auditor/{id}', [SettingAksesAuditorController::class, 'show'])
         ->name('akses-auditor.show');
-
     // UPDATE
     Route::put('/setting-akses-auditor/{id}', [SettingAksesAuditorController::class, 'update'])
         ->name('akses-auditor.update');
-
     // DELETE
     Route::delete('/setting-akses-auditor/{id}', [SettingAksesAuditorController::class, 'destroy'])
         ->name('akses-auditor.destroy');
-
     // STORE
     Route::post('/isi-akses-auditor', [IsiAksesAuditorController::class, 'store'])
         ->name('isi-akses-auditor.store');
-
     // SHOW (ambil semua auditor dalam 1 akses)
     Route::get('/isi-akses-auditor/{id}', [IsiAksesAuditorController::class, 'show'])
         ->name('isi-akses-auditor.show');
-
     // UPDATE
     Route::get('/isi-akses-auditor/{id}/edit', [IsiAksesAuditorController::class, 'edit'])
         ->name('isi-akses-auditor.edit');
     Route::put('/isi-akses-auditor/{id}', [IsiAksesAuditorController::class, 'update'])
         ->name('isi-akses-auditor.update');
-
     // DELETE
     Route::delete('/isi-akses-auditor/{id}', [IsiAksesAuditorController::class, 'destroy'])
         ->name('isi-akses-auditor.destroy');
@@ -182,42 +165,33 @@ Route::middleware(['auth', 'role:admin'])
     // LIST PAGE (INDEX)
     Route::get('/matriks-penilaian', [MatrixPenilaianController::class, 'index'])
         ->name('matriks-penilaian.index');
-
     // CREATE / STORE
     Route::post('/matrix/store', [MatrixPenilaianController::class, 'store'])
         ->name('matrix.store');
-
     // GET SINGLE DATA (FOR EDIT MODAL AJAX)
     Route::get('/matrix/{id}', [MatrixPenilaianController::class, 'show'])
         ->name('matrix.show');
-
     // UPDATE DATA
     Route::post('/matrix/update/{id}', [MatrixPenilaianController::class, 'update'])
         ->name('matrix.update');
-
     // DELETE DATA
     Route::delete('/matrix/delete/{id}', [MatrixPenilaianController::class, 'destroy'])
         ->name('matrix.delete');
 
     Route::post('/indikator/store', [IndikatorController::class, 'store'])
         ->name('indikator.store');
-
     Route::put('/indikator/{id}', [IndikatorController::class, 'update'])
         ->name('indikator.update');
-
     Route::delete('/indikator/{id}', [IndikatorController::class, 'destroy'])
         ->name('indikator.destroy');
-
     Route::get('/indikator/by-elemen/{id}', [IndikatorController::class, 'getByElemen']);
-
+    
     // LIST PAGE (INDEX)
     Route::get('/pertanyaan-ami-prodi', [PertanyaanAmiProdiController::class, 'index'])
         ->name('pertanyaan-ami-prodi.index');
-
     // Store
     Route::post('/pertanyaan-ami-prodi/store', [PertanyaanAmiProdiController::class, 'store'])
         ->name('pertanyaan-ami-prodi.store');
-
     // Update
     Route::put('/pertanyaan-ami-prodi/{id}', [PertanyaanAmiProdiController::class, 'update'])
         ->name('pertanyaan-ami-prodi.update');
@@ -233,11 +207,9 @@ Route::middleware(['auth', 'role:admin'])
         // LIST PAGE (INDEX)
     Route::get('/pertanyaan-ami-unit', [PertanyaanAmiUnitController::class, 'index'])
         ->name('pertanyaan-ami-unit.index');
-
     // Store
     Route::post('/pertanyaan-ami-unit/store', [PertanyaanAmiUnitController::class, 'store'])
         ->name('pertanyaan-ami-unit.store');
-
     // Update
     Route::put('/pertanyaan-ami-unit/{id}', [PertanyaanAmiUnitController::class, 'update'])
         ->name('pertanyaan-ami-unit.update');
@@ -252,21 +224,51 @@ Route::middleware(['auth', 'role:admin'])
 
     Route::get('/setting-score', [SettingScoreController::class, 'index'])
         ->name('setting-score.index');
-
     Route::get('/setting-score/create', [SettingScoreController::class, 'create'])
         ->name('setting-score.create');
-
     Route::post('/setting-score/store', [SettingScoreController::class, 'store'])
         ->name('setting-score.store');
-
     Route::get('/setting-score/edit/{id}', [SettingScoreController::class, 'edit'])
         ->name('setting-score.edit');
-
     Route::put('/setting-score/update/{id}', [SettingScoreController::class, 'update'])
         ->name('setting-score.update');
-
     Route::delete('/setting-score/delete/{id}', [SettingScoreController::class, 'destroy'])
         ->name('setting-score.delete');
+
+    Route::get('/hasil-audit/daftar-periksa', [HasilAuditDaftarPeriksaController::class, 'index'])
+        ->name('hasil-audit.daftar-periksa');
+    Route::get('/hasil-audit/daftar-periksa/print', [HasilAuditDaftarPeriksaController::class, 'print'])
+        ->name('hasil-audit.daftar-periksa.print');
+    Route::get('/hasil-audit/filter', [HasilAuditDaftarPeriksaController::class, 'filter'])
+        ->name('hasil-audit.filter');
+
+    Route::get('/hasil-audit/ptk', [HasilAuditPtkController::class, 'index'])
+        ->name('hasil-audit.ptk');
+    Route::get('/hasil-audit/ptk/filter', [HasilAuditPtkController::class, 'filter'])
+        ->name('hasil-audit.ptk.filter');
+    Route::get('/hasil-audit/ptk/print', [HasilAuditPtkController::class, 'print'])
+        ->name('hasil-audit.ptk.print');
+
+    Route::get('/hasil-audit/observasi', [HasilAuditObservasiController::class, 'index'])
+        ->name('hasil-audit.observasi');
+    Route::get('/hasil-audit/observasi/filter', [HasilAuditObservasiController::class, 'filter'])
+        ->name('hasil-audit.observasi.filter');
+    Route::get('/hasil-audit/observasi/print', [HasilAuditObservasiController::class, 'print'])
+        ->name('hasil-audit.observasi.print');
+
+    Route::get('/hasil-audit/terpenuhi', [HasilAuditTerpenuhiController::class, 'index'])
+        ->name('hasil-audit.terpenuhi');
+    Route::get('/hasil-audit/terpenuhi/filter', [HasilAuditTerpenuhiController::class, 'filter'])
+        ->name('hasil-audit.terpenuhi.filter');
+    Route::get('/hasil-audit/terpenuhi/print', [HasilAuditTerpenuhiController::class, 'print'])
+        ->name('hasil-audit.terpenuhi.print');
+
+    Route::get('/hasil-audit/rekapitulasi', [HasilAuditRekapitulasiController::class, 'index'])
+        ->name('hasil-audit.rekapitulasi');
+    Route::get('/hasil-audit/rekapitulasi/filter', [HasilAuditRekapitulasiController::class, 'filter'])
+        ->name('hasil-audit.rekapitulasi.filter');
+    Route::get('/hasil-audit/rekapitulasi/print', [HasilAuditRekapitulasiController::class, 'print'])
+        ->name('hasil-audit.rekapitulasi.print');
 });
 
 Route::middleware(['auth', 'role:auditor,unit_kerja'])
@@ -276,8 +278,8 @@ Route::middleware(['auth', 'role:auditor,unit_kerja'])
     Route::get('/dashboard', [DashboardController::class, 'auditor'])
         ->name('auditor.dashboard');
 
-    Route::get('/isi-data-auditiee', [IsiDataAuditieeController::class, 'index'])
-        ->name('isi-data-auditiee');
+    Route::get('/isi-data-auditee', [IsiDataAuditieeController::class, 'index'])
+        ->name('isi-data-auditee');
 
     Route::post('/isi-data-auditiee/store', [IsiDataAuditieeController::class, 'store'])
             ->name('auditiee.store');
@@ -293,48 +295,49 @@ Route::middleware(['auth', 'role:auditor,unit_kerja'])
 
     Route::get('/form-daftar-periksa', [FormDaftarPeriksaController::class, 'index'])
         ->name('form-daftar-periksa');
-    
+    Route::get('/form-daftar-periksa/print', [FormDaftarPeriksaController::class, 'print'])
+        ->name('form-daftar-periksa.print');
     Route::post('/form-daftar-periksa/store', [FormDaftarPeriksaController::class, 'store'])
         ->name('form-daftar-periksa.store');
-
     Route::get('/form-daftar-periksa/{id}/edit', [FormDaftarPeriksaController::class, 'edit'])
         ->name('form-daftar-periksa.edit');
-
     Route::put('/form-daftar-periksa/{id}', [FormDaftarPeriksaController::class, 'update'])
         ->name('form-daftar-periksa.update');
-
     Route::delete('/form-daftar-periksa/{id}', [FormDaftarPeriksaController::class, 'destroy'])
         ->name('form-daftar-periksa.destroy');
 
     Route::get('/form-ptk-permintaan-tindakan-koreksi', [FormKetidaksesuaianNcrController::class, 'index'])
         ->name('form-ptk-permintaan-tindakan-koreksi');
-
+    Route::get('/form-ketidaksesuaian-ncr/print', [FormKetidaksesuaianNcrController::class, 'print'])
+        ->name('form-ketidaksesuaian-ncr.print');
     Route::post('/form-ketidaksesuaian-ncr/store', [FormKetidaksesuaianNcrController::class, 'store'])
         ->name('form-ketidaksesuaian-ncr.store');
-
     Route::get('/form-ketidaksesuaian-ncr/{id}/edit', [FormKetidaksesuaianNcrController::class, 'edit'])
         ->name('form-ketidaksesuaian-ncr.edit');
-
     Route::put('/form-ketidaksesuaian-ncr/{id}', [FormKetidaksesuaianNcrController::class, 'update'])
         ->name('form-ketidaksesuaian-ncr.update');
-
     Route::delete('/form-ketidaksesuaian-ncr/{id}', [FormKetidaksesuaianNcrController::class, 'destroy'])
         ->name('form-ketidaksesuaian-ncr.destroy');
 
     Route::get('/form-observasi', [FormObservasiController::class, 'index'])
         ->name('form-observasi');
-
+    Route::get('/form-observasi/print', [FormObservasiController::class, 'print'])
+        ->name('form-observasi.print');
     Route::post('/form-observasi/store', [FormObservasiController::class, 'store'])
         ->name('form-observasi.store');
-
     Route::get('/form-observasi/{id}/edit', [FormObservasiController::class, 'edit'])
         ->name('form-observasi.edit');
-
     Route::put('/form-observasi/{id}', [FormObservasiController::class, 'update'])
         ->name('form-observasi.update');
-
     Route::delete('/form-observasi/{id}', [FormObservasiController::class, 'destroy'])
         ->name('form-observasi.destroy');
+
+    Route::get('/form-terpenuhi', [FormTerpenuhiController::class, 'index'])->name('form-terpenuhi');
+    Route::get('/form-terpenuhi/print', [FormTerpenuhiController::class, 'print'])->name('form-terpenuhi.print');
+    Route::post('/form-terpenuhi/store', [FormTerpenuhiController::class, 'store'])->name('form-terpenuhi.store');
+    Route::get('/form-terpenuhi/{id}/edit', [FormTerpenuhiController::class, 'edit'])->name('form-terpenuhi.edit');
+    Route::put('/form-terpenuhi/{id}', [FormTerpenuhiController::class, 'update'])->name('form-terpenuhi.update');
+    Route::delete('/form-terpenuhi/{id}', [FormTerpenuhiController::class, 'destroy'])->name('form-terpenuhi.destroy');
 
     Route::get('/cetak-rekapitulasi-ami', [CetakRekapitulasiController::class, 'index'])->name('cetak-ami.index');
     Route::get('/cetak-rekapitulasi-ami/data', [CetakRekapitulasiController::class, 'getData'])->name('cetak-ami.data');
@@ -354,19 +357,32 @@ Route::middleware(['auth', 'role:prodi'])
 
     Route::get('/daftar-periksa', [AuditeeDaftarPeriksaController::class, 'index'])
         ->name('daftar-periksa.index');
+    Route::get('/daftar-periksa/print', [AuditeeDaftarPeriksaController::class, 'print'])
+        ->name('daftar-periksa.print');
 
     Route::get('/form-ptk', [FormPtkController::class, 'index'])
         ->name('auditee.form-ptk.index');
-
+    Route::get('/form-ptk/print', [FormPtkController::class, 'print'])
+    ->name('auditee.ptk.print');
     Route::put('/form-ptk/{id}', [FormPtkController::class, 'update'])
         ->name('auditee.form-ptk.update');
 
     Route::get('/observasi', [AuditeeObservasiController::class, 'index'])
         ->name('auditee.observasi');
+    Route::get('/observasi/print', [AuditeeObservasiController::class, 'print'])
+        ->name('auditee-observasi.print');
 
-    Route::get('/cetak-rekapitulasi-ami', function () {
-        return 'Halaman Cetak Rekapitulasi';
-    });
+    Route::get('/terpenuhi', [AuditeeTerpenuhiController::class, 'index'])
+        ->name('auditee.terpenuhi');
+    Route::get('/terpenuhi/print', [AuditeeTerpenuhiController::class, 'print'])
+        ->name('auditee.terpenuhi.print');
+
+    Route::get('/cetak-rekapitulasi-ami', [CetakRekapitulasiAuditeeController::class, 'index'])
+        ->name('cetak-auditee.index');
+    Route::get('/cetak-rekapitulasi-auditee/data', [CetakRekapitulasiAuditeeController::class, 'getData'])
+        ->name('prodi.cetak-auditee.data');
+    Route::get('/cetak-rekapitulasi-auditee/print', [CetakRekapitulasiAuditeeController::class, 'print'])
+        ->name('prodi.cetak-auditee.print');
 
 });
 

@@ -50,6 +50,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
             </svg>
         </button>
+
+        <a
+            x-show="showCetak"
+            x-transition.opacity.duration.200ms
+            :href="`{{ route('form-daftar-periksa.print') }}?tahun_akademik_id=${selectedTahun}`"
+            target="_blank"
+            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-emerald-700 hover:shadow-sm"
+            style="display: none;"
+        >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8z" />
+            </svg>
+            Cetak
+        </a>
     </div>
 </div>
 
@@ -57,29 +71,33 @@
     function filterTahunAkademik() {
         return {
             selectedTahun: '',
-            
+            showCetak: false,
+
             init() {
-                // Ambil dari URL parameter
                 const urlParams = new URLSearchParams(window.location.search);
                 const tahunParam = urlParams.get('tahun_akademik_id');
+
                 if (tahunParam) {
                     this.selectedTahun = tahunParam;
+                    this.showCetak = true;
                     this.filterData();
                 }
             },
-            
+
             filterData() {
                 const val = this.selectedTahun;
-                
-                // Cari tabel di halaman utama (bukan di component ini)
+
+                this.showCetak = !!val;
+
                 const tableBody = document.querySelector('#formPeriksaTableContainer tbody');
                 if (!tableBody) return;
-                
+
                 const rows = tableBody.querySelectorAll('tr:not(#emptyStateRow)');
                 let visibleCount = 0;
-                
+
                 rows.forEach(row => {
                     const taId = row.getAttribute('data-ta-id');
+
                     if (!val || taId === val) {
                         row.style.display = '';
                         visibleCount++;
@@ -87,9 +105,9 @@
                         row.style.display = 'none';
                     }
                 });
-                
-                // Handle empty state
+
                 let emptyStateRow = document.getElementById('emptyStateRow');
+
                 if (visibleCount === 0) {
                     if (!emptyStateRow) {
                         emptyStateRow = document.createElement('tr');
@@ -103,7 +121,7 @@
                                     <div class="text-sm font-medium">Tidak ada data untuk filter ini</div>
                                     <div class="text-xs">Coba pilih tahun akademik lain</div>
                                 </div>
-                            <tr>
+                            </td>
                         `;
                         tableBody.appendChild(emptyStateRow);
                     } else {
@@ -114,19 +132,21 @@
                         emptyStateRow.style.display = 'none';
                     }
                 }
-                
-                // Update URL tanpa reload
+
                 const url = new URL(window.location.href);
+
                 if (val) {
                     url.searchParams.set('tahun_akademik_id', val);
                 } else {
                     url.searchParams.delete('tahun_akademik_id');
                 }
+
                 window.history.pushState({}, '', url.toString());
             },
-            
+
             resetFilter() {
                 this.selectedTahun = '';
+                this.showCetak = false;
                 this.filterData();
             }
         }

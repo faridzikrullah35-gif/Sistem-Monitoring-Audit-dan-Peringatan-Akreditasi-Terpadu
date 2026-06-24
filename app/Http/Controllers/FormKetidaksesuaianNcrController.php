@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditPtk;
-use App\Models\Matrix;
-use App\Models\Standar;
 use App\Models\PertanyaanAmiProdi;
 use App\Models\PertanyaanAmiUnit;
 use App\Models\TahunAkademik;
+use App\Models\Matrix;
 use App\Models\SettingScore;
+use App\Models\SettingAksesAuditor;
+use App\Models\IsiAksesAuditor;
+use App\Models\Auditiee;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class FormKetidaksesuaianNcrController extends Controller
 {
@@ -95,6 +99,167 @@ class FormKetidaksesuaianNcrController extends Controller
             'tahunAkademik' => $tahunAkademik,
             'kategoriTemuan' => $kategoriTemuan,
         ]);
+    }
+
+    public function print(Request $request)
+    {
+        $user = auth()->user();
+        $userId = auth()->id();
+        $tahunAkademikId = $request->tahun_akademik_id;
+
+        /*
+        |----------------------------------------
+        | DATA NCR (AUDIT PTK)
+        |----------------------------------------
+        */
+        $ncrItems = AuditPtk::with([
+            'pertanyaanAmiProdi.isiIndikator',
+            'pertanyaanAmiUnit.isiIndikator',
+            'auditPeriksa'
+        ])
+        ->where('users_id', $userId)
+        ->when($tahunAkademikId, function ($query) use ($tahunAkademikId) {
+            $query->where(function ($q) use ($tahunAkademikId) {
+                $q->whereHas('pertanyaanAmiProdi', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                })
+                ->orWhereHas('pertanyaanAmiUnit', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                });
+            });
+        })
+        ->orderBy('id', 'desc')
+        ->get();
+
+        /*
+        |----------------------------------------
+        | LOKASI AUDIT
+        |----------------------------------------
+        */
+        $lokasi_audit = implode(' - ', array_filter([
+            $user->sub_unit ?? null,
+            $user->unit ?? null
+        ]));
+
+        /*
+        |----------------------------------------
+        | TAHUN AKADEMIK FALLBACK
+        |----------------------------------------
+        */
+        $tahunYangDigunakan = $tahunAkademikId;
+
+        if (!$tahunYangDigunakan && $ncrItems->isNotEmpty()) {
+            $first = $ncrItems->first();
+
+            $tahunYangDigunakan =
+                $first->pertanyaanAmiProdi->tahun_akademik_id
+                ?? $first->pertanyaanAmiUnit->tahun_akademik_id
+                ?? null;
+        }
+
+        $tahunAkademik = TahunAkademik::find($tahunYangDigunakan);
+
+        /*
+        |----------------------------------------
+        | AUDITOR SETTING (SAMA KAYAK DAFTAR PERIKSA)
+        |----------------------------------------
+        */
+        $setting = SettingAksesAuditor::where('user_id', $userId)->first();
+
+        $auditors = collect();
+        $leadAuditorName = null;
+        $leadAuditorNidn = null;
+        $tanggal_audit = null;
+
+        if ($setting) {
+            $tanggal_audit = $setting->tgl_audit
+                ? Carbon::parse($setting->tgl_audit)->translatedFormat('d F Y')
+                : null;
+
+            $isiAkses = IsiAksesAuditor::with('auditor')
+                ->where('setting_akses_auditor_id', $setting->id)
+                ->whereIn('posisi', ['lead_auditor', 'anggota'])
+                ->get();
+
+            $auditors = $isiAkses->map(function ($item) {
+                return [
+                    'nama' => $item->auditor->nama_auditor ?? '-',
+                    'role' => $item->posisi === 'lead_auditor' ? 'Lead Auditor' : 'Anggota',
+                    'nidn' => $item->auditor->identity_number ?? null,
+                ];
+            });
+
+            $lead = $isiAkses->firstWhere('posisi', 'lead_auditor');
+            if ($lead && $lead->auditor) {
+                $leadAuditorName = $lead->auditor->nama_auditor;
+                $leadAuditorNidn = $lead->auditor->identity_number;
+            }
+        }
+
+        // fallback lead auditor
+        if (!$leadAuditorName) {
+            $leadAuditorName = '_________________________';
+            $leadAuditorNidn = '_________________';
+        }
+
+        /*
+        |----------------------------------------
+        | AUDITEE
+        |----------------------------------------
+        */
+        $auditees = Auditiee::where('users_id', $userId)->get();
+
+        /*
+        |----------------------------------------
+        | SIGNATURES
+        |----------------------------------------
+        */
+        $kabalai = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_bidang_internal')
+            ->first();
+
+        if (!$kabalai || !$kabalai->auditor) {
+            $kabalai = (object)[
+                'auditor' => (object)[
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________'
+                ]
+            ];
+        }
+
+        $kepalaLPM = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_lembaga_penjaminan_mutu')
+            ->first();
+
+        if (!$kepalaLPM || !$kepalaLPM->auditor) {
+            $kepalaLPM = (object)[
+                'auditor' => (object)[
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________'
+                ]
+            ];
+        }
+
+        /*
+        |----------------------------------------
+        | RETURN VIEW
+        |----------------------------------------
+        */
+        return view('auditor.form-ketidaksesuaian-ncr.print', compact(
+            'ncrItems',
+            'tahunAkademik',
+            'auditors',
+            'auditees',
+            'leadAuditorName',
+            'leadAuditorNidn',
+            'kabalai',
+            'kepalaLPM',
+            'tanggal_audit',
+            'lokasi_audit',
+            'tahunAkademikId'
+        ));
     }
 
     /**

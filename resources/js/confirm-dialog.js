@@ -378,6 +378,20 @@ window.deleteObservation = (id) => {
 
 };
 
+window.deleteTerpenuhi = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data terpenuhi ini?',
+        () => executeDelete({
+            url: `/auditor/form-terpenuhi/${id}`,
+            method: 'DELETE',
+            tableId: '#terpenuhiTableContainer',
+        })
+    );
+
+};
+
 // ============================================================
 // DOM INIT (SIMPLIFIED)
 // ============================================================

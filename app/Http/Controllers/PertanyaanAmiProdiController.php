@@ -39,7 +39,8 @@ class PertanyaanAmiProdiController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $tahunAkademik = TahunAkademik::orderBy('tahun_akademik')
+        $tahunAkademik = TahunAkademik::where('status', 'Aktif')
+            ->orderBy('tahun_akademik', 'desc')
             ->get();
 
         /*

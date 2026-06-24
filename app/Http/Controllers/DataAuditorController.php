@@ -12,7 +12,7 @@ class DataAuditorController extends Controller
      */
     public function index()
     {
-        $auditors = DataAuditor::orderBy('created_at', 'desc')
+        $auditors = DataAuditor::orderBy('created_at', 'asc')
             ->paginate(10);
 
         return view('pages.data-auditor', compact('auditors'));

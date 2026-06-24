@@ -52,4 +52,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Auditiee::class, 'users_id');
     }
+
+    public function settingAksesAuditor()
+    {
+        return $this->hasOne(SettingAksesAuditor::class, 'user_id');
+    }
 }

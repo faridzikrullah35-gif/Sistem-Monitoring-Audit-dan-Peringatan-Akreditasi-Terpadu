@@ -112,6 +112,34 @@
                 </span>
             </label>
 
+            <!-- Kepala Bidang Internal -->
+            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer
+                border-gray-300 dark:border-gray-600
+                has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500
+                dark:has-[:checked]:bg-emerald-900/20 dark:has-[:checked]:border-emerald-400">
+
+                <input type="radio" name="posisi" value="posisi_kepala_bidang_internal"
+                    class="w-4 h-4 text-emerald-600">
+
+                <span class="text-sm text-gray-800 dark:text-gray-200">
+                    Kepala Bidang Internal
+                </span>
+            </label>
+
+            <!-- Kepala Lembaga Penjaminan Mutu -->
+            <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer
+                border-gray-300 dark:border-gray-600
+                has-[:checked]:bg-emerald-50 has-[:checked]:border-emerald-500
+                dark:has-[:checked]:bg-emerald-900/20 dark:has-[:checked]:border-emerald-400">
+
+                <input type="radio" name="posisi" value="posisi_kepala_lembaga_penjaminan_mutu"
+                    class="w-4 h-4 text-emerald-600">
+
+                <span class="text-sm text-gray-800 dark:text-gray-200">
+                    Kepala Lembaga Penjaminan Mutu
+                </span>
+            </label>
+
         </div>
     </div>
 </div>

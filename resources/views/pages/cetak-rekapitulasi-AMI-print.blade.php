@@ -70,7 +70,7 @@
         .main-table td {
             border: 1px solid #000;
             padding: 10px 5px;
-            font-size: 13px; /* Ukuran pas agar muat banyak text di landscape */
+            font-size: 13px;
             vertical-align: top;
             line-height: 1.4;
         }
@@ -83,6 +83,33 @@
             text-decoration: underline;
             display: block;
             margin-bottom: 5px;
+        }
+
+        /* ===== RICH TEXT STYLING ===== */
+        .content-rich {
+            margin-top: 3px;
+        }
+        .content-rich ol,
+        .content-rich ul {
+            padding-left: 20px;
+            margin: 5px 0;
+        }
+        .content-rich ol li,
+        .content-rich ul li {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        .content-rich p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        .content-rich i,
+        .content-rich em {
+            font-style: italic;
+        }
+        .content-rich b,
+        .content-rich strong {
+            font-weight: bold;
         }
 
         /* REKAP SUMMARY */
@@ -137,7 +164,7 @@
                 display: none !important; 
             }
             .main-table, .header-table, .rekap-table { 
-                width: 100% !important; /* Memaksimalkan lebar kertas pas di-print */
+                width: 100% !important;
             }
             .rekap-table {
                 width: 25% !important;
@@ -149,16 +176,16 @@
 
 <div class="page">
 
-    {{-- TOMBOL CONTROL (Hanya muncul di web, hilang saat di-print) --}}
+    {{-- TOMBOL CONTROL --}}
     <div class="no-print">
         <button onclick="window.print()">Print Laporan</button>
     </div>
 
-    {{-- HEADER FORMULIR (Sesuai Struktur Asli Universitas Muhammadiyah Banjarmasin) --}}
+    {{-- HEADER FORMULIR --}}
     <table class="header-table">
         <tr>
             <th rowspan="3" class="logo-cell">
-                <img src="{{ asset('img/logo/a.png') }}" alt="Logo">
+                <img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75" alt="Logo">
             </th>
             <td class="tg-0pky" style="width: 65%;">FORMULIR</td>
             <td class="tg-0pky" style="width: 10%;">No Dokumen</td>
@@ -212,31 +239,27 @@
                 <td class="center">{{ $item['no_ncr'] ?? '-' }}</td>
                 <td class="center">{{ $item['tgl_audit'] ?? '-' }}</td>
                 <td>{{ $item['bagian'] ?? '-' }}</td>
+
+                {{-- ========== KOLOM MACAM TEMUAN ========== --}}
                 <td>
                     <span class="label-temuan"><u>{{ $kategori }}</u></span>
-                    
-                    {{-- Kondisi jika Observasi, teks bagian/jabatan tampil di sini --}}
-                    @if(strpos(strtolower($kategori), 'observasi') !== false)
-                        <p>{{ $item['uraian_temuan_opsional'] ?? 'Ka.Prodi S1 Teknik Sipil UM Banjarmasin' }}</p>
-                    @else
-                        <p>{{ $item['uraian_temuan'] ?? '' }}</p>
-                    @endif
+                    <div class="content-rich">
+                        {!! $item['uraian_temuan'] ?? '' !!}
+                    </div>
                 </td>
+
                 <td class="center">{{ $item['tgl_target_perbaikan'] ?? '-' }}</td>
                 <td class="center">{{ $item['tgl_verifikasi'] ?? '-' }}</td>
                 <td>
-                    {!! $item['auditor'] ?? 'M Fahrin Azhari, Ns, M.Kep., <b>(Lead Auditor)</b> <br> Hafizhatu Nadia., M.Pd.' !!}
+                    {!! $item['auditor'] ?? 'Auditor' !!}
                 </td>
                 <td class="center">
                     <b>{{ $item['status'] ?? '-' }}</b>
                 </td>
+
+                {{-- ========== KOLOM KETERANGAN ========== --}}
                 <td>
-                    {{-- Kalau observasi, detail temuannya masuk ke kolom keterangan sesuai format asli PDF --}}
-                    @if(strpos(strtolower($kategori), 'observasi') !== false)
-                        <p>{{ $item['uraian_temuan'] ?? '' }}</p>
-                    @else
-                        {{ $item['keterangan'] ?? '' }}
-                    @endif
+                    {!! $item['keterangan'] ?? '' !!}
                 </td>
             </tr>
             @empty
@@ -265,9 +288,8 @@
 
 </div>
 
-<script type="text/javascript">
+<script>
     window.addEventListener('load', function () {
-        // Otomatis trigger print pas load selesai
         window.print();
     });
 </script>

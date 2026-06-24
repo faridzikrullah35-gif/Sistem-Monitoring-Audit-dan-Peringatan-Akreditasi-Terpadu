@@ -22,7 +22,7 @@ class DataAuditor extends Model
         'tahun_non_aktif',
     ];
 
-    public function akses()
+    public function isiAksesAuditors()
     {
         return $this->hasMany(IsiAksesAuditor::class, 'auditor_id');
     }

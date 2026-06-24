@@ -13,10 +13,10 @@ class SettingAksesAuditorController extends Controller
     public function index()
     {
         $akses = SettingAksesAuditor::with(['user', 'tahunAkademik'])
-        ->latest()
+        ->orderBy('created_at', 'asc')
         ->paginate(10);
 
-        $units = User::whereIn('role', ['auditor'])
+        $units = User::whereIn('role', ['auditor', 'unit_kerja'])
         ->orderBy('name')
         ->get();
 

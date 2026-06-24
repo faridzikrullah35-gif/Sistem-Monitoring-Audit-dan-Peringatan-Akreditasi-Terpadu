@@ -1,5 +1,5 @@
 @props([
-    'title' => 'Data Auditiee',
+    'title' => 'Data Auditee',
 ])
 
 <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:mb-6">
@@ -15,6 +15,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
 
-        Tambah Auditiee
+        Tambah Auditee
     </button>
 </div>

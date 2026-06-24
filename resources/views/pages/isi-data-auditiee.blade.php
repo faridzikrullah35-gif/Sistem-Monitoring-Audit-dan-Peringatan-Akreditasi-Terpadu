@@ -3,7 +3,7 @@
 @section('title', 'Isi Data Auditiee | SIMANTAP')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Isi Data Auditiee" />
+    <x-common.page-breadcrumb pageTitle="Isi Data Auditee" />
 
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
 

@@ -29,6 +29,21 @@
         Reset Filter
     </button>
 
+    {{-- CETAK (muncul jika tahun dipilih) --}}
+    <a
+        x-show="tahunAkademikId"
+        x-transition.opacity.duration.200ms
+        :href="`{{ route('auditee-observasi.print') }}?tahun_akademik_id=${tahunAkademikId}`"
+        target="_blank"
+        class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-emerald-700"
+        style="display: none;"
+    >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8z"/>
+        </svg>
+        Cetak
+    </a>
+
 </div>
 
 <script>

@@ -42,7 +42,7 @@
                     </td>
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.rencana_tindakan_perbaikan_auditee || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.tanggal_target_perbaikan_auditee || '-'"></td>
-                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.tindakan_pencegahan_auditee || '-'"></td>
+                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200" x-html="item.tindakan_pencegahan_auditee || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.file_auditee || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.tanggal_selesai || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4">

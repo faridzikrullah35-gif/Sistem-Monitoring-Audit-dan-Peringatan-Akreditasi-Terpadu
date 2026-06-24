@@ -64,6 +64,11 @@ class AuditPeriksa extends Model
         return $this->hasOne(FormObservasi::class);
     }
 
+    public function terpenuhi()
+    {
+        return $this->hasOne(FormTerpenuhi::class, 'audit_periksa_id');
+    }
+
     public function settingScore()
     {
         return $this->belongsTo(SettingScore::class, 'setting_score_id');

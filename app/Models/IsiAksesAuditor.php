@@ -15,7 +15,7 @@ class IsiAksesAuditor extends Model
     // relasi ke setting akses
     public function settingAkses()
     {
-        return $this->belongsTo(SettingAksesAuditor::class);
+        return $this->belongsTo(SettingAksesAuditor::class, 'setting_akses_auditor_id');
     }
 
     // relasi ke auditor

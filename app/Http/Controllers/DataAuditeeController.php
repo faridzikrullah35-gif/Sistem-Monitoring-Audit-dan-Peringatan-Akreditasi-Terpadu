@@ -9,9 +9,19 @@ class DataAuditeeController extends Controller
 {
     public function index()
     {
-        $auditees = Auditiee::with('tahunAkademik')->latest()->get();
+        $user = auth()->user();
 
-        $tahunAkademiks = TahunAkademik::all();
+        $auditees = Auditiee::with('tahunAkademik')
+            ->whereHas('user', function ($q) use ($user) {
+                $q->where('unit', $user->unit)
+                ->where('sub_unit', $user->sub_unit);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $tahunAkademiks = TahunAkademik::where('status', 'Aktif')
+            ->orderBy('tahun_akademik', 'desc')
+            ->get();
 
         return view('pages.data-auditee', compact(
             'auditees',

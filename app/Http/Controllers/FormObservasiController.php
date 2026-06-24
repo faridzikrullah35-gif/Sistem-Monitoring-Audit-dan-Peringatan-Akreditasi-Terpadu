@@ -88,6 +88,47 @@ class FormObservasiController extends Controller
         ]);
     }
 
+    /**
+     * Print form observasi berdasarkan filter tahun akademik
+     */
+    public function print(Request $request)
+    {
+        $userId = auth()->id();
+        $tahunAkademikId = $request->tahun_akademik_id;
+
+        // Ambil data observasi milik user, dengan filter tahun jika ada
+        $observasiItems = FormObservasi::with([
+            'pertanyaanAmiProdi.isiIndikator',
+            'pertanyaanAmiUnit.isiIndikator',
+            'matrix.kriteriaAudit.standar',
+            'user'
+        ])
+        ->where('users_id', $userId)
+        ->when($tahunAkademikId, function ($query) use ($tahunAkademikId) {
+            $query->where(function ($q) use ($tahunAkademikId) {
+                $q->whereHas('pertanyaanAmiProdi', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                })->orWhereHas('pertanyaanAmiUnit', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                });
+            });
+        })
+        ->orderBy('id', 'asc')
+        ->get();
+
+        // (Opsional) Ambil nama tahun akademik untuk keperluan judul atau informasi tambahan
+        $tahunAkademik = null;
+        if ($tahunAkademikId) {
+            $tahunAkademik = TahunAkademik::find($tahunAkademikId);
+        } elseif ($observasiItems->isNotEmpty()) {
+            $first = $observasiItems->first();
+            $tahunId = $first->pertanyaanAmiProdi->tahun_akademik_id ?? $first->pertanyaanAmiUnit->tahun_akademik_id ?? null;
+            $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
+        }
+
+        return view('auditor.form-observasi.print', compact('observasiItems', 'tahunAkademik'));
+    }
+
     private function getPertanyaanModel()
     {
         return auth()->user()->role === 'unit_kerja'

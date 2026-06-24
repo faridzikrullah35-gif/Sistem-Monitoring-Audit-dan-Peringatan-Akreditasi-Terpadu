@@ -7,7 +7,7 @@
         <thead>
             <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
                 <th class="whitespace-nowrap px-4 py-3.5 font-medium text-gray-500 dark:text-gray-400">#</th>
-                <th class="whitespace-nowrap px-4 py-3.5 font-medium text-gray-500 dark:text-gray-400">Nama Auditiee</th>
+                <th class="whitespace-nowrap px-4 py-3.5 font-medium text-gray-500 dark:text-gray-400">Nama Auditee</th>
                 <th class="whitespace-nowrap px-4 py-3.5 font-medium text-gray-500 dark:text-gray-400">Tahun Akademik</th>
                 <th class="whitespace-nowrap px-4 py-3.5 text-right font-medium text-gray-500 dark:text-gray-400">Aksi</th>
             </tr>

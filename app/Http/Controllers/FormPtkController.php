@@ -6,42 +6,58 @@ use App\Models\AuditPtk;
 use App\Models\TahunAkademik;
 use App\Models\PertanyaanAmiProdi;
 use App\Models\SettingScore;
+use App\Models\user;
+use App\Models\auditPeriksa;
+use App\Models\Auditiee;
+use App\Models\SettingAksesAuditor;
+use App\Models\IsiAksesAuditor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class FormPtkController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+
+        $amiModel = $user->role === 'unit_kerja'
+            ? \App\Models\PertanyaanAmiUnit::class
+            : \App\Models\PertanyaanAmiProdi::class;
+
+        $relasiAmi = $user->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+
         $ptkList = AuditPtk::with([
-            'pertanyaanAmiProdi.isiIndikator',
-            'pertanyaanAmiProdi.tahunAkademik',
-            'auditPeriksa'
+            $relasiAmi . '.isiIndikator',
+            $relasiAmi . '.tahunAkademik',
+            'auditPeriksa',
         ])
+        ->whereHas('user', function ($q) use ($user) {
+            $q->where('unit', $user->unit)
+            ->where('sub_unit', $user->sub_unit);
+        })
         ->orderBy('id', 'asc')
         ->get();
 
-        $tahunAkademiks = TahunAkademik::orderBy('tahun_akademik', 'desc')
-            ->orderBy('semester', 'desc')
+        $tahunAkademiks = $amiModel::select('tahun_akademik_id')
+            ->distinct()
+            ->pluck('tahun_akademik_id');
+
+        $tahunAkademiks = \App\Models\TahunAkademik::whereIn('id', $tahunAkademiks)
+            ->orderBy('tahun_akademik', 'desc')
             ->get();
 
-        $kategoriTemuan = SettingScore::where('generate_ncr', 1)
+        $kategoriTemuan = \App\Models\SettingScore::where('generate_ncr', 1)
             ->orderBy('id', 'asc')
             ->get();
 
-        if ($request->ajax()) {
-            return view('pages.auditee-form-ptk', [
-                'ptkList'        => $ptkList,
-                'tahunAkademiks' => $tahunAkademiks,
-                'kategoriTemuan' => $kategoriTemuan,
-            ]);
-        }
-
-        return view('pages.auditee-form-ptk', [
-            'ptkList'        => $ptkList,
-            'tahunAkademiks' => $tahunAkademiks,
-            'kategoriTemuan' => $kategoriTemuan,
-        ]);
+        return view('pages.auditee-form-ptk', compact(
+            'ptkList',
+            'tahunAkademiks',
+            'kategoriTemuan'
+        ));
     }
 
     public function update(Request $request, $id)
@@ -101,4 +117,196 @@ class FormPtkController extends Controller
             'data'    => $ptk,
         ]);
     }
+
+    public function print(Request $request)
+    {
+        $user = auth()->user();
+        $userId = auth()->id();
+
+        // Tentukan model AMI berdasarkan role
+        $amiModel = $user->role === 'unit_kerja'
+            ? \App\Models\PertanyaanAmiUnit::class
+            : \App\Models\PertanyaanAmiProdi::class;
+
+        $relasiAmi = $user->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+
+        /*
+        |----------------------------------------
+        | DATA PTK
+        |----------------------------------------
+        */
+        $query = AuditPtk::with([
+            $relasiAmi . '.isiIndikator',
+            $relasiAmi . '.tahunAkademik',
+            'auditPeriksa',
+        ])
+        ->whereHas('user', function ($q) use ($user) {
+            $q->where('unit', $user->unit)
+            ->where('sub_unit', $user->sub_unit);
+        });
+
+        if ($request->filled('tahun_akademik_id')) {
+            $query->whereHas($relasiAmi, function ($q) use ($request) {
+                $q->where('tahun_akademik_id', $request->tahun_akademik_id);
+            });
+        }
+
+        $ptkList = $query->orderBy('id', 'asc')->get();
+
+        /*
+        |----------------------------------------
+        | LOKASI AUDIT
+        |----------------------------------------
+        */
+        $lokasi_audit = implode(' - ', array_filter([
+            $user->sub_unit ?? null,
+            $user->unit ?? null
+        ]));
+
+        /*
+        |----------------------------------------
+        | TAHUN AKADEMIK
+        |----------------------------------------
+        */
+        $tahunAkademikId = $request->tahun_akademik_id;
+
+        if (!$tahunAkademikId && $ptkList->isNotEmpty()) {
+            $first = $ptkList->first();
+
+            $tahunAkademikId =
+                optional($first->{$relasiAmi})->tahun_akademik_id;
+        }
+
+        $tahunAkademik = TahunAkademik::find($tahunAkademikId);
+
+        /*
+        |----------------------------------------
+        | AUDITOR
+        |----------------------------------------
+        */
+        $firstAudit = $ptkList->first();
+        $auditorUserId = $firstAudit ? $firstAudit->users_id : null;
+
+        // Cari setting berdasarkan auditor pembuat audit
+        $setting = null;
+
+        if ($auditorUserId) {
+            $setting = SettingAksesAuditor::where('user_id', $auditorUserId)->first();
+        }
+
+        // fallback jika tidak ditemukan
+        if (!$setting) {
+            $setting = SettingAksesAuditor::where('user_id', $userId)->first();
+        }
+
+        $auditors = collect();
+        $leadAuditorName = null;
+        $leadAuditorNidn = null;
+        $tanggal_audit = null;
+
+        if ($setting) {
+
+            $tanggal_audit = $setting->tgl_audit
+                ? Carbon::parse($setting->tgl_audit)
+                    ->translatedFormat('d F Y')
+                : null;
+
+            $isiAkses = IsiAksesAuditor::with('auditor')
+                ->where('setting_akses_auditor_id', $setting->id)
+                ->whereIn('posisi', ['lead_auditor', 'anggota'])
+                ->get();
+
+            $auditors = $isiAkses->map(function ($item) {
+                return [
+                    'nama' => $item->auditor->nama_auditor ?? '-',
+                    'role' => $item->posisi === 'lead_auditor'
+                        ? 'Lead Auditor'
+                        : 'Anggota',
+                    'nidn' => $item->auditor->identity_number ?? null,
+                ];
+            });
+
+            $lead = $isiAkses->firstWhere('posisi', 'lead_auditor');
+
+            if ($lead && $lead->auditor) {
+                $leadAuditorName = $lead->auditor->nama_auditor;
+                $leadAuditorNidn = $lead->auditor->identity_number;
+            }
+        }
+
+        if (!$leadAuditorName) {
+            $leadAuditorName = '_________________________';
+            $leadAuditorNidn = '_________________';
+        }
+
+        /*
+        |----------------------------------------
+        | AUDITEE
+        |----------------------------------------
+        */
+        $auditees = Auditiee::whereHas('user', function ($q) use ($user) {
+            $q->where('unit', $user->unit)
+            ->where('sub_unit', $user->sub_unit);
+        })->get();
+
+        /*
+        |----------------------------------------
+        | KEPALA BIDANG INTERNAL
+        |----------------------------------------
+        */
+        $kabalai = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_bidang_internal')
+            ->first();
+
+        if (!$kabalai || !$kabalai->auditor) {
+            $kabalai = (object)[
+                'auditor' => (object)[
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________',
+                ]
+            ];
+        }
+
+        /*
+        |----------------------------------------
+        | KEPALA LPM
+        |----------------------------------------
+        */
+        $kepalaLPM = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_lembaga_penjaminan_mutu')
+            ->first();
+
+        if (!$kepalaLPM || !$kepalaLPM->auditor) {
+            $kepalaLPM = (object)[
+                'auditor' => (object)[
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________',
+                ]
+            ];
+        }
+
+        /*
+        |----------------------------------------
+        | RETURN VIEW
+        |----------------------------------------
+        */
+        return view('auditee.ncr.print', compact(
+            'ptkList',
+            'tahunAkademik',
+            'auditors',
+            'auditees',
+            'leadAuditorName',
+            'leadAuditorNidn',
+            'kabalai',
+            'kepalaLPM',
+            'tanggal_audit',
+            'lokasi_audit',
+            'tahunAkademikId'
+        ));
+    }
+
 }

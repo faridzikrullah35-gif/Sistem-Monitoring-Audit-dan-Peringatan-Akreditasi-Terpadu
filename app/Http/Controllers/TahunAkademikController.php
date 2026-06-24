@@ -12,7 +12,7 @@ class TahunAkademikController extends Controller
      */
     public function index()
     {
-        $tahunAkademiks = TahunAkademik::orderBy('created_at', 'desc')
+        $tahunAkademiks = TahunAkademik::orderBy('created_at', 'asc')
             ->paginate(10);
 
         return view('pages.tahun-akademik', compact('tahunAkademiks'));

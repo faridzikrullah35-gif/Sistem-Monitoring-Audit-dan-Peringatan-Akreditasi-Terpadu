@@ -187,7 +187,7 @@
     ====================================================== --}}
     <td class="min-w-[260px] max-w-[360px] px-3 py-2.5 align-top">
         <p class="whitespace-normal break-words text-xs text-gray-600 dark:text-gray-400">
-            {{ $tindakanPencegahan ?? '-' }}
+            {!! $tindakanPencegahan !!}
         </p>
     </td>
 

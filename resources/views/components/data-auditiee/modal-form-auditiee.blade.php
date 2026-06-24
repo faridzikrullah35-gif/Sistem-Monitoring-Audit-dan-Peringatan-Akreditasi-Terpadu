@@ -8,7 +8,7 @@
         {{-- Modal Header --}}
         <div class="mb-5 flex items-center justify-between">
             <h3 id="modalFormTitle" class="text-base font-semibold text-gray-800 dark:text-white/90">
-                Tambah Auditiee
+                Tambah Auditee
             </h3>
             <button
                 type="button"
@@ -64,14 +64,14 @@
                 {{-- Nama Auditiee --}}
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Nama Auditiee <span class="text-red-500">*</span>
+                        Nama Auditee <span class="text-red-500">*</span>
                     </label>
 
                     <input
                         type="text"
                         id="namaAuditiee"
                         name="nama_auditiee"
-                        placeholder="Masukkan nama auditiee"
+                        placeholder="Masukkan nama auditee"
                         required
                         class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-white/[0.04] dark:text-white/85 dark:placeholder-gray-500"
                     />

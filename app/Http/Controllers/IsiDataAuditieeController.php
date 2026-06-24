@@ -20,10 +20,11 @@ class IsiDataAuditieeController extends Controller
                 'tahunAkademik'
             ])
             ->where('users_id', auth()->id())
-            ->latest()
+            ->orderBy('created_at', 'asc')
             ->get();
 
-        $tahunAkademik = TahunAkademik::orderBy('tahun_akademik', 'desc')
+        $tahunAkademik = TahunAkademik::where('status', 'Aktif')
+            ->orderBy('tahun_akademik', 'desc')
             ->orderBy('semester', 'desc')
             ->get();
 

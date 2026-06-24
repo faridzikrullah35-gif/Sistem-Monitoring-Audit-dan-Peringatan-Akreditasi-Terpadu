@@ -30,32 +30,24 @@ class AdminMenu
             ],
 
             [
-                'icon' => 'charts',
+                'icon' => 'tables',
                 'name' => 'Hasil Audit',
                 'subItems' => [
-                    ['name' => 'Input Nilai', 'path' => '/hasil/input'],
-                    ['name' => 'Hasil per Unit', 'path' => '/hasil/unit'],
-                    ['name' => 'Rekap Nilai', 'path' => '/hasil/rekap'],
+                    ['name' => 'Daftar Periksa', 'path' => '/admin/hasil-audit/daftar-periksa'],
+                    ['name' => 'PTK', 'path' => '/admin/hasil-audit/ptk'],
+                    ['name' => 'Observasi', 'path' => '/admin/hasil-audit/observasi'],
+                    ['name' => 'Terpenuhi', 'path' => '/admin/hasil-audit/terpenuhi'],
+                    ['name' => 'Rekapitulasi', 'path' => '/admin/hasil-audit/rekapitulasi'],
                 ],
             ],
 
             [
-                'icon' => 'pages',
+                'icon' => 'charts',
                 'name' => 'Temuan & Tindak Lanjut',
                 'subItems' => [
                     ['name' => 'Temuan Audit', 'path' => '/temuan'],
                     ['name' => 'Rekomendasi', 'path' => '/rekomendasi'],
                     ['name' => 'Tindak Lanjut', 'path' => '/tindak-lanjut'],
-                ],
-            ],
-
-            [
-                'icon' => 'tables',
-                'name' => 'Laporan',
-                'subItems' => [
-                    ['name' => 'Laporan Audit', 'path' => '/laporan'],
-                    ['name' => 'Export PDF', 'path' => '/laporan/pdf'],
-                    ['name' => 'Export Excel', 'path' => '/laporan/excel'],
                 ],
             ],
         ];

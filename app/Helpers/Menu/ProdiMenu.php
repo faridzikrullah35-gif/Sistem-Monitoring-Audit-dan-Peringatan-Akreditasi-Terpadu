@@ -20,7 +20,7 @@ class ProdiMenu
                 'subItems' => [
 
                     [
-                        'name' => 'Data Auditiee',
+                        'name' => 'Data Auditee',
                         'path' => '/prodi/data-auditee'
                     ],
 
@@ -37,6 +37,11 @@ class ProdiMenu
                     [
                         'name' => 'Observasi',
                         'path' => '/prodi/observasi'
+                    ],
+
+                    [
+                        'name' => 'Terpenuhi',
+                        'path' => '/prodi/terpenuhi'
                     ],
 
                     [

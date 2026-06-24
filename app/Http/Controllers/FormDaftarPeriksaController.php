@@ -9,8 +9,16 @@ use App\Models\TahunAkademik;
 use App\Models\Matrix;
 use App\Models\IsiIndikator;
 use App\Models\SettingScore;
+use App\Models\FormTerpenuhi;
 use App\Models\FormObservasi;
+use App\Models\SettingAksesAuditor;
+use App\Models\IsiAksesAuditor;
+use App\Models\DataAuditor;
+use App\Models\Auditiee;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class FormDaftarPeriksaController extends Controller
 {
@@ -116,6 +124,152 @@ class FormDaftarPeriksaController extends Controller
         ]);
     }
 
+    public function print(Request $request)
+    {
+        $user = auth()->user();
+        $userId = auth()->id();
+        $tahunAkademikId = $request->tahun_akademik_id;
+
+        // =======================
+        // DATA AUDIT PERIKSA
+        // =======================
+        $data = AuditPeriksa::with([
+            'score',
+            'pertanyaanAmiProdi.isiIndikator',
+            'pertanyaanAmiUnit.isiIndikator'
+        ])
+        ->where('users_id', $userId)
+        ->when($tahunAkademikId, function ($query) use ($tahunAkademikId) {
+            $query->where(function ($q) use ($tahunAkademikId) {
+                $q->whereHas('pertanyaanAmiProdi', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                })
+                ->orWhereHas('pertanyaanAmiUnit', function ($sub) use ($tahunAkademikId) {
+                    $sub->where('tahun_akademik_id', $tahunAkademikId);
+                });
+            });
+        })
+        ->orderBy('id', 'desc')
+        ->get();
+
+        $lokasi_audit = implode(' - ', array_filter([
+            $user->sub_unit,
+            $user->unit
+        ]));
+
+        // =======================
+        // AUDITEE
+        // =======================
+        $auditees = Auditiee::where('users_id', $userId)
+        ->get();
+
+        // =======================
+        // AMBIL TAHUN AKTIF
+        // =======================
+        $tahunYangDigunakan = $tahunAkademikId;
+
+        if (!$tahunYangDigunakan && $data->isNotEmpty()) {
+            $first = $data->first();
+
+            $tahunYangDigunakan =
+                $first->pertanyaanAmiProdi->tahun_akademik_id
+                ?? $first->pertanyaanAmiUnit->tahun_akademik_id
+                ?? null;
+        }
+
+        // =======================
+        // AUDITOR
+        // =======================
+        $setting = SettingAksesAuditor::where('user_id', $userId)->first();
+
+        $auditors = collect();
+        $leadAuditorName = null;
+        $leadAuditorNidn = null;
+
+        if ($setting) {
+            $tanggal_audit = $setting?->tgl_audit
+                ? Carbon::parse($setting->tgl_audit)->translatedFormat('d F Y')
+                : null;
+            $isiAkses = IsiAksesAuditor::with('auditor')
+                ->where('setting_akses_auditor_id', $setting->id)
+                ->whereIn('posisi', ['lead_auditor', 'anggota'])
+                ->get();
+            $auditors = $isiAkses->map(function ($item) {
+                return [
+                    'nama' => $item->auditor->nama_auditor ?? '-',
+                    'role' => $item->posisi === 'lead_auditor' ? 'Lead Auditor' : 'Anggota',
+                    'nidn' => $item->auditor->identity_number ?? null,
+                ];
+            });
+            $lead = $isiAkses->firstWhere('posisi', 'lead_auditor');
+                if ($lead && $lead->auditor) {
+                    $leadAuditorName = $lead->auditor->nama_auditor;
+                    $leadAuditorNidn = $lead->auditor->identity_number;
+                }
+            }
+
+            // Fallback jika tidak ada lead auditor
+            if (!$leadAuditorName) {
+                $leadAuditorName = '_________________________';
+                $leadAuditorNidn = '_________________';
+            }
+
+            $kabalai = IsiAksesAuditor::with('auditor')
+                ->where('setting_akses_auditor_id', $setting->id ?? null)
+                ->where('posisi', 'posisi_kepala_bidang_internal')
+                ->first();
+
+            if (!$kabalai || !$kabalai->auditor) {
+                $kabalai = (object) [
+                    'auditor' => (object) [
+                        'nama_auditor' => '_________________________',
+                        'identity_number' => '_________________'
+                    ]
+                ];
+            }
+
+            $kepalaLPM = IsiAksesAuditor::with('auditor')
+                ->where('setting_akses_auditor_id', $setting->id ?? null)
+                ->where('posisi', 'posisi_kepala_lembaga_penjaminan_mutu')
+                ->first();
+
+            if (!$kepalaLPM || !$kepalaLPM->auditor) {
+                $kepalaLPM = (object) [
+                    'auditor' => (object) [
+                        'nama_auditor' => '_________________________',
+                        'identity_number' => '_________________'
+                    ]
+                ];
+            }
+
+        // =======================
+        // FALLBACK AMAN
+        // =======================
+        if ($auditors->isEmpty()) {
+            $auditors = collect([[
+                'nama' => 'Data Auditor Tidak Tersedia',
+                'role' => '-',
+                'nidn' => null,
+            ]]);
+        }
+
+        // =======================
+        // RETURN VIEW
+        // =======================
+        return view('auditor.form-daftar-periksa.print', compact(
+            'data',
+            'auditees',
+            'auditors',
+            'tahunAkademikId',
+            'lokasi_audit',
+            'tanggal_audit',
+            'leadAuditorName',
+            'leadAuditorNidn',
+            'kabalai',
+            'kepalaLPM',
+        ));
+    }
+
     private function getPertanyaanModel()
     {
         return auth()->user()->role === 'unit_kerja'
@@ -210,6 +364,8 @@ class FormDaftarPeriksaController extends Controller
 
         $this->handleObservasi($data);
 
+        $this->handleTerpenuhi($data);
+
         return response()->json([
             'success' => true,
             'message' => 'Data audit berhasil disimpan',
@@ -274,6 +430,7 @@ class FormDaftarPeriksaController extends Controller
 
         $this->handlePtk($audit);
         $this->handleObservasi($audit);
+        $this->handleTerpenuhi($audit);
 
         return response()->json([
             'success' => true,
@@ -292,6 +449,7 @@ class FormDaftarPeriksaController extends Controller
 
         $audit->ptk()->delete();
         $audit->observasi()->delete();
+        $audit->terpenuhi()->delete();
 
         $audit->delete();
 
@@ -354,9 +512,10 @@ class FormDaftarPeriksaController extends Controller
 
         $nilai = (int) ($score->nilai_score ?? 0);
 
-        if (!$score || !in_array($nilai, [3, 4])) {
+        if (!$score || $nilai !== 3) {
 
             $audit->observasi()->delete();
+
             return;
         }
 
@@ -364,7 +523,9 @@ class FormDaftarPeriksaController extends Controller
             $audit->pertanyaanAmiProdi
             ?? $audit->pertanyaanAmiUnit;
 
-        $matrixId = optional(optional($pertanyaan)->isiIndikator)->matrixs_id;
+        $matrixId = optional(
+            optional($pertanyaan)->isiIndikator
+        )->matrixs_id;
 
         $audit->observasi()->updateOrCreate(
             [
@@ -373,10 +534,60 @@ class FormDaftarPeriksaController extends Controller
             [
                 'users_id' => $audit->users_id,
 
-                'pertanyaan_ami_prodi_id' => $audit->pertanyaan_ami_prodi_id,
-                'pertanyaan_ami_unit_id'  => $audit->pertanyaan_ami_unit_id,
+                'pertanyaan_ami_prodi_id' =>
+                    $audit->pertanyaan_ami_prodi_id,
+
+                'pertanyaan_ami_unit_id' =>
+                    $audit->pertanyaan_ami_unit_id,
 
                 'matrixs_id' => $matrixId,
+            ]
+        );
+    }
+
+    private function handleTerpenuhi($audit)
+    {
+        $score = $audit->score;
+
+        $nilai = (int) ($score->nilai_score ?? 0);
+
+        if (!$score || $nilai !== 4) {
+
+            $audit->terpenuhi()->delete();
+
+            return;
+        }
+
+        $pertanyaan =
+            $audit->pertanyaanAmiProdi
+            ?? $audit->pertanyaanAmiUnit;
+
+        $indikator = optional($pertanyaan)->isiIndikator;
+
+        $matrix = Matrix::with('kriteriaAudit.standar')
+            ->find($indikator?->matrixs_id);
+
+        $audit->terpenuhi()->updateOrCreate(
+            [
+                'audit_periksa_id' => $audit->id
+            ],
+            [
+                'users_id' => $audit->users_id,
+
+                'matrixs_id' =>
+                    $indikator?->matrixs_id,
+
+                'isi_indikator_id' =>
+                    $indikator?->id,
+
+                'pertanyaan_ami_prodi_id' =>
+                    $audit->pertanyaan_ami_prodi_id,
+
+                'pertanyaan_ami_unit_id' =>
+                    $audit->pertanyaan_ami_unit_id,
+
+                'discussed_with' => null,
+                'rekomendasi' => null,
             ]
         );
     }

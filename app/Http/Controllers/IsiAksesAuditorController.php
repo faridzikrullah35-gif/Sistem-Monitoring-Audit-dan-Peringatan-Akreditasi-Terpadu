@@ -15,7 +15,7 @@ class IsiAksesAuditorController extends Controller
         $request->validate([
             'setting_akses_auditor_id' => 'required|exists:setting_akses_auditors,id',
             'auditor_id' => 'required|exists:data_auditor,id',
-            'posisi' => 'required|in:lead_auditor,anggota',
+            'posisi' => 'required|in:lead_auditor,anggota,posisi_kepala_bidang_internal,posisi_kepala_lembaga_penjaminan_mutu',
         ]);
 
         $data = IsiAksesAuditor::create([
@@ -51,7 +51,7 @@ class IsiAksesAuditorController extends Controller
     {
         $request->validate([
             'auditor_id' => 'required|exists:data_auditor,id',
-            'posisi' => 'required|in:lead_auditor,anggota',
+            'posisi' => 'required|in:lead_auditor,anggota,posisi_kepala_bidang_internal,posisi_kepala_lembaga_penjaminan_mutu',
         ]);
 
         $data = IsiAksesAuditor::findOrFail($id);

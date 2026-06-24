@@ -4,7 +4,6 @@
 <div
     x-data="{
         data: @js($daftarPeriksas),
-        selectedTahun: '',  <!-- variabel ini akan di-binding dari parent jika ada -->
         currentPage: 1,
         perPage: 5,
 
@@ -37,14 +36,21 @@
     x-init="$watch('selectedTahun', () => resetPage())"
     class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800"
 >
-    <table class="w-full table-fixed border-separate border-spacing-0 text-sm">
+    {{-- GANTI table-fixed → table-auto --}}
+    <table class="w-full table-auto border-separate border-spacing-0 text-sm">
         <thead>
             <tr class="bg-gray-50 dark:bg-gray-800/50">
+                {{-- Kolom # --}}
                 <th class="w-[5%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">#</th>
-                <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Tujuan</th>
+                {{-- Kolom Standar --}}
+                <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Standar</th>
+                {{-- Kolom Indikator --}}
                 <th class="w-[25%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Indikator</th>
+                {{-- Kolom Lingkup --}}
                 <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Lingkup</th>
+                {{-- Kolom Skor --}}
                 <th class="w-[10%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Skor</th>
+                {{-- Kolom Panduan --}}
                 <th class="w-[20%] px-4 py-3 text-left text-xs font-semibold uppercase text-gray-700 dark:text-gray-200">Panduan</th>
             </tr>
         </thead>
@@ -55,23 +61,24 @@
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300"
                         x-text="((currentPage - 1) * perPage) + index + 1"></td>
 
-                    {{-- TUJUAN --}}
+                    {{-- STANDAR --}}
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div class="line-clamp-3 leading-relaxed"
+                        {{-- Hilangkan line-clamp-3, biarkan teks utuh --}}
+                        <div class="leading-relaxed"
                              x-text="item.pertanyaan_ami_prodi?.indikator?.matrix?.kriteria_audit?.standar?.nama || '-'">
                         </div>
                     </td>
 
                     {{-- INDIKATOR --}}
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div class="line-clamp-3 leading-relaxed"
+                        <div class="leading-relaxed"
                              x-text="item.pertanyaan_ami_prodi?.indikator?.indikator || '-'">
                         </div>
                     </td>
 
                     {{-- LINGKUP --}}
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div class="line-clamp-3 leading-relaxed"
+                        <div class="leading-relaxed"
                              x-text="item.pertanyaan_ami_prodi?.indikator?.matrix?.elemen || '-'">
                         </div>
                     </td>
@@ -89,7 +96,8 @@
 
                     {{-- PANDUAN --}}
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        <div class="line-clamp-3 leading-relaxed"
+                        {{-- Hilangkan line-clamp-3, biarkan teks utuh --}}
+                        <div class="leading-relaxed"
                              x-html="item.panduan_pengisian || '-'">
                         </div>
                     </td>

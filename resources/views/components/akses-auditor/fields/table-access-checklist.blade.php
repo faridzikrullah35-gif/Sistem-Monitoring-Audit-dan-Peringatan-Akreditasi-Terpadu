@@ -19,12 +19,12 @@
                     </tr>
                 </thead>
                 <tbody id="auditor-table-body">
-    <tr>
-        <td colspan="3" class="text-center py-6 text-gray-500">
-            Pilih data untuk melihat auditor
-        </td>
-    </tr>
-</tbody>
+                    <tr>
+                        <td colspan="3" class="text-center py-6 text-gray-500">
+                            Pilih data untuk melihat auditor
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 

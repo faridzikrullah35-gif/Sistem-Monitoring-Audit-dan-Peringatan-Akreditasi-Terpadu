@@ -1,9 +1,10 @@
 @props([
     'tahunAkademik' => [],
-    'tableSelector' => '#tableBody', // Default selector untuk body tabel NCR
+    'tableSelector' => '#tableBody',
     'rowAttribute' => 'data-ta-id',
     'urlParamName' => 'tahun_akademik_id',
-    'iconColor' => 'red' // Bisa 'blue', 'red', 'green', dll
+    'iconColor' => 'red',
+    'printUrl' => null, // URL untuk cetak, misal route('form-daftar-periksa.print')
 ])
 
 @php
@@ -22,7 +23,8 @@
         tableSelector: '{{ $tableSelector }}',
         rowAttribute: '{{ $rowAttribute }}',
         urlParamName: '{{ $urlParamName }}',
-        colspan: {{ $attributes->get('colspan', 13) }}
+        colspan: {{ $attributes->get('colspan', 13) }},
+        printUrl: '{{ $printUrl }}'
     })" 
     x-init="init()"
     class="mb-5 flex flex-col gap-2 rounded-xl border border-gray-100 bg-gray-50/50 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800/60 dark:bg-white/[0.02] lg:mb-6"
@@ -74,6 +76,21 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
             </svg>
         </button>
+
+        {{-- Tombol Cetak, muncul hanya jika ada tahun yang dipilih --}}
+        <a
+            x-show="showCetak"
+            x-transition.opacity.duration.200ms
+            :href="`{{ route('form-ketidaksesuaian-ncr.print') }}?tahun_akademik_id=${selectedTahun}`"
+            target="_blank"
+            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-emerald-700 hover:shadow-sm"
+            style="display: none;"
+        >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8z" />
+            </svg>
+            Cetak
+        </a>
     </div>
 </div>
 
@@ -81,22 +98,28 @@
     function filterTahunAkademik(config = {}) {
         return {
             selectedTahun: '',
+            showCetak: false,                 // <-- tambahan untuk kontrol tombol cetak
             tableSelector: config.tableSelector || '#tableBody',
             rowAttribute: config.rowAttribute || 'data-ta-id',
             urlParamName: config.urlParamName || 'tahun_akademik_id',
             colspan: config.colspan || 13,
+            printUrl: config.printUrl || '',
             
             init() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const tahunParam = urlParams.get(this.urlParamName);
                 if (tahunParam) {
                     this.selectedTahun = tahunParam;
+                    this.showCetak = true;    // munculkan tombol cetak jika ada parameter
                     this.filterData();
                 }
             },
             
             filterData() {
                 const val = this.selectedTahun;
+                // Atur kemunculan tombol cetak: true hanya jika val tidak kosong
+                this.showCetak = !!val;
+                
                 const tableBody = document.querySelector(this.tableSelector);
                 if (!tableBody) return;
                 
@@ -164,7 +187,8 @@
             
             resetFilter() {
                 this.selectedTahun = '';
-                this.filterData();
+                this.showCetak = false;   // sembunyikan tombol cetak saat reset
+                this.filterData();         // panggil filterData untuk update tabel & URL
             }
         }
     }
