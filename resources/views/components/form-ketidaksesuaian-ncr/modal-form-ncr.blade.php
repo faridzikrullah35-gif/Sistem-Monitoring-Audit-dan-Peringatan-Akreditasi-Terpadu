@@ -61,10 +61,10 @@
                 </div>
 
                 {{-- Baris 2: Kriteria + Elemen --}}
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
 
                     {{-- Kriteria --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="kriteria"
                             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Kriteria <span class="text-red-500">*</span>
@@ -89,7 +89,7 @@
                     </div>
 
                     {{-- Elemen --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="elemen"
                             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Elemen <span class="text-red-500">*</span>
@@ -110,7 +110,7 @@
                 </div>
 
                 {{-- Baris 3: Indikator --}}
-                <div>
+                <div class="lg:col-span-12">
                     <label for="indikator"
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Pilih Indikator <span class="text-red-500">*</span>
@@ -126,6 +126,17 @@
                             Pilih Indikator
                         </option>
                     </select>
+
+                    {{-- PREVIEW INDIKATOR --}}
+                    <div id="previewIndikatorNCR"
+                        class="hidden mt-3 rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-3">
+                        <p class="text-xs font-semibold text-blue-600 dark:text-blue-300 mb-1">
+                            Preview Indikator
+                        </p>
+                        <p id="previewIndikatorTextNCR"
+                            class="text-sm leading-6 text-gray-700 dark:text-gray-200">
+                        </p>
+                    </div>
 
                     <input type="hidden" id="isiIndikatorId" name="isi_indikator_id" value="" />
 
@@ -341,138 +352,47 @@
 </style>
 
 <script>
+    // ==========================================
+    // GLOBAL VARIABLES (dari server)
+    // ==========================================
+    const relasiPertanyaan = @json($relasiPertanyaan); // 'pertanyaanAmiProdi' atau 'pertanyaanAmiUnit'
     const matrixs = @json($matrixs);
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-
-    const kriteriaSelect = document.getElementById('kriteria');
-    const elemenSelect = document.getElementById('elemen');
-    const indikatorSelect = document.getElementById('indikator');
-
-    // =========================
-    // PILIH KRITERIA
-    // =========================
-    kriteriaSelect.addEventListener('change', function () {
-
-        const kriteriaId = this.value;
-
-        elemenSelect.innerHTML = `
-            <option value="" disabled selected>
-                Pilih Elemen
-            </option>
-        `;
-
-        indikatorSelect.innerHTML = `
-            <option value="" disabled selected>
-                Pilih Indikator
-            </option>
-        `;
-
-        const filteredMatrix = matrixs.filter(item => {
-            return item.kriteria_audit &&
-                   item.kriteria_audit.standar &&
-                   item.kriteria_audit.standar.id == kriteriaId;
-        });
-
-        filteredMatrix.forEach(item => {
-            elemenSelect.innerHTML += `
-                <option value="${item.id}">
-                    ${item.elemen}
-                </option>
-            `;
-        });
-    });
-
-    // =========================
-    // PILIH ELEMEN
-    // =========================
-    elemenSelect.addEventListener('change', function () {
-        const matrixId = this.value;
-        
-        indikatorSelect.innerHTML = `<option value="" disabled selected>Pilih Indikator</option>`;
-        
-        const selectedMatrix = matrixs.find(item => item.id == matrixId);
-        
-        if (selectedMatrix?.isi_indikator?.length > 0) {
-            selectedMatrix.isi_indikator.forEach(item => {
-                let pertanyaanAmiProdiId = null;
-                if (item.pertanyaan_ami_prodi?.length > 0) {
-                    pertanyaanAmiProdiId = item.pertanyaan_ami_prodi[0].id;
-                }
-                
-                indikatorSelect.innerHTML += `
-                    <option 
-                        value="${pertanyaanAmiProdiId}" 
-                        data-isi_indikator_id="${item.id}"
-                    >
-                        ${item.indikator}
-                    </option>
-                `;
-            });
-        }
-    });
-
-    // =========================
-    // KETIKA INDIKATOR BERUBAH
-    // =========================
-    if (indikatorSelect) {
-        indikatorSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const isiIndikatorId = selectedOption.getAttribute('data-isi_indikator_id');
-            
-            const hiddenField = document.getElementById('isiIndikatorId');
-            if (hiddenField) {
-                hiddenField.value = isiIndikatorId;
-            }
-        });
-    }
-
-});
-</script>
-
-<script>
-    // ==========================================
-    // GLOBAL VARIABLES
-    // ==========================================
+    // Laravel otomatis snake_case-kan nama relasi saat di-JSON-kan,
+    // jadi 'pertanyaanAmiProdi' -> 'pertanyaan_ami_prodi', dst.
+    const relasiPertanyaanKey = relasiPertanyaan
+        .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+        .toLowerCase();
     let ncrFlatpickr = null;
-    let isEditMode = false;
-    let editDataCache = null;
+    let isLoadingData = false; // flag untuk mencegah event listener saat loading data edit
+</script>
 
+<script>
     // ==========================================
-    // RICH TEXT EDITOR FUNCTIONS (PERBAIKAN)
+    // RICH TEXT EDITOR FUNCTIONS
     // ==========================================
     function execNcrCmd(command) {
         const editor = document.getElementById('ncrUraianEditor');
         if (!editor) return;
-
-        // Fokus ke editor
         editor.focus();
-
-        // Pastikan ada selection (range) agar perintah execCommand bekerja
         let selection = window.getSelection();
         if (selection.rangeCount === 0) {
             let range = document.createRange();
             range.selectNodeContents(editor);
-            range.collapse(false); // letakkan kursor di akhir
+            range.collapse(false);
             selection.removeAllRanges();
             selection.addRange(range);
         }
-
         try {
             document.execCommand(command, false, null);
         } catch (e) {
             console.error('ExecCommand error:', e);
-            // Fallback untuk list jika perintah gagal (opsional)
             if (command === 'insertUnorderedList') {
                 document.execCommand('insertHTML', false, '<ul><li>Item baru</li></ul>');
             } else if (command === 'insertOrderedList') {
                 document.execCommand('insertHTML', false, '<ol><li>Item baru</li></ol>');
             }
         }
-
-        // Trigger input event (opsional, untuk sinkronisasi)
         editor.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
@@ -485,69 +405,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // RESET FORM FUNCTION
+    // RESET FORM
     // ==========================================
     function resetNCRForm() {
-        const textFields = ['noNcr', 'klausul', 'isiIndikatorId'];
-        textFields.forEach(fieldId => {
-            const el = document.getElementById(fieldId);
+        ['noNcr', 'klausul', 'isiIndikatorId'].forEach(id => {
+            const el = document.getElementById(id);
             if (el) el.value = '';
         });
-
-        const selects = ['kriteria', 'elemen', 'indikator', 'kategoriTemuan'];
-        selects.forEach(selectId => {
-            const el = document.getElementById(selectId);
-            if (el && el.options && el.options.length > 0) {
+        ['kriteria', 'kategoriTemuan'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.options.length > 0) {
                 el.selectedIndex = 0;
-                const changeEvent = new Event('change', { bubbles: true });
-                el.dispatchEvent(changeEvent);
             }
         });
+        // Reset elemen dan indikator secara langsung
+        const elemenSelect = document.getElementById('elemen');
+        if (elemenSelect) {
+            elemenSelect.innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
+        }
+        const indikatorSelect = document.getElementById('indikator');
+        if (indikatorSelect) {
+            indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
+        }
+        // Sembunyikan preview
+        const preview = document.getElementById('previewIndikatorNCR');
+        if (preview) preview.classList.add('hidden');
+        const previewText = document.getElementById('previewIndikatorTextNCR');
+        if (previewText) previewText.textContent = '';
 
         const editor = document.getElementById('ncrUraianEditor');
         if (editor) editor.innerHTML = '';
-        
-        const hiddenUraian = document.getElementById('ncrUraianHidden');
-        if (hiddenUraian) hiddenUraian.value = '';
-
+        const hidden = document.getElementById('ncrUraianHidden');
+        if (hidden) hidden.value = '';
         const openRadio = document.querySelector('input[name="status_ncr"][value="Open"]');
         if (openRadio) openRadio.checked = true;
-
         if (ncrFlatpickr) ncrFlatpickr.clear();
-
         const ncrId = document.getElementById('ncrId');
         if (ncrId) ncrId.value = '';
+        const isiHidden = document.getElementById('isiIndikatorId');
+        if (isiHidden) isiHidden.value = '';
     }
 
     // ==========================================
-    // LOAD ELEMEN BASED ON KRITERIA
+    // LOAD ELEMEN BERDASARKAN KRITERIA
     // ==========================================
-    function loadElemenByKriteria(kriteriaId, selectedElemenId = null) {
+    function loadElemenByKriteria(kriteriaId, selectedElemenId = null, triggerChange = true) {
         const elemenSelect = document.getElementById('elemen');
         if (!elemenSelect) return Promise.reject('Elemen select not found');
-
         return new Promise((resolve) => {
             elemenSelect.innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
-            
             if (!kriteriaId) {
                 resolve(null);
                 return;
             }
-
-            const filteredMatrix = matrixs.filter(item => {
-                return item.kriteria_audit &&
-                       item.kriteria_audit.standar &&
-                       item.kriteria_audit.standar.id == kriteriaId;
-            });
-
-            filteredMatrix.forEach(item => {
+            const filtered = matrixs.filter(item => 
+                item.kriteria_audit?.standar?.id == kriteriaId
+            );
+            filtered.forEach(item => {
                 elemenSelect.innerHTML += `<option value="${item.id}">${item.elemen}</option>`;
             });
-
-            if (selectedElemenId && filteredMatrix.some(item => item.id == selectedElemenId)) {
+            if (selectedElemenId && filtered.some(item => item.id == selectedElemenId)) {
                 elemenSelect.value = selectedElemenId;
-                const changeEvent = new Event('change', { bubbles: true });
-                elemenSelect.dispatchEvent(changeEvent);
+                if (triggerChange) {
+                    const event = new Event('change', { bubbles: true });
+                    elemenSelect.dispatchEvent(event);
+                }
                 resolve(selectedElemenId);
             } else {
                 resolve(null);
@@ -556,53 +478,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // LOAD INDIKATOR BASED ON ELEMEN
+    // LOAD INDIKATOR BERDASARKAN ELEMEN (dengan preview)
     // ==========================================
     function loadIndikatorByElemen(elemenId, selectedPertanyaanId = null, selectedIsiIndikatorId = null) {
         const indikatorSelect = document.getElementById('indikator');
         if (!indikatorSelect) return Promise.reject('Indikator select not found');
-
         return new Promise((resolve) => {
             indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
-            
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorNCR');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextNCR');
+            if (previewText) previewText.textContent = '';
+
             if (!elemenId) {
                 resolve(null);
                 return;
             }
-
             const selectedMatrix = matrixs.find(item => item.id == elemenId);
+            if (selectedMatrix && selectedMatrix.isi_indikator) {
+                selectedMatrix.isi_indikator.forEach((item, index) => {
+                    let pertanyaanId = null;
+                    const pertanyaanData = item[relasiPertanyaanKey];
 
-            if (selectedMatrix && selectedMatrix.isi_indikator && selectedMatrix.isi_indikator.length > 0) {
-                selectedMatrix.isi_indikator.forEach(item => {
-                    let pertanyaanAmiProdiId = null;
-                    if (item.pertanyaan_ami_prodi && item.pertanyaan_ami_prodi.length > 0) {
-                        pertanyaanAmiProdiId = item.pertanyaan_ami_prodi[0].id;
+                    if (pertanyaanData && pertanyaanData.length > 0) {
+                        pertanyaanId = pertanyaanData[0].id;
                     }
-                    
+
+                    // Simpan teks indikator lengkap ke atribut data
+                    const indikatorTeks = item.indikator;
                     indikatorSelect.innerHTML += `
-                        <option 
-                            value="${pertanyaanAmiProdiId}" 
-                            data-isi_indikator_id="${item.id}"
-                        >
-                            ${item.indikator}
+                        <option value="${pertanyaanId}" 
+                                data-isi_indikator_id="${item.id}"
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}">
+                            ${index + 1}. ${indikatorTeks}
                         </option>
                     `;
                 });
             }
 
+            // Set selected jika ada
             if (selectedPertanyaanId) {
+                let found = false;
                 for (let i = 0; i < indikatorSelect.options.length; i++) {
                     if (indikatorSelect.options[i].value == selectedPertanyaanId) {
                         indikatorSelect.selectedIndex = i;
+                        found = true;
                         break;
                     }
                 }
-                
-                const hiddenField = document.getElementById('isiIndikatorId');
-                if (hiddenField && selectedIsiIndikatorId) {
-                    hiddenField.value = selectedIsiIndikatorId;
+                if (found) {
+                    const hiddenField = document.getElementById('isiIndikatorId');
+                    if (hiddenField && selectedIsiIndikatorId) {
+                        hiddenField.value = selectedIsiIndikatorId;
+                    }
+                    // Tampilkan preview setelah set value
+                    triggerIndikatorPreview();
+                } else {
+                    console.warn('Selected pertanyaan ID not found in options:', selectedPertanyaanId);
                 }
-                
                 resolve(selectedPertanyaanId);
             } else {
                 resolve(null);
@@ -611,53 +545,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // LOAD ALL DATA FOR EDIT MODE
+    // FUNGSI UNTUK MENAMPILKAN PREVIEW INDIKATOR
+    // ==========================================
+    function triggerIndikatorPreview() {
+        const select = document.getElementById('indikator');
+        const selectedOption = select.options[select.selectedIndex];
+        const preview = document.getElementById('previewIndikatorNCR');
+        const previewText = document.getElementById('previewIndikatorTextNCR');
+
+        if (selectedOption && selectedOption.value && selectedOption.dataset.indikatorTeks) {
+            previewText.textContent = selectedOption.dataset.indikatorTeks;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+            previewText.textContent = '';
+        }
+    }
+
+    // ==========================================
+    // LOAD DATA EDIT KE FORM
     // ==========================================
     async function loadEditDataToForm(id) {
         try {
+            isLoadingData = true;
+            
             const response = await fetch(`/auditor/form-ketidaksesuaian-ncr/${id}/edit`);
             if (!response.ok) throw new Error('Network response was not ok');
             const result = await response.json();
             const data = result.data;
-            
-            const noNcrInput = document.getElementById('noNcr');
-            if (noNcrInput) noNcrInput.value = data.no_ncr ?? '';
-            
-            const klausulInput = document.getElementById('klausul');
-            if (klausulInput) klausulInput.value = data.klausul_dokumen ?? '';
-            
-            const isiIndikatorIdField = document.getElementById('isiIndikatorId');
-            if (isiIndikatorIdField) isiIndikatorIdField.value = data.isi_indikator_id ?? '';
-            
-            const kategoriSelect = document.getElementById('kategoriTemuan');
-            if (kategoriSelect && data.kategori_temuan) {
-                kategoriSelect.value = data.kategori_temuan;
-            }
-            
-            if (data.status_ncr) {
-                const radio = document.querySelector(`input[name="status_ncr"][value="${data.status_ncr}"]`);
-                if (radio) radio.checked = true;
-            }
-            
-            const editor = document.getElementById('ncrUraianEditor');
-            if (editor) editor.innerHTML = data.deskripsi_uraian_temuan ?? '';
 
-            const hiddenUraian = document.getElementById('ncrUraianHidden');
-            if (hiddenUraian) hiddenUraian.value = data.deskripsi_uraian_temuan ?? '';
+            document.getElementById('noNcr').value = data.no_ncr ?? '';
+            document.getElementById('klausul').value = data.klausul_dokumen ?? '';
+            document.getElementById('isiIndikatorId').value = data.isi_indikator_id ?? '';
+            document.getElementById('kategoriTemuan').value = data.kategori_temuan ?? '';
+            
+            const statusRadio = document.querySelector(`input[name="status_ncr"][value="${data.status_ncr}"]`);
+            if (statusRadio) statusRadio.checked = true;
+
+            const editor = document.getElementById('ncrUraianEditor');
+            editor.innerHTML = data.deskripsi_uraian_temuan ?? '';
+            document.getElementById('ncrUraianHidden').value = data.deskripsi_uraian_temuan ?? '';
 
             const kriteriaSelect = document.getElementById('kriteria');
             if (kriteriaSelect && data.kriteria_id) {
                 kriteriaSelect.value = data.kriteria_id;
-                
-                await loadElemenByKriteria(data.kriteria_id, data.matrixs_id);
-                await new Promise(resolve => setTimeout(resolve, 150));
-                
+                await loadElemenByKriteria(data.kriteria_id, data.matrixs_id, false);
+                await new Promise(resolve => setTimeout(resolve, 100));
                 if (data.matrixs_id) {
-                    await loadIndikatorByElemen(
-                        data.matrixs_id,
-                        data.pertanyaan_ami_prodi_id ?? data.pertanyaan_ami_unit_id,
-                        data.isi_indikator_id
-                    );
+                    let pertanyaanId = null;
+                    if (relasiPertanyaan === 'pertanyaanAmiProdi') {
+                        pertanyaanId = data.pertanyaan_ami_prodi_id;
+                    } else {
+                        pertanyaanId = data.pertanyaan_ami_unit_id;
+                    }
+                    await loadIndikatorByElemen(data.matrixs_id, pertanyaanId, data.isi_indikator_id);
                 }
             }
 
@@ -667,21 +608,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         ncrFlatpickr.setDate(data.tanggal_selesai, false);
                     } else {
                         const tglInput = document.getElementById('tanggalSelesai');
-                        if (tglInput) {
-                            tglInput.value = data.tanggal_selesai;
-                        }
+                        if (tglInput) tglInput.value = data.tanggal_selesai;
                     }
                 }, 200);
             }
-            
         } catch (error) {
             console.error('Error fetching NCR data:', error);
             alert('Gagal mengambil data NCR.');
+        } finally {
+            isLoadingData = false;
         }
     }
 
     // ==========================================
-    // OPEN MODAL FUNCTION
+    // OPEN MODAL
     // ==========================================
     async function openModalFormNCR(id = null) {
         const modal = document.getElementById('userModal');
@@ -689,26 +629,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const hiddenId = document.getElementById('ncrId');
         const form = document.getElementById('formNCR');
 
-        document.getElementById('noNcr').value = '';
-        document.getElementById('kriteria').selectedIndex = 0;
-        document.getElementById('elemen').innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
-        document.getElementById('indikator').innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
-        document.getElementById('klausul').value = '';
-        document.getElementById('ncrUraianEditor').innerHTML = '';
-        document.getElementById('ncrUraianHidden').value = '';
-        document.getElementById('kategoriTemuan').selectedIndex = 0;
-        document.getElementById('isiIndikatorId').value = '';
-        
-        document.querySelectorAll('input[name="status_ncr"]').forEach(radio => {
-            radio.checked = false;
-        });
+        resetNCRForm();
 
         if (id) {
             title.textContent = 'Ubah Data';
             hiddenId.value = id;
-            
             form.action = `/auditor/form-ketidaksesuaian-ncr/${id}`;
-            
             let methodInput = form.querySelector('input[name="_method"]');
             if (!methodInput) {
                 methodInput = document.createElement('input');
@@ -717,29 +643,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 form.appendChild(methodInput);
             }
             methodInput.value = 'PUT';
-            
             await loadEditDataToForm(id);
-            
         } else {
             title.textContent = 'Tambah Data';
             hiddenId.value = '';
-            
             form.action = "{{ route('form-ketidaksesuaian-ncr.store') }}";
-            
             let methodInput = form.querySelector('input[name="_method"]');
-            if (methodInput) {
-                methodInput.remove();
-            }
+            if (methodInput) methodInput.remove();
         }
 
         if (ncrFlatpickr) ncrFlatpickr.clear();
-
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
     // ==========================================
-    // CLOSE MODAL FUNCTION
+    // CLOSE MODAL
     // ==========================================
     function closeModalFormNCR() {
         const modal = document.getElementById('userModal');
@@ -751,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // EVENT LISTENERS FOR DEPENDENT SELECTS
+    // INIT DEPENDENT SELECTS
     // ==========================================
     function initDependentSelects() {
         const kriteriaSelect = document.getElementById('kriteria');
@@ -760,13 +679,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (kriteriaSelect) {
             kriteriaSelect.addEventListener('change', async function() {
-                const kriteriaId = this.value;
-                await loadElemenByKriteria(kriteriaId, null);
+                if (isLoadingData) return;
+                await loadElemenByKriteria(this.value, null, true);
             });
         }
 
         if (elemenSelect) {
             elemenSelect.addEventListener('change', async function() {
+                if (isLoadingData) return;
                 const elemenId = this.value;
                 await loadIndikatorByElemen(elemenId, null, null);
             });
@@ -774,23 +694,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (indikatorSelect) {
             indikatorSelect.addEventListener('change', function() {
+                if (isLoadingData) return;
                 const selectedOption = this.options[this.selectedIndex];
-                const isiIndikatorId = selectedOption ? selectedOption.getAttribute('data-isi_indikator_id') : null;
-                
-                const hiddenField = document.getElementById('isiIndikatorId');
-                if (hiddenField) {
-                    hiddenField.value = isiIndikatorId;
-                }
+                const isiId = selectedOption ? selectedOption.getAttribute('data-isi_indikator_id') : null;
+                const hidden = document.getElementById('isiIndikatorId');
+                if (hidden) hidden.value = isiId;
+                // Tampilkan preview
+                triggerIndikatorPreview();
             });
         }
     }
 
     // ==========================================
-    // FLATPICKR INITIALIZATION
+    // FLATPICKR INIT
     // ==========================================
     function initFlatpickr() {
-        const tanggalInput = document.getElementById('tanggalSelesai');
-        if (tanggalInput && typeof flatpickr !== 'undefined') {
+        const input = document.getElementById('tanggalSelesai');
+        if (input && typeof flatpickr !== 'undefined') {
             ncrFlatpickr = flatpickr("#tanggalSelesai", {
                 dateFormat: "Y-m-d",
                 altInput: true,
@@ -807,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // DOM CONTENT LOADED
+    // DOM READY
     // ==========================================
     document.addEventListener('DOMContentLoaded', function() {
         initFlatpickr();

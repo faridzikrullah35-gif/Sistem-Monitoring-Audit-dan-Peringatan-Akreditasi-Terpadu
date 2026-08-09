@@ -16,6 +16,8 @@ use App\Models\IsiAksesAuditor;
 use App\Models\DataAuditor;
 use App\Models\Auditiee;
 use App\Models\User;
+use App\Models\AksesPertanyaanProdi;
+use App\Models\AksesPertanyaanUnit;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -28,49 +30,54 @@ class FormDaftarPeriksaController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $role = $user->role;
 
-        $pertanyaanAmiModel = match($role) {
-            'unit_kerja' => \App\Models\PertanyaanAmiUnit::class,
-            default      => \App\Models\PertanyaanAmiProdi::class,
-        };
+        // Model akses sesuai role
+        $aksesModel = $user->role === 'unit_kerja'
+            ? AksesPertanyaanUnit::class
+            : AksesPertanyaanProdi::class;
 
-        $relasiPertanyaan = match($role) {
-            'unit_kerja' => 'pertanyaanAmiUnit',
-            default      => 'pertanyaanAmiProdi',
-        };
-
-        /*
-        |--------------------------------------------------------------------------
-        | DATA DROPDOWN
-        |--------------------------------------------------------------------------
-        */
-
-        $tahunAkademik = TahunAkademik::whereIn(
-            'id',
-            $pertanyaanAmiModel::select('tahun_akademik_id')->distinct()
-        )
-        ->orderBy('tahun_akademik', 'desc')
-        ->get();
+        // Relasi yang dipakai di AuditPeriksa (tetap ke tabel asli)
+        $relasiPertanyaan = $user->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
 
         /*
         |--------------------------------------------------------------------------
-        | PERTANYAAN AMI
+        | DATA DROPDOWN TAHUN AKADEMIK
         |--------------------------------------------------------------------------
         */
+        // Ambil semua akses yang sesuai dengan user, lalu ambil tahun_akademik_id
+        // dari relasi pertanyaan (tanpa join manual)
+        $tahunAkademikIds = $aksesModel::forUser($user)
+            ->with('pertanyaan.tahunAkademik')
+            ->get()
+            ->pluck('pertanyaan.tahun_akademik_id')
+            ->unique()
+            ->filter(); // hilangkan nilai null
 
-        $pertanyaanAmi = $pertanyaanAmiModel::with([
-            'isiIndikator.matrix.kriteriaAudit.standar'
-        ])->get();
+        $tahunAkademik = TahunAkademik::whereIn('id', $tahunAkademikIds)
+            ->orderBy('tahun_akademik', 'desc')
+            ->get();
 
         /*
         |--------------------------------------------------------------------------
-        | TABLE UTAMA
+        | DAFTAR PERTANYAAN YANG DIAKSES
         |--------------------------------------------------------------------------
         */
+        $aksesList = $aksesModel::forUser($user)
+            ->with('pertanyaan.isiIndikator.matrix.kriteriaAudit.standar')
+            ->get();
 
+        // Kumpulkan pertanyaan asli (unik) dari akses
+        $pertanyaanAmi = $aksesList->pluck('pertanyaan')->filter()->unique('id')->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TABLE UTAMA (data audit yang sudah diisi)
+        |--------------------------------------------------------------------------
+        */
         $pertanyaan = AuditPeriksa::with([
-            $relasiPertanyaan . '.indikator.matrix.kriteriaAudit.standar',
+            $relasiPertanyaan . '.isiIndikator.matrix.kriteriaAudit.standar',
             'score',
         ])
         ->where('users_id', $user->id)
@@ -82,7 +89,6 @@ class FormDaftarPeriksaController extends Controller
         | MATRIX & KRITERIA
         |--------------------------------------------------------------------------
         */
-
         $matrixs = $pertanyaanAmi
             ->pluck('isiIndikator.matrix')
             ->filter()
@@ -104,7 +110,6 @@ class FormDaftarPeriksaController extends Controller
         | SCORE
         |--------------------------------------------------------------------------
         */
-
         $settingScores = SettingScore::all();
 
         /*
@@ -112,7 +117,6 @@ class FormDaftarPeriksaController extends Controller
         | RETURN VIEW
         |--------------------------------------------------------------------------
         */
-
         return view('pages.form-daftar-periksa', [
             'title'         => 'Form Daftar Periksa | SIMANTAP',
             'tahunAkademik' => $tahunAkademik,
@@ -270,13 +274,19 @@ class FormDaftarPeriksaController extends Controller
         ));
     }
 
-    private function getPertanyaanModel()
+    /**
+     * Helper untuk mengambil model akses
+     */
+    private function getAksesModel()
     {
         return auth()->user()->role === 'unit_kerja'
-            ? \App\Models\PertanyaanAmiUnit::class
-            : \App\Models\PertanyaanAmiProdi::class;
+            ? AksesPertanyaanUnit::class
+            : AksesPertanyaanProdi::class;
     }
 
+    /**
+     * Helper untuk relasi di AuditPeriksa (tetap ke tabel asli)
+     */
     private function getPertanyaanRelation()
     {
         return auth()->user()->role === 'unit_kerja'
@@ -299,58 +309,44 @@ class FormDaftarPeriksaController extends Controller
         ]);
 
         $user = auth()->user();
+        $aksesModel = $this->getAksesModel();
 
-        $isUnit = $user->role === 'unit_kerja';
+        // Cari akses yang sesuai dengan user dan isi_indikator_id
+        $akses = $aksesModel::forUser($user)
+            ->whereHas('pertanyaan', function ($q) use ($request) {
+                $q->where('isi_indikator_id', $request->isi_indikator_id);
+            })
+            ->first();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil model pertanyaan sesuai role
-        |--------------------------------------------------------------------------
-        */
-
-        $pertanyaanModel = $this->getPertanyaanModel();
-
-        $pertanyaanAmi = $pertanyaanModel::where(
-            'isi_indikator_id',
-            $request->isi_indikator_id
-        )->first();
-
-        if (!$pertanyaanAmi) {
-
+        if (!$akses) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data pertanyaan AMI tidak ditemukan.'
-            ], 404);
+                'message' => 'Anda tidak memiliki akses untuk pertanyaan ini.'
+            ], 403);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Simpan audit
-        |--------------------------------------------------------------------------
-        */
+        // Ambil pertanyaan asli dari relasi
+        $pertanyaanAsli = $akses->pertanyaan; // instance PertanyaanAmiProdi atau Unit
 
+        // Tentukan foreign key mana yang diisi
+        $foreignKeyProdi = null;
+        $foreignKeyUnit = null;
+
+        if ($pertanyaanAsli instanceof PertanyaanAmiProdi) {
+            $foreignKeyProdi = $pertanyaanAsli->id;
+        } elseif ($pertanyaanAsli instanceof PertanyaanAmiUnit) {
+            $foreignKeyUnit = $pertanyaanAsli->id;
+        }
+
+        // Simpan ke AuditPeriksa
         $data = AuditPeriksa::create([
-
             'users_id' => $user->id,
-
-            'pertanyaan_ami_prodi_id' =>
-                $pertanyaanAmi instanceof PertanyaanAmiProdi
-                    ? $pertanyaanAmi->id
-                    : null,
-
-            'pertanyaan_ami_unit_id' =>
-                $pertanyaanAmi instanceof PertanyaanAmiUnit
-                    ? $pertanyaanAmi->id
-                    : null,
-
+            'pertanyaan_ami_prodi_id' => $foreignKeyProdi,
+            'pertanyaan_ami_unit_id'  => $foreignKeyUnit,
             'uraian_temuan'     => $request->uraian_temuan,
-
             'analisis_penyebab' => $request->analisis_penyebab,
-
             'akibat'            => $request->akibat,
-
             'setting_score_id'  => $request->setting_score_id,
-
             'panduan_pengisian' => $request->panduan_pengisian,
         ]);
 
@@ -361,9 +357,7 @@ class FormDaftarPeriksaController extends Controller
         ]);
 
         $this->handlePtk($data);
-
         $this->handleObservasi($data);
-
         $this->handleTerpenuhi($data);
 
         return response()->json([
@@ -378,9 +372,7 @@ class FormDaftarPeriksaController extends Controller
      */
     public function edit($id)
     {
-        $relasiPertanyaan = auth()->user()->role === 'unit_kerja'
-            ? 'pertanyaanAmiUnit'
-            : 'pertanyaanAmiProdi';
+        $relasiPertanyaan = $this->getPertanyaanRelation();
 
         $data = AuditPeriksa::with([
             $relasiPertanyaan . '.isiIndikator.matrix.kriteriaAudit.standar',
@@ -408,21 +400,13 @@ class FormDaftarPeriksaController extends Controller
             'panduan_pengisian'  => 'nullable|string',
         ]);
 
-        $audit = AuditPeriksa::where(
-            'users_id',
-            auth()->id()
-        )->findOrFail($id);
+        $audit = AuditPeriksa::where('users_id', auth()->id())->findOrFail($id);
 
         $audit->update([
-
             'uraian_temuan'     => $request->uraian_temuan,
-
             'analisis_penyebab' => $request->analisis_penyebab,
-
             'akibat'            => $request->akibat,
-
             'setting_score_id'  => $request->setting_score_id,
-
             'panduan_pengisian' => $request->panduan_pengisian,
         ]);
 
@@ -444,8 +428,7 @@ class FormDaftarPeriksaController extends Controller
      */
     public function destroy($id)
     {
-        $audit = AuditPeriksa::where('users_id', auth()->id())
-            ->findOrFail($id);
+        $audit = AuditPeriksa::where('users_id', auth()->id())->findOrFail($id);
 
         $audit->ptk()->delete();
         $audit->observasi()->delete();
@@ -459,48 +442,29 @@ class FormDaftarPeriksaController extends Controller
         ]);
     }
 
+    // ====== METODE PEMBANTU UNTUK NCR, OBSERVASI, TERPENUHI ======
+
     private function handlePtk($audit)
     {
         $score = $audit->score;
 
         if (!$score || !$score->generate_ncr) {
-
             $audit->ptk()->delete();
-
             return;
         }
 
         $audit->ptk()->updateOrCreate(
-
-            [
-                'audit_periksa_id' => $audit->id
-            ],
-
+            ['audit_periksa_id' => $audit->id],
             [
                 'users_id' => $audit->users_id,
-
-                'pertanyaan_ami_prodi_id' =>
-                    $audit->pertanyaan_ami_prodi_id,
-
-                'pertanyaan_ami_unit_id' =>
-                    $audit->pertanyaan_ami_unit_id,
-
+                'pertanyaan_ami_prodi_id' => $audit->pertanyaan_ami_prodi_id,
+                'pertanyaan_ami_unit_id'  => $audit->pertanyaan_ami_unit_id,
                 'no_ncr' => null,
-
                 'klausul_dokumen' => null,
-
-                'deskripsi_uraian_temuan' =>
-                    $audit->uraian_temuan,
-
-                'analisis_penyebab' =>
-                    $audit->analisis_penyebab,
-
-                'akibat' =>
-                    $audit->akibat,
-
-                'kategori_temuan' =>
-                    $score->keterangan,
-
+                'deskripsi_uraian_temuan' => $audit->uraian_temuan,
+                'analisis_penyebab' => $audit->analisis_penyebab,
+                'akibat' => $audit->akibat,
+                'kategori_temuan' => $score->keterangan,
                 'status_ncr' => 'Open',
             ]
         );
@@ -509,37 +473,22 @@ class FormDaftarPeriksaController extends Controller
     private function handleObservasi($audit)
     {
         $score = $audit->score;
-
         $nilai = (int) ($score->nilai_score ?? 0);
 
         if (!$score || $nilai !== 3) {
-
             $audit->observasi()->delete();
-
             return;
         }
 
-        $pertanyaan =
-            $audit->pertanyaanAmiProdi
-            ?? $audit->pertanyaanAmiUnit;
-
-        $matrixId = optional(
-            optional($pertanyaan)->isiIndikator
-        )->matrixs_id;
+        $pertanyaan = $audit->pertanyaanAmiProdi ?? $audit->pertanyaanAmiUnit;
+        $matrixId = optional(optional($pertanyaan)->isiIndikator)->matrixs_id;
 
         $audit->observasi()->updateOrCreate(
-            [
-                'audit_periksa_id' => $audit->id
-            ],
+            ['audit_periksa_id' => $audit->id],
             [
                 'users_id' => $audit->users_id,
-
-                'pertanyaan_ami_prodi_id' =>
-                    $audit->pertanyaan_ami_prodi_id,
-
-                'pertanyaan_ami_unit_id' =>
-                    $audit->pertanyaan_ami_unit_id,
-
+                'pertanyaan_ami_prodi_id' => $audit->pertanyaan_ami_prodi_id,
+                'pertanyaan_ami_unit_id'  => $audit->pertanyaan_ami_unit_id,
                 'matrixs_id' => $matrixId,
             ]
         );
@@ -548,48 +497,28 @@ class FormDaftarPeriksaController extends Controller
     private function handleTerpenuhi($audit)
     {
         $score = $audit->score;
-
         $nilai = (int) ($score->nilai_score ?? 0);
 
         if (!$score || $nilai !== 4) {
-
             $audit->terpenuhi()->delete();
-
             return;
         }
 
-        $pertanyaan =
-            $audit->pertanyaanAmiProdi
-            ?? $audit->pertanyaanAmiUnit;
-
+        $pertanyaan = $audit->pertanyaanAmiProdi ?? $audit->pertanyaanAmiUnit;
         $indikator = optional($pertanyaan)->isiIndikator;
-
-        $matrix = Matrix::with('kriteriaAudit.standar')
-            ->find($indikator?->matrixs_id);
+        $matrix = Matrix::with('kriteriaAudit.standar')->find($indikator?->matrixs_id);
 
         $audit->terpenuhi()->updateOrCreate(
-            [
-                'audit_periksa_id' => $audit->id
-            ],
+            ['audit_periksa_id' => $audit->id],
             [
                 'users_id' => $audit->users_id,
-
-                'matrixs_id' =>
-                    $indikator?->matrixs_id,
-
-                'isi_indikator_id' =>
-                    $indikator?->id,
-
-                'pertanyaan_ami_prodi_id' =>
-                    $audit->pertanyaan_ami_prodi_id,
-
-                'pertanyaan_ami_unit_id' =>
-                    $audit->pertanyaan_ami_unit_id,
-
+                'matrixs_id' => $indikator?->matrixs_id,
+                'isi_indikator_id' => $indikator?->id,
+                'pertanyaan_ami_prodi_id' => $audit->pertanyaan_ami_prodi_id,
+                'pertanyaan_ami_unit_id'  => $audit->pertanyaan_ami_unit_id,
                 'discussed_with' => null,
                 'rekomendasi' => null,
             ]
         );
     }
-
 }

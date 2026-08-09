@@ -1,3 +1,5 @@
+@props(['items' => []])
+
 <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden h-full">
     <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
@@ -18,49 +20,37 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                
-                <!-- Baris 1 (Mendesah) -->
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td class="px-5 py-4 font-medium text-gray-800 dark:text-gray-200">Prodi Teknik Informatika</td>
-                    <td class="px-5 py-4 text-center text-gray-600 dark:text-gray-400">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            25 Okt 2023
-                        </div>
-                    </td>
-                    <td class="px-5 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                            2 Hari Lagi
-                        </span>
-                    </td>
-                    <td class="px-5 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                            Proses Input
-                        </span>
-                    </td>
-                </tr>
-
-                <!-- Baris 2 (Aman tapi harus diingatkan) -->
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td class="px-5 py-4 font-medium text-gray-800 dark:text-gray-200">UPT Perpustakaan</td>
-                    <td class="px-5 py-4 text-center text-gray-600 dark:text-gray-400">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            28 Okt 2023
-                        </div>
-                    </td>
-                    <td class="px-5 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
-                            5 Hari Lagi
-                        </span>
-                    </td>
-                    <td class="px-5 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                            Belum Mulai
-                        </span>
-                    </td>
-                </tr>
-
+                @forelse($items as $item)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                        <td class="px-5 py-4 font-medium text-gray-800 dark:text-gray-200">{{ $item['unit_sub_unit'] }}</td>
+                        <td class="px-5 py-4 text-center text-gray-600 dark:text-gray-400">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                {{ $item['deadline'] }}
+                            </div>
+                        </td>
+                        <td class="px-5 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold 
+                                {{ $item['sisa_hari'] <= 2 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 
+                                   ($item['sisa_hari'] <= 5 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+                                   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}">
+                                {{ $item['sisa_hari'] }} Hari Lagi
+                            </span>
+                        </td>
+                        <td class="px-5 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium 
+                                {{ $item['status'] == 'Selesai' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
+                                   ($item['status'] == 'Proses Input' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 
+                                   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400') }}">
+                                {{ $item['status'] }}
+                            </span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-5 py-4 text-center text-gray-500">Belum ada data</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

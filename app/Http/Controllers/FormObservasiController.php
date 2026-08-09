@@ -7,26 +7,84 @@ use App\Models\Matrix;
 use App\Models\PertanyaanAmiProdi;
 use App\Models\PertanyaanAmiUnit;
 use App\Models\TahunAkademik;
+use App\Models\AksesPertanyaanProdi;
+use App\Models\AksesPertanyaanUnit;
 use Illuminate\Http\Request;
 
 class FormObservasiController extends Controller
 {
+    /**
+     * Helper: model akses sesuai role
+     */
+    private function getAksesModel()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? AksesPertanyaanUnit::class
+            : AksesPertanyaanProdi::class;
+    }
+
+    /**
+     * Helper: nama relasi di FormObservasi ke pertanyaan asli
+     */
+    private function getPertanyaanRelation()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        $pertanyaanModel = $this->getPertanyaanModel();
+        $user = auth()->user();
+        $aksesModel = $this->getAksesModel();
+        $relasiPertanyaan = $this->getPertanyaanRelation();
 
-        $pertanyaanRelation = $this->getPertanyaanRelation();
+        /*
+        |--------------------------------------------------------------------------
+        | DATA TAHUN AKADEMIK (dari akses)
+        |--------------------------------------------------------------------------
+        */
+        $tahunAkademikIds = $aksesModel::forUser($user)
+            ->with('pertanyaan.tahunAkademik')
+            ->get()
+            ->pluck('pertanyaan.tahun_akademik_id')
+            ->unique()
+            ->filter();
 
-        $indikatorIds = $pertanyaanModel::pluck('isi_indikator_id');
+        $tahunAkademik = TahunAkademik::whereIn('id', $tahunAkademikIds)
+            ->orderBy('tahun_akademik', 'desc')
+            ->orderBy('semester', 'desc')
+            ->get();
 
-        $matrixs = Matrix::with([
-            'kriteriaAudit.standar',
-            'isiIndikator.' . $pertanyaanRelation
-        ])
-        ->whereHas('isiIndikator', function ($q) use ($indikatorIds) {
-            $q->whereIn('id', $indikatorIds);
-        })
-        ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | DAFTAR PERTANYAAN YANG DIAKSES (untuk matriks & kriteria)
+        |--------------------------------------------------------------------------
+        */
+        $aksesList = $aksesModel::forUser($user)
+            ->with('pertanyaan.isiIndikator.matrix.kriteriaAudit.standar')
+            ->get();
+
+        $pertanyaanAmi = $aksesList->pluck('pertanyaan')->filter()->unique('id')->values();
+
+        $matrixs = $pertanyaanAmi
+            ->pluck('isiIndikator.matrix')
+            ->filter()
+            ->unique('id')
+            ->values()
+            ->map(function ($matrix) {
+                // PERBAIKAN: harus eager-load kedua relasi pertanyaan (prodi & unit)
+                // di dalam isiIndikator, karena JS di blade membaca
+                // item.pertanyaan_ami_prodi dan item.pertanyaan_ami_unit
+                // untuk membangun opsi dropdown Indikator (add & edit mode).
+                // Sebelumnya cuma load('isiIndikator') tanpa relasi nested ini,
+                // jadi kedua field itu selalu kosong di JSON -> dropdown Indikator kosong.
+                $matrix->load(['isiIndikator.pertanyaanAmiProdi', 'isiIndikator.pertanyaanAmiUnit']);
+                return $matrix;
+            });
 
         $kriteriaList = $matrixs
             ->pluck('kriteriaAudit.standar')
@@ -34,35 +92,20 @@ class FormObservasiController extends Controller
             ->unique('id')
             ->values();
 
-        $tahunAkademikIdsProdi = PertanyaanAmiProdi::whereNotNull('tahun_akademik_id')
-            ->pluck('tahun_akademik_id');
-        $tahunAkademikIdsUnit = PertanyaanAmiUnit::whereNotNull('tahun_akademik_id')
-            ->pluck('tahun_akademik_id');
-        $tahunAkademik = TahunAkademik::whereIn(
-                'id',
-                $tahunAkademikIdsProdi->merge($tahunAkademikIdsUnit)->unique()
-            )
-            ->orderBy('tahun_akademik', 'desc')
-            ->orderBy('semester', 'desc')
-            ->get();
-
+        /*
+        |--------------------------------------------------------------------------
+        | QUERY OBSERVASI
+        |--------------------------------------------------------------------------
+        */
         $observasi = FormObservasi::with([
-            'pertanyaanAmiProdi.indikator',
-            'pertanyaanAmiUnit.indikator',
+            $relasiPertanyaan . '.indikator',
             'matrix.kriteriaAudit',
             'user',
         ])
-        ->where('users_id', auth()->id())
-        
-        ->when($request->filled('tahun_akademik_id'), function ($query) use ($request) {
-            $tahunId = $request->tahun_akademik_id;
-            $query->where(function ($q) use ($tahunId) {
-                $q->whereHas('pertanyaanAmiProdi', function ($sub) use ($tahunId) {
-                    $sub->where('tahun_akademik_id', $tahunId);
-                })
-                ->orWhereHas('pertanyaanAmiUnit', function ($sub) use ($tahunId) {
-                    $sub->where('tahun_akademik_id', $tahunId);
-                });
+        ->where('users_id', $user->id)
+        ->when($request->filled('tahun_akademik_id'), function ($query) use ($request, $relasiPertanyaan) {
+            $query->whereHas($relasiPertanyaan, function ($q) use ($request) {
+                $q->where('tahun_akademik_id', $request->tahun_akademik_id);
             });
         })
         ->orderBy('id', 'asc')
@@ -72,9 +115,7 @@ class FormObservasiController extends Controller
         // Alpine filter → return JSON
         if ($request->ajax() && $request->wantsJson()) {
             return response()->json([
-                'table' => view('components.form-observasi.observation-table',
-                    ['observasi' => $observasi]
-                )->render()
+                'table' => view('components.form-observasi.observation-table', ['observasi' => $observasi])->render()
             ]);
         }
 
@@ -95,52 +136,35 @@ class FormObservasiController extends Controller
     {
         $userId = auth()->id();
         $tahunAkademikId = $request->tahun_akademik_id;
+        $relasiPertanyaan = $this->getPertanyaanRelation();
 
         // Ambil data observasi milik user, dengan filter tahun jika ada
         $observasiItems = FormObservasi::with([
-            'pertanyaanAmiProdi.isiIndikator',
-            'pertanyaanAmiUnit.isiIndikator',
+            $relasiPertanyaan . '.isiIndikator',
             'matrix.kriteriaAudit.standar',
             'user'
         ])
         ->where('users_id', $userId)
-        ->when($tahunAkademikId, function ($query) use ($tahunAkademikId) {
-            $query->where(function ($q) use ($tahunAkademikId) {
-                $q->whereHas('pertanyaanAmiProdi', function ($sub) use ($tahunAkademikId) {
-                    $sub->where('tahun_akademik_id', $tahunAkademikId);
-                })->orWhereHas('pertanyaanAmiUnit', function ($sub) use ($tahunAkademikId) {
-                    $sub->where('tahun_akademik_id', $tahunAkademikId);
-                });
+        ->when($tahunAkademikId, function ($query) use ($tahunAkademikId, $relasiPertanyaan) {
+            $query->whereHas($relasiPertanyaan, function ($q) use ($tahunAkademikId) {
+                $q->where('tahun_akademik_id', $tahunAkademikId);
             });
         })
         ->orderBy('id', 'asc')
         ->get();
 
-        // (Opsional) Ambil nama tahun akademik untuk keperluan judul atau informasi tambahan
+        // Ambil nama tahun akademik untuk keperluan judul
         $tahunAkademik = null;
         if ($tahunAkademikId) {
             $tahunAkademik = TahunAkademik::find($tahunAkademikId);
         } elseif ($observasiItems->isNotEmpty()) {
             $first = $observasiItems->first();
-            $tahunId = $first->pertanyaanAmiProdi->tahun_akademik_id ?? $first->pertanyaanAmiUnit->tahun_akademik_id ?? null;
+            $pertanyaan = $first->{$relasiPertanyaan};
+            $tahunId = $pertanyaan->tahun_akademik_id ?? null;
             $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
         }
 
         return view('auditor.form-observasi.print', compact('observasiItems', 'tahunAkademik'));
-    }
-
-    private function getPertanyaanModel()
-    {
-        return auth()->user()->role === 'unit_kerja'
-            ? \App\Models\PertanyaanAmiUnit::class
-            : \App\Models\PertanyaanAmiProdi::class;
-    }
-
-    private function getPertanyaanRelation()
-    {
-        return auth()->user()->role === 'unit_kerja'
-            ? 'pertanyaanAmiUnit'
-            : 'pertanyaanAmiProdi';
     }
 
     /**
@@ -148,23 +172,63 @@ class FormObservasiController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'matrixs_id' => 'required|exists:matrixs,id',
-            'pertanyaan_ami_prodi_id' => 'nullable|exists:pertanyaan_ami_prodi,id',
-            'pertanyaan_ami_unit_id'  => 'nullable|exists:pertanyaan_ami_unit,id',
+        $user = auth()->user();
+        $role = $user->role;
+
+        // Validasi dinamis
+        $rules = [
+            'matrixs_id'    => 'required|exists:matrixs,id',
             'isi_indikator_id' => 'nullable|exists:isi_indikator,id',
             'discussed_with'   => 'nullable|string',
             'rekomendasi'      => 'nullable|string',
-        ]);
+        ];
 
+        if ($role === 'unit_kerja') {
+            $rules['pertanyaan_ami_unit_id'] = 'required|exists:pertanyaan_ami_unit,id';
+        } else {
+            $rules['pertanyaan_ami_prodi_id'] = 'required|exists:pertanyaan_ami_prodi,id';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Ambil pertanyaan asli berdasarkan role
+        if ($role === 'unit_kerja') {
+            $pertanyaan = PertanyaanAmiUnit::find($validated['pertanyaan_ami_unit_id']);
+            $foreignKey = 'pertanyaan_ami_unit_id';
+            $foreignValue = $pertanyaan->id;
+            $prodiId = null;
+            $unitId = $pertanyaan->id;
+        } else {
+            $pertanyaan = PertanyaanAmiProdi::find($validated['pertanyaan_ami_prodi_id']);
+            $foreignKey = 'pertanyaan_ami_prodi_id';
+            $foreignValue = $pertanyaan->id;
+            $prodiId = $pertanyaan->id;
+            $unitId = null;
+        }
+
+        // Cek akses user terhadap pertanyaan ini
+        $aksesModel = $this->getAksesModel();
+        $hasAccess = $aksesModel::forUser($user)
+            ->where('pertanyaan_id', $pertanyaan->id)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk pertanyaan ini.'
+            ], 403);
+        }
+
+        // Ambil isi_indikator_id dari pertanyaan jika tidak dikirim
+        $isiIndikatorId = $validated['isi_indikator_id'] ?? $pertanyaan->isi_indikator_id;
+
+        // Simpan
         $data = FormObservasi::create([
-            'users_id' => auth()->id(),
+            'users_id' => $user->id,
             'matrixs_id' => $validated['matrixs_id'],
-
-            'pertanyaan_ami_prodi_id' => $validated['pertanyaan_ami_prodi_id'] ?? null,
-            'pertanyaan_ami_unit_id'  => $validated['pertanyaan_ami_unit_id'] ?? null,
-
-            'isi_indikator_id' => $validated['isi_indikator_id'] ?? null,
+            'pertanyaan_ami_prodi_id' => $prodiId,
+            'pertanyaan_ami_unit_id'  => $unitId,
+            'isi_indikator_id' => $isiIndikatorId,
             'discussed_with'   => $validated['discussed_with'] ?? null,
             'rekomendasi'      => $validated['rekomendasi'] ?? null,
         ]);
@@ -181,35 +245,42 @@ class FormObservasiController extends Controller
      */
     public function edit($id)
     {
+        $relasiPertanyaan = $this->getPertanyaanRelation();
+
         try {
             $observasi = FormObservasi::with([
                 'matrix.kriteriaAudit.standar',
-                'matrix.isiIndikator.pertanyaanAmiProdi'
+                'matrix.isiIndikator.' . $relasiPertanyaan
             ])->findOrFail($id);
+
+            // Pastikan observasi milik user yang login
+            if ($observasi->users_id !== auth()->id()) {
+                abort(403);
+            }
 
             $matrix = $observasi->matrix;
 
-            $kriteriaId = optional(
-                optional($matrix->kriteriaAudit)->standar
-            )->id;
+            $kriteriaId = optional(optional($matrix->kriteriaAudit)->standar)->id;
 
+            // Ambil isi_indikator_id dari pertanyaan jika null
             $isi_indikator_id = $observasi->isi_indikator_id;
-
-            if (!$isi_indikator_id && $observasi->pertanyaan_ami_prodi_id) {
-                $pertanyaan = PertanyaanAmiProdi::find($observasi->pertanyaan_ami_prodi_id);
+            if (!$isi_indikator_id) {
+                $pertanyaan = $observasi->{$relasiPertanyaan};
                 $isi_indikator_id = $pertanyaan?->isi_indikator_id;
             }
 
-            // ambil list indikator biar frontend gak blank pas edit
+            // Ambil daftar indikator untuk dropdown (dari matrix)
             $indikatorList = [];
-
             if ($matrix && $matrix->isiIndikator) {
-                $indikatorList = $matrix->isiIndikator->map(function ($item) {
+                $indikatorList = $matrix->isiIndikator->map(function ($item) use ($relasiPertanyaan) {
+                    // Ambil pertanyaan yang terhubung dengan indikator ini
+                    $pertanyaan = $item->{$relasiPertanyaan}->first();
+                    $isUnit = $relasiPertanyaan === 'pertanyaanAmiUnit';
                     return [
                         'id' => $item->id,
                         'indikator' => $item->indikator,
-                        'pertanyaan_ami_prodi_id' =>
-                            optional($item->pertanyaanAmiProdi->first())->id
+                        'pertanyaan_ami_prodi_id' => $isUnit ? null : optional($pertanyaan)->id,
+                        'pertanyaan_ami_unit_id' => $isUnit ? optional($pertanyaan)->id : null,
                     ];
                 });
             }
@@ -219,13 +290,10 @@ class FormObservasiController extends Controller
                     'id' => $observasi->id,
                     'kriteria_id' => $kriteriaId,
                     'matrixs_id' => $observasi->matrixs_id,
-
                     'indikator_list' => $indikatorList,
-
                     'pertanyaan_ami_prodi_id' => $observasi->pertanyaan_ami_prodi_id,
                     'pertanyaan_ami_unit_id' => $observasi->pertanyaan_ami_unit_id,
                     'isi_indikator_id' => $isi_indikator_id,
-
                     'discussed_with' => $observasi->discussed_with,
                     'rekomendasi' => $observasi->rekomendasi,
                 ]
@@ -244,26 +312,59 @@ class FormObservasiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'matrixs_id' => 'required|exists:matrixs,id',
+        $user = auth()->user();
+        $role = $user->role;
 
-            'pertanyaan_ami_prodi_id' => 'nullable|exists:pertanyaan_ami_prodi,id',
-            'pertanyaan_ami_unit_id'  => 'nullable|exists:pertanyaan_ami_unit,id',
+        $observasi = FormObservasi::where('users_id', $user->id)->findOrFail($id);
 
+        // Validasi dinamis
+        $rules = [
+            'matrixs_id'    => 'required|exists:matrixs,id',
             'isi_indikator_id' => 'nullable|exists:isi_indikator,id',
             'discussed_with'   => 'nullable|string',
             'rekomendasi'      => 'nullable|string',
-        ]);
+        ];
 
-        $observasi = FormObservasi::findOrFail($id);
+        if ($role === 'unit_kerja') {
+            $rules['pertanyaan_ami_unit_id'] = 'required|exists:pertanyaan_ami_unit,id';
+        } else {
+            $rules['pertanyaan_ami_prodi_id'] = 'required|exists:pertanyaan_ami_prodi,id';
+        }
 
+        $validated = $request->validate($rules);
+
+        // Ambil pertanyaan asli
+        if ($role === 'unit_kerja') {
+            $pertanyaan = PertanyaanAmiUnit::find($validated['pertanyaan_ami_unit_id']);
+            $prodiId = null;
+            $unitId = $pertanyaan->id;
+        } else {
+            $pertanyaan = PertanyaanAmiProdi::find($validated['pertanyaan_ami_prodi_id']);
+            $prodiId = $pertanyaan->id;
+            $unitId = null;
+        }
+
+        // Cek akses
+        $aksesModel = $this->getAksesModel();
+        $hasAccess = $aksesModel::forUser($user)
+            ->where('pertanyaan_id', $pertanyaan->id)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk pertanyaan ini.'
+            ], 403);
+        }
+
+        $isiIndikatorId = $validated['isi_indikator_id'] ?? $pertanyaan->isi_indikator_id;
+
+        // Update
         $observasi->update([
             'matrixs_id' => $validated['matrixs_id'],
-
-            'pertanyaan_ami_prodi_id' => $validated['pertanyaan_ami_prodi_id'] ?? null,
-            'pertanyaan_ami_unit_id'  => $validated['pertanyaan_ami_unit_id'] ?? null,
-
-            'isi_indikator_id' => $validated['isi_indikator_id'] ?? null,
+            'pertanyaan_ami_prodi_id' => $prodiId,
+            'pertanyaan_ami_unit_id'  => $unitId,
+            'isi_indikator_id' => $isiIndikatorId,
             'discussed_with'   => $validated['discussed_with'] ?? null,
             'rekomendasi'      => $validated['rekomendasi'] ?? null,
         ]);
@@ -280,12 +381,10 @@ class FormObservasiController extends Controller
      */
     public function destroy($id)
     {
-        $observasi = FormObservasi::findOrFail($id);
-
+        $observasi = FormObservasi::where('users_id', auth()->id())->findOrFail($id);
         $observasi->delete();
 
         return response()->json([
-
             'success' => true,
             'message' => 'Data observasi berhasil dihapus'
         ]);

@@ -15,6 +15,15 @@ class AdminMenu
             ],
 
             [
+                'icon' => 'clipboard-document-check',
+                'name' => 'Data Akreditasi',
+                'subItems' => [
+                    ['name' => 'Early Warning System', 'path' => '/admin/early-warning-system'],
+                    ['name' => 'Akreditasi', 'path' => '/admin/data-akreditasi'],
+                ],
+            ],
+
+            [
                 'icon' => 'task',
                 'name' => 'Manajemen Audit',
                 'subItems' => [

@@ -25,6 +25,7 @@
             <x-pertanyaan-ami-prodi.filter-bar 
                 :kriteria="$kriteria"
                 :tahunAkademik="$tahunAkademik"
+                :filterAksesOptions="$filterAksesOptions"
             />
 
             <!-- Divider -->
@@ -36,7 +37,8 @@
                 class="p-5 lg:p-6"
             >
                 <x-pertanyaan-ami-prodi.question-list 
-                    :dataPertanyaan="$dataPertanyaan" 
+                    :dataPertanyaan="$dataPertanyaan"
+                    :indikators="$indikators" 
                 />
             </div>
             
@@ -44,9 +46,14 @@
     </div>
 
     <!-- Modal Form -->
-    <x-pertanyaan-ami-prodi.form-modal 
+    <x-pertanyaan-ami-prodi.form-modal
         :kriteria="$kriteria"
         :tahunAkademik="$tahunAkademik"
+        :roles="$roles"
+        :units="$units"
+        :subUnits="$subUnits"
+        :roleData="$roleData"
+        :indikators="$indikators"
     />
 
 @endsection

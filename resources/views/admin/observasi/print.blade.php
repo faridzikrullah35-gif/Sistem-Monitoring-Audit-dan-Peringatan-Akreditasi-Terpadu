@@ -1,23 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LAPORAN OBSERVASI</title>
     <style>
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 13px;
             margin: 20px;
             line-height: 1.4;
             color: #000;
         }
+
         .header-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
         }
-        .header-table td, .header-table th {
+        .header-table td,
+        .header-table th {
             border: 1px solid #000;
             padding: 6px;
             vertical-align: middle;
@@ -76,7 +82,8 @@
             margin-top: 10px;
             font-size: 11px;
         }
-        .main-table th, .main-table td {
+        .main-table th,
+        .main-table td {
             border: 1px solid #000;
             padding: 4px 6px;
             vertical-align: top;
@@ -122,19 +129,31 @@
         .rich-text u {
             text-decoration: underline;
         }
-        .rich-text h1, .rich-text h2, .rich-text h3, .rich-text h4, .rich-text h5, .rich-text h6 {
+        .rich-text h1,
+        .rich-text h2,
+        .rich-text h3,
+        .rich-text h4,
+        .rich-text h5,
+        .rich-text h6 {
             font-weight: bold;
             margin: 8px 0 4px 0;
         }
-        .rich-text h1 { font-size: 1.4em; }
-        .rich-text h2 { font-size: 1.2em; }
-        .rich-text h3 { font-size: 1.1em; }
+        .rich-text h1 {
+            font-size: 1.4em;
+        }
+        .rich-text h2 {
+            font-size: 1.2em;
+        }
+        .rich-text h3 {
+            font-size: 1.1em;
+        }
         .rich-text table {
             width: 100%;
             border-collapse: collapse;
             margin: 4px 0;
         }
-        .rich-text table td, .rich-text table th {
+        .rich-text table td,
+        .rich-text table th {
             border: 1px solid #000;
             padding: 4px 6px;
         }
@@ -148,9 +167,14 @@
         }
 
         @media print {
-            body { margin: 15px; }
-            .no-print { display: none; }
+            body {
+                margin: 15px;
+            }
+            .no-print {
+                display: none;
+            }
         }
+
         .no-print {
             text-align: center;
             margin-top: 20px;
@@ -163,19 +187,29 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            font-family: 'Aptos Display', 'Segoe UI', Roboto, sans-serif;
+        }
+        .no-print button:hover {
+            background: #1d4ed8;
+        }
+        .no-print button:last-child {
+            background: #6b7280;
+        }
+        .no-print button:last-child:hover {
+            background: #4b5563;
         }
     </style>
 </head>
 <body>
 
-    {{-- HEADER --}}
+    <!-- ===== HEADER ===== -->
     <table class="header-table">
         <tr>
             <td class="logo-cell" rowspan="3">
-                <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo">
+                <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo" />
             </td>
             <th class="title" rowspan="3">
-                LAPORAN OBSERVASI<br>AUDIT INTERNAL UNIT KERJA
+                LAPORAN OBSERVASI<br />AUDIT INTERNAL UNIT KERJA
             </th>
             <td class="meta-label">No. Dokumen</td>
             <td class="meta-val">UM.BJM-LPM-FORM.OBS-AMI-000</td>
@@ -190,7 +224,7 @@
         </tr>
     </table>
 
-    {{-- TABEL OBSERVASI --}}
+    <!-- ===== TABEL OBSERVASI ===== -->
     <table class="main-table">
         <thead>
             <tr>
@@ -218,20 +252,24 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" style="text-align:center; padding:15px;">Tidak ada data observasi untuk filter yang dipilih.</td>
+                    <td colspan="4" style="text-align:center; padding:15px;">
+                        Tidak ada data observasi untuk filter yang dipilih.
+                    </td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{-- TOMBOL CETAK --}}
+    <!-- ===== TOMBOL CETAK ===== -->
     <div class="no-print">
         <button onclick="window.print()">🖨 Cetak</button>
-        <button onclick="window.close()" style="background:#6b7280; margin-left:10px;">✕ Tutup</button>
+        <button onclick="window.close()">✕ Tutup</button>
     </div>
 
     <script>
-        window.onload = function() { window.print(); }
+        window.onload = function() {
+            window.print();
+        };
     </script>
 
 </body>

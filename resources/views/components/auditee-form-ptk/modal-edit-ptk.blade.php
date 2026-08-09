@@ -176,7 +176,7 @@
                                 </button>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Format: PDF | Maks. 2MB | Kosongkan jika tidak ingin mengganti</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Format: PDF | Maks. 2MB | Kosongkan jika tidak ingin mengisi</p>
                         <div id="ptkFileError" class="text-xs text-red-600 hidden"></div>
                     </div>
 

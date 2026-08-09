@@ -43,7 +43,7 @@
     <a
         x-show="selectedTahun !== ''"
         x-transition.opacity.duration.200ms
-        :href="`{{ route('daftar-periksa.print') }}?tahun_akademik_id=${selectedTahun}`"
+        :href="`{{ route('prodi.daftar-periksa.print') }}?tahun_akademik_id=${selectedTahun}`"
         target="_blank"
         class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
         style="display: none;"

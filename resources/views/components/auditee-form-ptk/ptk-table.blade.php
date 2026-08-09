@@ -27,11 +27,33 @@
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.no_ncr || '-'"></td>
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200"><div class="line-clamp-4 leading-relaxed" x-text="item.pertanyaan_ami_prodi?.isi_indikator?.indikator || '-'"></div></td>
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200"><div class="line-clamp-4 leading-relaxed" x-text="item.klausul_dokumen || '-'"></div></td>
+
+                    {{-- DESKRIPSI / URAIAN TEMUAN -- DENGAN RICH TEXT --}}
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200">
-                        <div class="line-clamp-4 break-words whitespace-normal leading-relaxed" 
-                            x-html="item.deskripsi_uraian_temuan || '-'">
-                        </div>
+                        <template x-if="item.deskripsi_uraian_temuan">
+                            <div class="
+                                max-w-none break-words whitespace-normal leading-relaxed text-gray-700 dark:text-gray-200
+
+                                [&_p]:mb-2
+                                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-2
+                                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-2
+                                [&_li]:mb-1
+                                [&_strong]:font-semibold
+                                [&_em]:italic
+                                [&_u]:underline
+                                [&_h1]:text-base [&_h1]:font-bold [&_h1]:mb-2
+                                [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:mb-2
+                                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2
+                                [&_td]:border [&_td]:p-2
+                                [&_th]:border [&_th]:p-2 [&_th]:font-semibold
+                            "
+                            x-html="item.deskripsi_uraian_temuan"></div>
+                        </template>
+                        <template x-if="!item.deskripsi_uraian_temuan">
+                            <span class="text-gray-400">-</span>
+                        </template>
                     </td>
+
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200"><div class="line-clamp-4 leading-relaxed" x-text="item.audit_periksa?.analisis_penyebab || '-'"></div></td>
                     <td class="px-4 py-4 text-gray-700 dark:text-gray-200"><div class="line-clamp-4 leading-relaxed" x-text="item.audit_periksa?.akibat || '-'"></div></td>
                     <td class="whitespace-nowrap px-4 py-4">
@@ -40,9 +62,55 @@
                             'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': item.kategori_temuan === 'Minor'
                         }" class="inline-flex rounded-full px-3 py-1 text-xs font-medium" x-text="item.kategori_temuan"></span>
                     </td>
-                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.rencana_tindakan_perbaikan_auditee || '-'"></td>
+                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200">
+                        <template x-if="item.rencana_tindakan_perbaikan_auditee">
+                            <div class="
+                                max-w-none break-words whitespace-normal leading-relaxed text-gray-700 dark:text-gray-200
+
+                                [&_p]:mb-2
+                                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-2
+                                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-2
+                                [&_li]:mb-1
+                                [&_strong]:font-semibold
+                                [&_em]:italic
+                                [&_u]:underline
+                                [&_h1]:text-base [&_h1]:font-bold [&_h1]:mb-2
+                                [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:mb-2
+                                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2
+                                [&_td]:border [&_td]:p-2
+                                [&_th]:border [&_th]:p-2 [&_th]:font-semibold
+                            "
+                            x-html="item.rencana_tindakan_perbaikan_auditee"></div>
+                        </template>
+                        <template x-if="!item.rencana_tindakan_perbaikan_auditee">
+                            <span class="text-gray-400">-</span>
+                        </template>
+                    </td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.tanggal_target_perbaikan_auditee || '-'"></td>
-                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200" x-html="item.tindakan_pencegahan_auditee || '-'"></td>
+                    <td class="px-4 py-4 text-gray-700 dark:text-gray-200">
+                        <template x-if="item.tindakan_pencegahan_auditee">
+                            <div class="
+                                max-w-none break-words whitespace-normal leading-relaxed text-gray-700 dark:text-gray-200
+
+                                [&_p]:mb-2
+                                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-2
+                                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-2
+                                [&_li]:mb-1
+                                [&_strong]:font-semibold
+                                [&_em]:italic
+                                [&_u]:underline
+                                [&_h1]:text-base [&_h1]:font-bold [&_h1]:mb-2
+                                [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:mb-2
+                                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2
+                                [&_td]:border [&_td]:p-2
+                                [&_th]:border [&_th]:p-2 [&_th]:font-semibold
+                            "
+                            x-html="item.tindakan_pencegahan_auditee"></div>
+                        </template>
+                        <template x-if="!item.tindakan_pencegahan_auditee">
+                            <span class="text-gray-400">-</span>
+                        </template>
+                    </td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.file_auditee || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4 text-gray-700 dark:text-gray-200" x-text="item.tanggal_selesai || '-'"></td>
                     <td class="whitespace-nowrap px-4 py-4">

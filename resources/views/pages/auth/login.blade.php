@@ -110,9 +110,7 @@
 
     <div class="absolute bottom-4 left-0 w-full px-4 text-center z-20">
         <p class="inline-block text-xs md:text-sm text-white/80 leading-relaxed backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-lg">
-            © {{ date('Y') }} Developed by Muhammad Farid Zikrullah 
-            <br class="md:hidden">
-            - Sistem Audit Internal - Lembaga Penjaminan Mutu - UMBJM
+            © {{ date('Y') }} SIMANTAP - Lembaga Penjaminan Mutu Universitas Muhammadiyah Banjarmasin.
         </p>
     </div>
 

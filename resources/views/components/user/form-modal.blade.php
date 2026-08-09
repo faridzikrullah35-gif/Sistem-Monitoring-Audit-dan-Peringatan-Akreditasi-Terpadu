@@ -23,8 +23,6 @@
                 <!-- Form Body -->
                 <form 
                     id="userForm"
-                    data-ajax="1"
-                    data-table-id="#userTableContainer"
                     action="{{ route('pengguna.store') }}"
                     method="POST"
                 >
@@ -57,6 +55,7 @@
                         <!-- Simpan -->
                         <button 
                             type="submit"
+                            id="submitBtn"
                             class="px-4 py-2 text-sm font-medium rounded-lg 
                                 text-white bg-blue-600 hover:bg-blue-700 
                                 shadow-sm hover:shadow-md
@@ -75,6 +74,10 @@
 </div>
 
 <script>
+// ============================================================
+// 1. FUNGSI MODAL (open, close, clear errors)
+// ============================================================
+
 async function openModal(type, id = null) {
     const modal = document.getElementById('userModal');
     const form = document.getElementById('userForm');
@@ -85,13 +88,12 @@ async function openModal(type, id = null) {
     clearFormErrors();
     document.getElementById('user_id').value = '';
 
-    // Reset ke STORE default
-    form.action = window.routes.penggunaStore;
-    form.method = "POST";
-
     // hapus method override lama kalau ada
     const oldMethod = form.querySelector('input[name="_method"]');
     if (oldMethod) oldMethod.remove();
+
+    // tetap POST (method spoofing ditangani lewat _method kalau perlu)
+    form.method = "POST";
 
     if (type === 'edit' && id) {
         modalTitle.innerText = 'Edit Pengguna';
@@ -123,9 +125,6 @@ async function openModal(type, id = null) {
             methodInput.value = 'PUT';
 
             form.appendChild(methodInput);
-
-            // tetap POST
-            form.method = 'POST';
 
             form.action = window.routes.pengguna.update.replace(':id', id);
 
@@ -184,4 +183,140 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// ============================================================
+// 2. AJAX SUBMIT FORM (TANPA RELOAD)
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('userForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Cegah reload halaman
+
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg class="inline w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Menyimpan...
+        `;
+
+        // Bersihkan error sebelumnya
+        clearFormErrors();
+
+        try {
+            // Ambil data form
+            const formData = new FormData(form);
+            const url = form.action;
+
+            // Kirim via fetch
+            const response = await fetch(url, {
+                method: 'POST', // selalu POST, method spoofing via _method
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    // Jangan set 'Content-Type', biar FormData yang set boundary
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Kalau response status bukan 2xx, lempar error
+            if (!response.ok) {
+                // Cek apakah ada error validasi (422)
+                if (response.status === 422) {
+                    // Tampilkan error per field
+                    if (result.errors) {
+                        for (const [field, messages] of Object.entries(result.errors)) {
+                            const input = form.querySelector(`[name="${field}"]`);
+                            if (input) {
+                                input.classList.add('border-red-500', 'ring-red-500');
+                                // Tampilkan pesan error di bawah input
+                                const errorMsg = document.createElement('p');
+                                errorMsg.className = 'error-message text-red-500 text-xs mt-1';
+                                errorMsg.textContent = messages[0];
+                                input.parentNode.appendChild(errorMsg);
+                            }
+                        }
+                    }
+                    throw new Error('Periksa kembali data yang dimasukkan.');
+                }
+                // Error lain
+                throw new Error(result.message || 'Terjadi kesalahan saat menyimpan data.');
+            }
+
+            // Sukses!
+            if (result.message) {
+                window.toast?.success(result.message) || alert(result.message);
+            }
+
+            // Tutup modal
+            closeModal();
+
+            // REFRESH TABEL TANPA RELOAD (standalone, gak pake table-refresh.js)
+            await reloadUserTableOnly();
+
+        } catch (error) {
+            console.error('Submit error:', error);
+            window.toast?.error(error.message) || alert(error.message);
+        } finally {
+            // Kembalikan tombol ke keadaan semula
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+});
+
+// ============================================================
+// 3. FUNGSI REFRESH TABEL — STANDALONE
+// ============================================================
+
+async function reloadUserTableOnly() {
+    const container = document.getElementById('userTableContainer');
+    if (!container) {
+        window.location.reload();
+        return;
+    }
+
+    try {
+        // Pakai URL halaman saat ini, biar filter/search/pagination aktif tetap kebawa
+        const fetchUrl = window.location.href;
+
+        const response = await fetch(fetchUrl, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Gagal refresh tabel');
+
+        const data = await response.json();
+
+        if (!data.html) throw new Error('Response tidak berisi html');
+
+        // Parse HTML string yang dikirim balik controller
+        const doc = new DOMParser().parseFromString(data.html, 'text/html');
+
+        const newContainer = doc.getElementById('userTableContainer');
+
+        if (newContainer) {
+            container.innerHTML = newContainer.innerHTML;
+        } else {
+            // fallback kalau struktur beda dari yang diharapkan
+            container.innerHTML = data.html;
+        }
+
+    } catch (error) {
+        console.error('[ReloadUserTable] Error:', error);
+        // Fallback aman: reload halaman kalau AJAX refresh gagal
+        window.location.reload();
+    }
+}
 </script>

@@ -96,10 +96,53 @@
 
                     {{-- PANDUAN --}}
                     <td class="break-words px-4 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        {{-- Hilangkan line-clamp-3, biarkan teks utuh --}}
-                        <div class="leading-relaxed"
-                             x-html="item.panduan_pengisian || '-'">
-                        </div>
+                        {{-- Jika ada konten, tampilkan sebagai HTML --}}
+                        <template x-if="item.panduan_pengisian">
+                            <div class="
+                                max-w-none break-words
+
+                                [&_p]:mb-2
+
+                                [&_ul]:list-disc
+                                [&_ul]:pl-6
+                                [&_ul]:mb-2
+
+                                [&_ol]:list-decimal
+                                [&_ol]:pl-6
+                                [&_ol]:mb-2
+
+                                [&_li]:mb-1
+
+                                [&_strong]:font-semibold
+                                [&_em]:italic
+                                [&_u]:underline
+
+                                [&_h1]:text-lg
+                                [&_h1]:font-bold
+                                [&_h1]:mb-2
+
+                                [&_h2]:text-base
+                                [&_h2]:font-semibold
+                                [&_h2]:mb-2
+
+                                [&_table]:w-full
+                                [&_table]:border-collapse
+                                [&_table]:mb-2
+
+                                [&_td]:border
+                                [&_td]:p-2
+
+                                [&_th]:border
+                                [&_th]:p-2
+                                [&_th]:font-semibold
+                            "
+                            x-html="item.panduan_pengisian"></div>
+                        </template>
+
+                        {{-- Jika kosong, tampilkan tanda hubung --}}
+                        <template x-if="!item.panduan_pengisian">
+                            <span class="text-gray-400 italic">-</span>
+                        </template>
                     </td>
                 </tr>
             </template>

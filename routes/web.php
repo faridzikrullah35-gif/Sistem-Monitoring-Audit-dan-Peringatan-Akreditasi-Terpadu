@@ -34,14 +34,45 @@ use App\Http\Controllers\HasilAuditPtkController;
 use App\Http\Controllers\HasilAuditObservasiController;
 use App\Http\Controllers\HasilAuditTerpenuhiController;
 use App\Http\Controllers\HasilAuditRekapitulasiController;
+use App\Http\Controllers\PenilaianKinerjaController;
+use App\Http\Controllers\EarlyWarningSystemController;
+use App\Http\Controllers\EarlyWarningSystemAdminController;
+use App\Http\Controllers\DataAkreditasiController;
+use App\Http\Controllers\AkreditasiController;
+use App\Http\Controllers\Prodi\ProfileProdiController;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// });
+
+Route::redirect('/', '/SIMANTAP-Sistem-Monitoring-Audit-dan-Peringatan-Akreditasi-Terpadu');
+
+Route::get('/SIMANTAP-Sistem-Monitoring-Audit-dan-Peringatan-Akreditasi-Terpadu', function () {
+    return view('pages.landing.landingpage-simantap');
+})->name('landing');
+
+Route::get('/early-warning-system', [App\Http\Controllers\EarlyWarningSystemController::class, 'index'])->name('ews.index');
 
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware('auth')->get('/dashboard', function () {
+
+    return match (auth()->user()->role) {
+
+        'admin' => redirect()->route('admin.dashboard'),
+
+        'auditor',
+        'unit_kerja' => redirect()->route('auditor.dashboard'),
+
+        'prodi' => redirect()->route('prodi.dashboard'),
+
+        default => abort(403),
+
+    };
+
+})->name('dashboard');
 
 // dashboard pages
 Route::middleware(['auth', 'role:admin'])
@@ -54,6 +85,8 @@ Route::middleware(['auth', 'role:admin'])
     Route::prefix('others')->group(function () {
 
         Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
+
+        Route::get('/pengguna/sub-unit', [UserController::class, 'getSubUnit'])->name('pengguna.sub-unit');
 
         Route::get('/pengguna/filter', [UserController::class, 'filterData'])->name('pengguna.filter');
 
@@ -269,6 +302,32 @@ Route::middleware(['auth', 'role:admin'])
         ->name('hasil-audit.rekapitulasi.filter');
     Route::get('/hasil-audit/rekapitulasi/print', [HasilAuditRekapitulasiController::class, 'print'])
         ->name('hasil-audit.rekapitulasi.print');
+
+    // ==================== DATA AKREDITASI ====================
+    Route::get('/data-akreditasi', [DataAkreditasiController::class, 'index'])
+        ->name('data-akreditasi');
+    Route::post('/data-akreditasi/store', [DataAkreditasiController::class, 'store'])
+        ->name('data-akreditasi.store');
+    Route::get('/data-akreditasi/{id}', [DataAkreditasiController::class, 'show'])
+        ->name('data-akreditasi.show');
+    Route::put('/data-akreditasi/update/{id}', [DataAkreditasiController::class, 'update'])
+        ->name('data-akreditasi.update');
+    Route::delete('/data-akreditasi/delete/{id}', [DataAkreditasiController::class, 'destroy'])
+        ->name('data-akreditasi.delete');
+    
+    Route::get('/early-warning-system', [EarlyWarningSystemAdminController::class, 'index'])
+        ->name('early-warning-system');
+    Route::get('/sub-unit/{unit}', [EarlyWarningSystemAdminController::class, 'getSubUnit'])
+        ->name('early-warning-system.sub-unit');
+    Route::post('/early-warning-system', [EarlyWarningSystemAdminController::class, 'store'])
+        ->name('early-warning-system.store');
+    Route::get('/early-warning-system/{id}/edit', [EarlyWarningSystemAdminController::class, 'edit'])
+        ->name('early-warning-system.edit');
+    Route::put('/early-warning-system/{id}', [EarlyWarningSystemAdminController::class, 'update'])
+        ->name('early-warning-system.update');
+    Route::delete('/early-warning-system/{id}', [EarlyWarningSystemAdminController::class, 'destroy'])
+        ->name('early-warning-system.destroy');
+
 });
 
 Route::middleware(['auth', 'role:auditor,unit_kerja'])
@@ -347,10 +406,11 @@ Route::middleware(['auth', 'role:auditor,unit_kerja'])
 
 Route::middleware(['auth', 'role:prodi'])
     ->prefix('prodi')
+    ->name('prodi.')
     ->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'prodi'])
-        ->name('prodi.dashboard');
+        ->name('dashboard');
 
     Route::get('/data-auditee', [DataAuditeeController::class, 'index'])
         ->name('data-auditee.index');
@@ -380,10 +440,83 @@ Route::middleware(['auth', 'role:prodi'])
     Route::get('/cetak-rekapitulasi-ami', [CetakRekapitulasiAuditeeController::class, 'index'])
         ->name('cetak-auditee.index');
     Route::get('/cetak-rekapitulasi-auditee/data', [CetakRekapitulasiAuditeeController::class, 'getData'])
-        ->name('prodi.cetak-auditee.data');
+        ->name('cetak-auditee.data');
     Route::get('/cetak-rekapitulasi-auditee/print', [CetakRekapitulasiAuditeeController::class, 'print'])
-        ->name('prodi.cetak-auditee.print');
+        ->name('cetak-auditee.print');
 
+    Route::get('/penilaian-kinerja', [PenilaianKinerjaController::class, 'index'])
+            ->name('penilaian-kinerja.index');
+
+    Route::post('/penilaian-kinerja', [PenilaianKinerjaController::class, 'store'])
+        ->name('penilaian-kinerja.store');
+
+    Route::get('/penilaian-kinerja/{id}', [PenilaianKinerjaController::class, 'show'])
+        ->name('penilaian-kinerja.show');
+
+    Route::get('/penilaian-kinerja/{id}/edit', [PenilaianKinerjaController::class, 'edit'])
+        ->name('penilaian-kinerja.edit');
+
+    Route::put('/penilaian-kinerja/{id}', [PenilaianKinerjaController::class, 'update'])
+        ->name('penilaian-kinerja.update');
+
+    Route::delete('/penilaian-kinerja/{id}', [PenilaianKinerjaController::class, 'destroy'])
+        ->name('penilaian-kinerja.destroy');
+
+    // ==================== DATA AKREDITASI ====================
+    Route::get('/data-akreditasi', [DataAkreditasiController::class, 'index'])
+        ->name('data-akreditasi');
+    Route::post('/data-akreditasi/store', [DataAkreditasiController::class, 'store'])
+        ->name('data-akreditasi.store');
+    Route::get('/data-akreditasi/{id}', [DataAkreditasiController::class, 'show'])
+        ->name('data-akreditasi.show');
+    Route::put('/data-akreditasi/update/{id}', [DataAkreditasiController::class, 'update'])
+        ->name('data-akreditasi.update');
+    Route::delete('/data-akreditasi/delete/{id}', [DataAkreditasiController::class, 'destroy'])
+        ->name('data-akreditasi.delete');
+    
+    Route::get('/early-warning-system', [EarlyWarningSystemAdminController::class, 'index'])
+        ->name('early-warning-system');
+    Route::get('/sub-unit/{unit}', [EarlyWarningSystemAdminController::class, 'getSubUnit'])
+        ->name('early-warning-system.sub-unit');
+    Route::post('/early-warning-system', [EarlyWarningSystemAdminController::class, 'store'])
+        ->name('early-warning-system.store');
+    Route::get('/early-warning-system/{id}/edit', [EarlyWarningSystemAdminController::class, 'edit'])
+        ->name('early-warning-system.edit');
+    Route::put('/early-warning-system/{id}', [EarlyWarningSystemAdminController::class, 'update'])
+        ->name('early-warning-system.update');
+    Route::delete('/early-warning-system/{id}', [EarlyWarningSystemAdminController::class, 'destroy'])
+        ->name('early-warning-system.destroy');
+
+    // ==================== PROFILE PRODI ====================
+    // Halaman utama
+    Route::get('/identitas-prodi', [ProfileProdiController::class, 'index'])
+        ->name('identitas-prodi');
+    // ==================== VMTS ====================
+    Route::post('/identitas-prodi/vmts', [ProfileProdiController::class, 'storeVmts'])
+        ->name('identitas-prodi.vmts.store');
+    Route::get('/identitas-prodi/vmts/{id}', [ProfileProdiController::class, 'showVmts'])
+        ->name('identitas-prodi.vmts.show');
+    Route::put('/identitas-prodi/vmts/{id}', [ProfileProdiController::class, 'updateVmts'])
+        ->name('identitas-prodi.vmts.update');
+    Route::delete('/identitas-prodi/vmts/{id}', [ProfileProdiController::class, 'destroyVmts'])
+        ->name('identitas-prodi.vmts.destroy');
+    // ==================== DTPS ====================
+    Route::put('/identitas-prodi/dtps', [ProfileProdiController::class, 'updateDtps'])
+        ->name('identitas-prodi.dtps.update');
+    // ==================== MAHASISWA ====================
+    Route::put('/identitas-prodi/mahasiswa', [ProfileProdiController::class, 'updateMahasiswa'])
+        ->name('identitas-prodi.mahasiswa.update');
+    // ==================== DOKUMEN ====================
+    Route::post('/identitas-prodi/dokumen', [ProfileProdiController::class, 'storeDocument'])
+        ->name('identitas-prodi.dokumen.store');
+    Route::get('/identitas-prodi/dokumen/{id}', [ProfileProdiController::class, 'showDocument'])
+        ->name('identitas-prodi.dokumen.show');
+    Route::get('/identitas-prodi/dokumen/{id}/edit', [ProfileProdiController::class, 'editDocument'])
+        ->name('identitas-prodi.dokumen.edit');
+    Route::put('/identitas-prodi/dokumen/{id}', [ProfileProdiController::class, 'updateDocument'])
+        ->name('identitas-prodi.dokumen.update');
+    Route::delete('/identitas-prodi/dokumen/{id}', [ProfileProdiController::class, 'destroyDocument'])
+        ->name('identitas-prodi.dokumen.destroy');
 });
 
 // profile pages

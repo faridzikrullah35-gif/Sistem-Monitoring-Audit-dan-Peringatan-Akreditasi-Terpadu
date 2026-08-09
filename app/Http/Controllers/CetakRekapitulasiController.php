@@ -9,13 +9,36 @@ use App\Models\FormTerpenuhi;
 use App\Models\AuditPeriksa;
 use App\Models\SettingScore;
 use App\Models\User;
+use App\Models\AksesPertanyaanProdi;
+use App\Models\AksesPertanyaanUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CetakRekapitulasiController extends Controller
 {
+    /**
+     * Helper: model akses sesuai role
+     */
+    private function getAksesModel()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? AksesPertanyaanUnit::class
+            : AksesPertanyaanProdi::class;
+    }
+
+    /**
+     * Helper: nama relasi di model terkait ke pertanyaan asli
+     */
+    private function getPertanyaanRelation()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+    }
+
     public function index()
     {
+        // Tampilkan semua tahun akademik yang aktif (atau sesuai kebutuhan)
         $tahunAkademikList = TahunAkademik::where('status', 'Aktif')
             ->orderBy('tahun_akademik', 'asc')
             ->orderBy('semester', 'asc')
@@ -26,10 +49,10 @@ class CetakRekapitulasiController extends Controller
 
     public function getData(Request $request)
     {
-        $userId = auth()->id();
-
+        $user = auth()->user();
+        $userId = $user->id;
         $tahunAkademikId = $request->query('tahun_akademik_id');
-        
+
         $defaultResponse = [
             'data' => [],
             'categories' => [],
@@ -42,34 +65,50 @@ class CetakRekapitulasiController extends Controller
             return response()->json($defaultResponse);
         }
 
-        // Ambil audit_periksa_id yang terhubung ke tahun akademik
-        $auditPeriksaIds = DB::table('audit_periksa as ap')
-            ->leftJoin('pertanyaan_ami_prodi as pap', 'ap.pertanyaan_ami_prodi_id', '=', 'pap.id')
-            ->leftJoin('pertanyaan_ami_unit as pau', 'ap.pertanyaan_ami_unit_id', '=', 'pau.id')
-            ->where(function($q) use ($tahunAkademikId) {
-                $q->where('pap.tahun_akademik_id', $tahunAkademikId)
-                    ->orWhere('pau.tahun_akademik_id', $tahunAkademikId);
-            })
-            ->where('ap.users_id', $userId)
-            ->pluck('ap.id')
+        // Model akses dan relasi sesuai role
+        $aksesModel = $this->getAksesModel();
+        $relasiPertanyaan = $this->getPertanyaanRelation();
+
+        // Ambil daftar ID pertanyaan yang diakses oleh user
+        $pertanyaanIds = $aksesModel::forUser($user)
+            ->pluck('pertanyaan_id')
+            ->unique()
             ->filter()
             ->values();
+
+        if ($pertanyaanIds->isEmpty()) {
+            return response()->json($defaultResponse);
+        }
+
+        // Ambil audit_periksa_id yang terhubung ke pertanyaan yang diakses dan tahun akademik
+        $auditPeriksaIds = AuditPeriksa::where('users_id', $userId)
+            ->whereHas($relasiPertanyaan, function ($query) use ($pertanyaanIds, $tahunAkademikId) {
+                $query->whereIn('id', $pertanyaanIds)
+                      ->where('tahun_akademik_id', $tahunAkademikId);
+            })
+            ->pluck('id')
+            ->filter()
+            ->values();
+
+        if ($auditPeriksaIds->isEmpty()) {
+            return response()->json($defaultResponse);
+        }
 
         // Kategori temuan dari setting_scores
         $kategoriTemuan = SettingScore::where('generate_ncr', 1)->get();
         $listKategoriTemuan = $kategoriTemuan->pluck('keterangan')->toArray();
-        
+
         $kategoriObservasi = SettingScore::where('generate_ncr', 0)
             ->where('keterangan', 'Observasi')
             ->first();
 
-        // Data temuan
+        // Data temuan (NCR)
         $temuan = AuditPtk::whereIn('audit_periksa_id', $auditPeriksaIds)
             ->where('users_id', $userId)
             ->whereIn('kategori_temuan', $listKategoriTemuan)
             ->get();
 
-        // Data observasi (gunakan FormObservasi sesuai model Anda)
+        // Data observasi
         $observasi = collect();
         if ($kategoriObservasi) {
             $observasi = FormObservasi::whereIn('audit_periksa_id', $auditPeriksaIds)
@@ -77,22 +116,14 @@ class CetakRekapitulasiController extends Controller
                 ->get();
         }
 
-        // Data terpenuhi (gunakan FormTerpenuhi sesuai model Anda)
+        // Data terpenuhi (dengan filter akses dan tahun akademik)
         $terpenuhi = FormTerpenuhi::with([
-            'pertanyaanAmiProdi',
-            'pertanyaanAmiUnit'
+            $relasiPertanyaan
         ])
         ->where('users_id', $userId)
-        ->where(function ($query) use ($tahunAkademikId) {
-
-            $query->whereHas('pertanyaanAmiProdi', function ($q) use ($tahunAkademikId) {
-                $q->where('tahun_akademik_id', $tahunAkademikId);
-            })
-
-            ->orWhereHas('pertanyaanAmiUnit', function ($q) use ($tahunAkademikId) {
-                $q->where('tahun_akademik_id', $tahunAkademikId);
-            });
-
+        ->whereHas($relasiPertanyaan, function ($query) use ($pertanyaanIds, $tahunAkademikId) {
+            $query->whereIn('id', $pertanyaanIds)
+                  ->where('tahun_akademik_id', $tahunAkademikId);
         })
         ->get();
 
@@ -100,14 +131,12 @@ class CetakRekapitulasiController extends Controller
         $items = [];
         foreach ($temuan as $t) {
             $ap = AuditPeriksa::find($t->audit_periksa_id);
-
             $items[] = [
                 'no_ncr' => $t->no_ncr ?? '-',
                 'tgl_audit' => $t->created_at ? $t->created_at->format('d F Y') : '-',
                 'bagian' => $ap ? ($ap->pertanyaan_ami_prodi_id ? 'Program Studi' : 'Unit Kerja') : '-',
                 'macam_temuan' => $t->kategori_temuan,
-                'uraian_temuan' => $t->deskripsi_uraian_temuan
-                    ?? ($ap->uraian_temuan ?? ''),
+                'uraian_temuan' => $t->deskripsi_uraian_temuan ?? ($ap->uraian_temuan ?? ''),
                 'tgl_target_perbaikan' => $t->tanggal_target_perbaikan_auditee
                     ? date('d F Y', strtotime($t->tanggal_target_perbaikan_auditee))
                     : '-',
@@ -137,23 +166,15 @@ class CetakRekapitulasiController extends Controller
         }
 
         foreach ($terpenuhi as $tp) {
+            $pertanyaan = $tp->{$relasiPertanyaan};
             $items[] = [
                 'no_ncr' => '-',
-                'tgl_audit' => $tp->created_at
-                    ? $tp->created_at->format('d F Y')
-                    : '-',
-
-                'bagian' => $tp->pertanyaanAmiProdi
-                    ? 'Program Studi'
-                    : 'Unit Kerja',
-
+                'tgl_audit' => $tp->created_at ? $tp->created_at->format('d F Y') : '-',
+                'bagian' => $pertanyaan instanceof \App\Models\PertanyaanAmiProdi ? 'Program Studi' : 'Unit Kerja',
                 'macam_temuan' => 'Terpenuhi',
-
                 'uraian_temuan' => $tp->rekomendasi ?? '',
-
                 'tgl_target_perbaikan' => '-',
                 'tgl_verifikasi' => '-',
-
                 'auditor' => User::find($tp->users_id)?->name ?? 'Auditor',
                 'status' => '-',
                 'keterangan' => '',
@@ -176,7 +197,7 @@ class CetakRekapitulasiController extends Controller
                 'color' => $warna[$kt->keterangan] ?? 'text-gray-600',
             ];
         }
-        
+
         if ($kategoriObservasi) {
             $categories[] = [
                 'label' => 'Observasi',

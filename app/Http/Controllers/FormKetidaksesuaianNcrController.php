@@ -11,12 +11,34 @@ use App\Models\SettingScore;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
 use App\Models\Auditiee;
+use App\Models\AksesPertanyaanProdi;
+use App\Models\AksesPertanyaanUnit;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class FormKetidaksesuaianNcrController extends Controller
 {
+    /**
+     * Helper: model akses sesuai role
+     */
+    private function getAksesModel()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? AksesPertanyaanUnit::class
+            : AksesPertanyaanProdi::class;
+    }
+
+    /**
+     * Helper: nama relasi di AuditPtk ke pertanyaan asli
+     */
+    private function getPertanyaanRelation()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+    }
+
     /**
      * Display listing
      */
@@ -25,61 +47,70 @@ class FormKetidaksesuaianNcrController extends Controller
         $user = auth()->user();
         $role = $user->role;
 
-        $pertanyaanAmiModel = match($role) {
-            'unit_kerja' => PertanyaanAmiUnit::class,
-            default      => PertanyaanAmiProdi::class,
-        };
+        $aksesModel = $this->getAksesModel();
+        $relasiPertanyaan = $this->getPertanyaanRelation(); // 'pertanyaanAmiProdi' atau 'pertanyaanAmiUnit'
 
-        $relasiPertanyaan = match($role) {
-            'unit_kerja' => 'pertanyaanAmiUnit',
-            default      => 'pertanyaanAmiProdi',
-        };
+        /*
+        |--------------------------------------------------------------------------
+        | DATA TAHUN AKADEMIK (dari akses)
+        |--------------------------------------------------------------------------
+        */
+        $tahunAkademikIds = $aksesModel::forUser($user)
+            ->with('pertanyaan.tahunAkademik')
+            ->get()
+            ->pluck('pertanyaan.tahun_akademik_id')
+            ->unique()
+            ->filter();
 
-        // Ambil semua indikator dari pertanyaan_ami_prodi
-        $indikatorIds = $pertanyaanAmiModel::pluck('isi_indikator_id');
+        $tahunAkademik = TahunAkademik::whereIn('id', $tahunAkademikIds)
+            ->orderBy('tahun_akademik', 'desc')
+            ->orderBy('semester', 'desc')
+            ->get();
 
-        // Query matrix
-        $matrixs = Matrix::with([
-            'kriteriaAudit.standar',
-            'isiIndikator.' . $relasiPertanyaan
-        ])
-        ->whereHas('isiIndikator', function ($q) use ($indikatorIds) {
-            $q->whereIn('id', $indikatorIds);
-        })
-        ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | DAFTAR PERTANYAAN YANG DIAKSES (untuk matriks & kriteria)
+        |--------------------------------------------------------------------------
+        */
+        $aksesList = $aksesModel::forUser($user)
+            ->with('pertanyaan.isiIndikator.matrix.kriteriaAudit.standar')
+            ->get();
 
-        // Kriterialist untuk dropdown
+        $pertanyaanAmi = $aksesList->pluck('pertanyaan')->filter()->unique('id')->values();
+
+        // PERBAIKAN: muat relasi indikator dengan pertanyaan sesuai role
+        $matrixs = $pertanyaanAmi
+            ->pluck('isiIndikator.matrix')
+            ->filter()
+            ->unique('id')
+            ->values()
+            ->map(function ($matrix) use ($relasiPertanyaan) {
+                // Load isiIndikator beserta relasi pertanyaan (prodi atau unit)
+                $matrix->load(['isiIndikator.' . $relasiPertanyaan]);
+                return $matrix;
+            });
+
         $kriteriaList = $matrixs
             ->pluck('kriteriaAudit.standar')
             ->filter()
             ->unique('id')
             ->values();
 
-        // Ambil semua tahun_akademik_id yang unique dari tabel pertanyaan_ami_prodi
-        $tahunAkademik = TahunAkademik::whereIn(
-            'id',
-            $pertanyaanAmiModel::select('tahun_akademik_id')
-                ->whereNotNull('tahun_akademik_id')
-        )
-        ->orderBy('tahun_akademik', 'desc')
-        ->orderBy('semester', 'desc')
-        ->get();
-
-        // ========== QUERY AUDIT PTK DENGAN FILTER ==========
+        /*
+        |--------------------------------------------------------------------------
+        | QUERY NCR (AUDIT PTK) DENGAN FILTER
+        |--------------------------------------------------------------------------
+        */
         $query = AuditPtk::with([
             $relasiPertanyaan . '.indikator',
             $relasiPertanyaan . '.tahunAkademik',
             'auditPeriksa'
         ])
-        ->where('users_id', auth()->id());;
+        ->where('users_id', $user->id);
 
-        // Filter berdasarkan tahun akademik jika ada
         if ($request->filled('tahun_akademik_id')) {
-            $query->whereHas($relasiPertanyaan, function($q) use ($request) {
-                $q->where(
-                    'tahun_akademik_id',
-                    $request->tahun_akademik_id
-                );
+            $query->whereHas($relasiPertanyaan, function ($q) use ($request) {
+                $q->where('tahun_akademik_id', $request->tahun_akademik_id);
             });
         }
 
@@ -87,17 +118,15 @@ class FormKetidaksesuaianNcrController extends Controller
 
         $kategoriTemuan = SettingScore::where('generate_ncr', 1)->get();
 
-        // Debug: cek apakah $tahunAkademik ada datanya
-        // dd($tahunAkademik); // Uncomment untuk cek
-
         return view('pages.form-ketidaksesuaian-ncr', [
-            'title' => 'Form Ketidaksesuaian NCR | SIMANTAP',
-            'dataNcr' => [],
-            'kriteriaList' => $kriteriaList,
-            'matrixs' => $matrixs,
-            'auditPtk' => $auditPtk,
-            'tahunAkademik' => $tahunAkademik,
+            'title'          => 'Form Ketidaksesuaian NCR | SIMANTAP',
+            'dataNcr'        => [],
+            'kriteriaList'   => $kriteriaList,
+            'matrixs'        => $matrixs,
+            'auditPtk'       => $auditPtk,
+            'tahunAkademik'  => $tahunAkademik,
             'kategoriTemuan' => $kategoriTemuan,
+            'relasiPertanyaan' => $relasiPertanyaan,
         ]);
     }
 
@@ -263,26 +292,68 @@ class FormKetidaksesuaianNcrController extends Controller
     }
 
     /**
-     * Store new data
+     * Store new NCR
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'pertanyaan_ami_prodi_id' => 'required|exists:pertanyaan_ami_prodi,id',
-            'no_ncr' => 'required',
-            'klausul_dokumen' => 'required',
-            'deskripsi_uraian_temuan' => 'required',
-            'kategori_temuan' => 'required',
-            'status_ncr' => 'required',
-        ]);
+        $user = auth()->user();
+        $role = $user->role;
 
-        $pertanyaanAmiProdi = PertanyaanAmiProdi::find($request->pertanyaan_ami_prodi_id);
-        
+        // Validasi dinamis berdasarkan role
+        $rules = [
+            'no_ncr'                  => 'required',
+            'klausul_dokumen'         => 'required',
+            'deskripsi_uraian_temuan' => 'required',
+            'kategori_temuan'         => 'required',
+            'status_ncr'              => 'required',
+            'audit_periksa_id'        => 'nullable|exists:audit_periksa,id',
+        ];
+
+        if ($role === 'unit_kerja') {
+            $rules['pertanyaan_ami_unit_id'] = 'required|exists:pertanyaan_ami_unit,id';
+        } else {
+            $rules['pertanyaan_ami_prodi_id'] = 'required|exists:pertanyaan_ami_prodi,id';
+        }
+
+        $request->validate($rules);
+
+        // Ambil pertanyaan asli berdasarkan role
+        if ($role === 'unit_kerja') {
+            $pertanyaan = PertanyaanAmiUnit::find($request->pertanyaan_ami_unit_id);
+            $foreignKey = 'pertanyaan_ami_unit_id';
+        } else {
+            $pertanyaan = PertanyaanAmiProdi::find($request->pertanyaan_ami_prodi_id);
+            $foreignKey = 'pertanyaan_ami_prodi_id';
+        }
+
+        // Cek apakah user punya akses ke pertanyaan ini (via tabel akses)
+        $aksesModel = $this->getAksesModel();
+        $hasAccess = $aksesModel::forUser($user)
+            ->where('pertanyaan_id', $pertanyaan->id)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk pertanyaan ini.'
+            ], 403);
+        }
+
+        // Siapkan data
         $data = $request->all();
-        $data['isi_indikator_id'] = $pertanyaanAmiProdi->isi_indikator_id;
+        $data['users_id'] = $user->id;
+        $data['isi_indikator_id'] = $pertanyaan->isi_indikator_id;
         $data['audit_periksa_id'] = $request->audit_periksa_id ?? null;
-        $data['users_id'] = auth()->user()->id;
-        
+
+        // Hanya simpan foreign key yang sesuai
+        if ($role === 'unit_kerja') {
+            $data['pertanyaan_ami_unit_id'] = $pertanyaan->id;
+            $data['pertanyaan_ami_prodi_id'] = null;
+        } else {
+            $data['pertanyaan_ami_prodi_id'] = $pertanyaan->id;
+            $data['pertanyaan_ami_unit_id'] = null;
+        }
+
         AuditPtk::create($data);
 
         return response()->json([
@@ -292,54 +363,100 @@ class FormKetidaksesuaianNcrController extends Controller
     }
 
     /**
-     * Edit data (AJAX / modal)
+     * Edit NCR (AJAX / modal)
      */
     public function edit($id)
     {
+        $relasi = $this->getPertanyaanRelation();
+
         $data = AuditPtk::with([
-            'pertanyaanAmiProdi.indikator.matrix.kriteriaAudit.standar'
+            $relasi . '.indikator.matrix.kriteriaAudit.standar'
         ])->findOrFail($id);
-        
-        // Cari kriteria_id dan matrixs_id dari relasi
-        $pertanyaan = $data->pertanyaanAmiProdi;
+
+        // Pastikan NCR milik user yang login
+        if ($data->users_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Ambil informasi tambahan untuk tampilan modal
+        $pertanyaan = $data->{$relasi};
         $isiIndikator = $pertanyaan->indikator ?? null;
         $matrix = $isiIndikator->matrix ?? null;
         $kriteriaAudit = $matrix->kriteriaAudit ?? null;
         $standar = $kriteriaAudit->standar ?? null;
-        
-        // Tambahkan ke response
+
         $data->kriteria_id = $standar->id ?? null;
         $data->matrixs_id = $matrix->id ?? null;
         $data->elemen_nama = $matrix->elemen ?? null;
         $data->kriteria_nama = $standar->nama ?? null;
 
-        return response()->json([
-            'data' => $data
-        ]);
+        return response()->json(['data' => $data]);
     }
 
     /**
-     * Update data
+     * Update NCR
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'pertanyaan_ami_prodi_id' => 'required|exists:pertanyaan_ami_prodi,id',
-            'no_ncr' => 'required', // required tapi tidak harus unique
-            'klausul_dokumen' => 'required',
-            'deskripsi_uraian_temuan' => 'required',
-            'kategori_temuan' => 'required',
-            'status_ncr' => 'required',
-        ]);
+        $user = auth()->user();
+        $role = $user->role;
 
-        $data = AuditPtk::findOrFail($id);
-        
-        $input = $request->all();
-        $input['audit_periksa_id'] = $request->audit_periksa_id ?? $data->audit_periksa_id;
-        
-        // $input['isi_indikator_id'] = $request->isi_indikator_id ?? $data->isi_indikator_id;
-        
-        $data->update($input);
+        $auditPtk = AuditPtk::where('users_id', $user->id)->findOrFail($id);
+
+        // Validasi dinamis
+        $rules = [
+            'no_ncr'                  => 'required',
+            'klausul_dokumen'         => 'required',
+            'deskripsi_uraian_temuan' => 'required',
+            'kategori_temuan'         => 'required',
+            'status_ncr'              => 'required',
+            'audit_periksa_id'        => 'nullable|exists:audit_periksa,id',
+        ];
+
+        if ($role === 'unit_kerja') {
+            $rules['pertanyaan_ami_unit_id'] = 'required|exists:pertanyaan_ami_unit,id';
+        } else {
+            $rules['pertanyaan_ami_prodi_id'] = 'required|exists:pertanyaan_ami_prodi,id';
+        }
+
+        $request->validate($rules);
+
+        // Ambil pertanyaan asli
+        if ($role === 'unit_kerja') {
+            $pertanyaan = PertanyaanAmiUnit::find($request->pertanyaan_ami_unit_id);
+            $foreignKey = 'pertanyaan_ami_unit_id';
+        } else {
+            $pertanyaan = PertanyaanAmiProdi::find($request->pertanyaan_ami_prodi_id);
+            $foreignKey = 'pertanyaan_ami_prodi_id';
+        }
+
+        // Cek akses
+        $aksesModel = $this->getAksesModel();
+        $hasAccess = $aksesModel::forUser($user)
+            ->where('pertanyaan_id', $pertanyaan->id)
+            ->exists();
+
+        if (!$hasAccess) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk pertanyaan ini.'
+            ], 403);
+        }
+
+        // Update data
+        $data = $request->all();
+        $data['isi_indikator_id'] = $pertanyaan->isi_indikator_id;
+        $data['audit_periksa_id'] = $request->audit_periksa_id ?? $auditPtk->audit_periksa_id;
+
+        if ($role === 'unit_kerja') {
+            $data['pertanyaan_ami_unit_id'] = $pertanyaan->id;
+            $data['pertanyaan_ami_prodi_id'] = null;
+        } else {
+            $data['pertanyaan_ami_prodi_id'] = $pertanyaan->id;
+            $data['pertanyaan_ami_unit_id'] = null;
+        }
+
+        $auditPtk->update($data);
 
         return response()->json([
             'success' => true,
@@ -348,12 +465,11 @@ class FormKetidaksesuaianNcrController extends Controller
     }
 
     /**
-     * Delete data
+     * Delete NCR
      */
     public function destroy($id)
     {
-        $data = AuditPtk::findOrFail($id);
-
+        $data = AuditPtk::where('users_id', auth()->id())->findOrFail($id);
         $data->delete();
 
         return response()->json([

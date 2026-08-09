@@ -8,18 +8,57 @@ use Illuminate\Http\Request;
 
 class AuditeeObservasiController extends Controller
 {
+    /**
+     * Helper: nama relasi di FormObservasi ke pertanyaan asli
+     */
+    private function getPertanyaanRelation()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
+        $relasiAmi = $this->getPertanyaanRelation();
 
-        $amiModel = $user->role === 'unit_kerja'
-            ? \App\Models\PertanyaanAmiUnit::class
-            : \App\Models\PertanyaanAmiProdi::class;
+        /*
+        |--------------------------------------------------------------------------
+        | DAPATKAN TAHUN AKADEMIK YANG ADA (dari data observasi)
+        |--------------------------------------------------------------------------
+        */
+        $observasiQuery = FormObservasi::whereHas('user', function ($q) use ($user) {
+            $q->where('unit', $user->unit)
+              ->where('sub_unit', $user->sub_unit);
+        })
+        ->whereHas($relasiAmi, function ($q) {
+            $q->whereNotNull('tahun_akademik_id');
+        });
 
-        $relasiAmi = $user->role === 'unit_kerja'
-            ? 'pertanyaanAmiUnit'
-            : 'pertanyaanAmiProdi';
+        if ($request->filled('tahun_akademik_id')) {
+            $observasiQuery->whereHas($relasiAmi, function ($q) use ($request) {
+                $q->where('tahun_akademik_id', $request->tahun_akademik_id);
+            });
+        }
 
+        // Ambil data lalu pluck tahun dari relasi (hindari dot notation di query builder)
+        $tahunAkademikIds = $observasiQuery->with($relasiAmi)
+            ->get()
+            ->pluck($relasiAmi . '.tahun_akademik_id')
+            ->unique()
+            ->filter()
+            ->values();
+
+        $tahunAkademiks = TahunAkademik::whereIn('id', $tahunAkademikIds)
+            ->orderBy('tahun_akademik', 'desc')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUERY OBSERVASI (dengan filter dan paginasi)
+        |--------------------------------------------------------------------------
+        */
         $query = FormObservasi::with([
             $relasiAmi . '.isiIndikator',
             $relasiAmi . '.tahunAkademik',
@@ -40,19 +79,9 @@ class AuditeeObservasiController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $tahunAkademiks = $amiModel::select('tahun_akademik_id')
-            ->distinct()
-            ->pluck('tahun_akademik_id');
-
-        $tahunAkademiks = TahunAkademik::whereIn('id', $tahunAkademiks)
-            ->orderBy('tahun_akademik', 'desc')
-            ->get();
-
+        // AJAX untuk table refresh
         if ($request->ajax()) {
-            return view(
-                'components.auditee-observasi.observation-table',
-                compact('observations')
-            )->render();
+            return view('components.auditee-observasi.observation-table', compact('observations'))->render();
         }
 
         return view('pages.auditee-observasi', compact(
@@ -63,21 +92,12 @@ class AuditeeObservasiController extends Controller
 
     /**
      * Print form observasi untuk auditee berdasarkan filter tahun akademik
-    */
+     */
     public function print(Request $request)
     {
         $user = auth()->user();
+        $relasiAmi = $this->getPertanyaanRelation();
 
-        // Tentukan model dan relasi sesuai role
-        $amiModel = $user->role === 'unit_kerja'
-            ? \App\Models\PertanyaanAmiUnit::class
-            : \App\Models\PertanyaanAmiProdi::class;
-
-        $relasiAmi = $user->role === 'unit_kerja'
-            ? 'pertanyaanAmiUnit'
-            : 'pertanyaanAmiProdi';
-
-        // Query data observasi milik auditee (sama dengan di index)
         $query = FormObservasi::with([
             $relasiAmi . '.isiIndikator',
             $relasiAmi . '.tahunAkademik',
@@ -85,10 +105,9 @@ class AuditeeObservasiController extends Controller
         ])
         ->whereHas('user', function ($q) use ($user) {
             $q->where('unit', $user->unit)
-            ->where('sub_unit', $user->sub_unit);
+              ->where('sub_unit', $user->sub_unit);
         });
 
-        // Filter tahun jika ada
         $tahunAkademikId = $request->tahun_akademik_id;
         if ($tahunAkademikId) {
             $query->whereHas($relasiAmi, function ($q) use ($tahunAkademikId) {
@@ -104,11 +123,10 @@ class AuditeeObservasiController extends Controller
             $tahunAkademik = TahunAkademik::find($tahunAkademikId);
         } elseif ($observasiItems->isNotEmpty()) {
             $first = $observasiItems->first();
-            $tahunId = $first->{$relasiAmi}->tahun_akademik_id ?? null;
+            $tahunId = optional($first->{$relasiAmi})->tahun_akademik_id;
             $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
         }
 
         return view('auditee.observasi.print', compact('observasiItems', 'tahunAkademik'));
     }
-
 }

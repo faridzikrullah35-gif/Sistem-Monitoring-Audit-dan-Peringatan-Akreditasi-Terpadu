@@ -25,6 +25,7 @@
             <x-pertanyaan-ami-unit.filter-bar 
                 :kriteria="$kriteria"
                 :tahunAkademik="$tahunAkademik"
+                :filterAksesOptions="$filterAksesOptions ?? []"
             />
 
             <!-- Divider -->
@@ -36,7 +37,8 @@
                 class="p-5 lg:p-6"
             >
                 <x-pertanyaan-ami-unit.question-list 
-                    :dataPertanyaan="$dataPertanyaan" 
+                    :dataPertanyaan="$dataPertanyaan"
+                    :indikators="$indikators"
                 />
             </div>
             
@@ -47,6 +49,8 @@
     <x-pertanyaan-ami-unit.form-modal 
         :kriteria="$kriteria"
         :tahunAkademik="$tahunAkademik"
+        :roleData="$roleData"
+        :indikators="$indikators"
     />
 
 @endsection

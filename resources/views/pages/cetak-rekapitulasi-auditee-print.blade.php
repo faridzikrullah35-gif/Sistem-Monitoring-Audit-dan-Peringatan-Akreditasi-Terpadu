@@ -4,21 +4,35 @@
     <meta charset="UTF-8">
     <title>DAFTAR REKAPITULASI KETIDAKSESUAIAN DAN PERMINTAAN TINDAKAN PERBAIKAN (AUDITEE)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Times New Roman', Times, serif;
             color: #000;
             background: #fff;
             padding: 10mm;
         }
-        .page { width: 100%; margin: 0 auto; }
+
+        .page {
+            width: 100%;
+            margin: 0 auto;
+        }
 
         .header-table {
             width: 95%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        .header-table th, .header-table td {
+        .header-table th,
+        .header-table td {
             border: 1px solid #000;
             padding: 8px;
             font-size: 14px;
@@ -66,7 +80,9 @@
             vertical-align: top;
             line-height: 1.4;
         }
-        .center { text-align: center !important; }
+        .center {
+            text-align: center !important;
+        }
 
         .label-temuan {
             font-weight: bold;
@@ -75,11 +91,11 @@
             margin-bottom: 5px;
         }
 
-        /* ========== PERBAIKAN RICH TEXT ========== */
+        /* ========== RICH TEXT ========== */
         .content-rich {
             margin-top: 3px;
         }
-        .content-rich ol, 
+        .content-rich ol,
         .content-rich ul {
             padding-left: 20px;
             margin: 5px 0;
@@ -93,16 +109,18 @@
             margin: 5px 0;
             line-height: 1.5;
         }
-        .content-rich i, 
+        .content-rich i,
         .content-rich em {
             font-style: italic;
         }
-        .content-rich b, 
+        .content-rich b,
         .content-rich strong {
             font-weight: bold;
         }
 
-        .rekap-section { margin-top: 25px; }
+        .rekap-section {
+            margin-top: 25px;
+        }
         .rekap-title {
             font-size: 15px;
             font-weight: bold;
@@ -118,142 +136,162 @@
             font-size: 14px;
         }
 
-        .no-print { margin-bottom: 15px; display: flex; gap: 8px; }
+        .no-print {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 8px;
+        }
         .no-print button {
             padding: 8px 16px;
-            font-family: Arial, sans-serif;
             font-size: 13px;
             cursor: pointer;
             background: #2563eb;
             color: #fff;
             border: none;
             border-radius: 4px;
+            font-family: inherit;
         }
-        .no-print button.btn-back { background: #6b7280; }
+        .no-print button.btn-back {
+            background: #6b7280;
+        }
 
         @media print {
-            @page { size: landscape; margin: 10mm; }
-            body { padding: 0; }
-            .no-print { display: none !important; }
-            .main-table, .header-table, .rekap-table { width: 100% !important; }
-            .rekap-table { width: 25% !important; }
+            @page {
+                size: landscape;
+                margin: 10mm;
+            }
+            body {
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .main-table,
+            .header-table,
+            .rekap-table {
+                width: 100% !important;
+            }
+            .rekap-table {
+                width: 25% !important;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="page">
+    <div class="page">
 
-    <div class="no-print">
-        <button onclick="window.print()">Print Laporan</button>
-    </div>
+        <div class="no-print">
+            <button onclick="window.print()">🖨 Print Laporan</button>
+            <button class="btn-back" onclick="window.close()">✕ Tutup</button>
+        </div>
 
-    <table class="header-table">
-        <tr>
-            <th rowspan="3" class="logo-cell">
-                <img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75">
-            </th>
-            <td class="tg-0pky" style="width: 65%;">FORMULIR</td>
-            <td class="tg-0pky" style="width: 10%;">No Dokumen</td>
-            <td class="tg-0pky" style="width: 1%; text-align:center;">:</td>
-            <td class="tg-0pky" style="width: 24%;">{{ $data['no_dokumen'] ?? 'UM.BJM-LPM-FORM.DR-AMI-00' }}</td>
-        </tr>
-        <tr>
-            <td class="title-cell" rowspan="2">
-                DAFTAR REKAPITULASI KETIDAKSESUAIAN DAN PERMINTAAN TINDAKAN PERBAIKAN
-            </td>
-            <td class="tg-0pky">Tanggal Terbit</td>
-            <td class="tg-0pky" style="text-align:center;">:</td>
-            <td class="tg-0pky">{{ $data['tanggal_terbit'] ?? '' }}</td>
-        </tr>
-        <tr>
-            <td class="tg-0pky">No. Revisi</td>
-            <td class="tg-0pky" style="text-align:center;">:</td>
-            <td class="tg-0pky">{{ $data['no_revisi'] ?? '00' }}</td>
-        </tr>
-    </table>
-
-    <div class="log-status">
-        <span style="display:block; margin-bottom: 5px;">LOG STATUS</span>
-        PERIODE : {{ $tahun->nama_tahun_akademik ?? ($tahun->tahun_akademik ?? '2020/2021 Genap') }}
-    </div>
-
-    <table class="main-table">
-        <thead>
+        <table class="header-table">
             <tr>
-                <th style="width: 3%;">No</th>
-                <th style="width: 5%;">No. NCR</th>
-                <th style="width: 10%;">Tgl. Audit</th>
-                <th style="width: 15%;">Bagian</th>
-                <th style="width: 35%;">Macam Temuan</th>
-                <th style="width: 10%;">Tgl. Target Perbaikan</th>
-                <th style="width: 10%;">Tgl. Verifikasi</th>
-                <th style="width: 12%;">Auditor</th>
-                <th style="width: 5%;">Status Open/ Close</th>
-                <th style="width: 15%;">Keterangan</th>
+                <th rowspan="3" class="logo-cell">
+                    <img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75">
+                </th>
+                <td class="tg-0pky" style="width: 65%;">FORMULIR</td>
+                <td class="tg-0pky" style="width: 10%;">No Dokumen</td>
+                <td class="tg-0pky" style="width: 1%; text-align:center;">:</td>
+                <td class="tg-0pky" style="width: 24%;">{{ $data['no_dokumen'] ?? 'UM.BJM-LPM-FORM.DR-AMI-00' }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @forelse($data['data'] as $index => $item)
-            @php
-                $kategori = strtoupper($item['macam_temuan'] ?? '-');
-            @endphp
             <tr>
-                <td class="center">{{ $index + 1 }}</td>
-                <td class="center">{{ $item['no_ncr'] ?? '-' }}</td>
-                <td class="center">{{ $item['tgl_audit'] ?? '-' }}</td>
-                <td>{{ $item['bagian'] ?? '-' }}</td>
-
-                {{-- ========== KOLOM MACAM TEMUAN DIPERBAIKI ========== --}}
-                <td>
-                    <span class="label-temuan"><u>{{ $kategori }}</u></span>
-                    <div class="content-rich">
-                        {!! $item['uraian_temuan'] ?? '' !!}
-                    </div>
+                <td class="title-cell" rowspan="2">
+                    DAFTAR REKAPITULASI KETIDAKSESUAIAN DAN PERMINTAAN TINDAKAN PERBAIKAN
                 </td>
-
-                <td class="center">{{ $item['tgl_target_perbaikan'] ?? '-' }}</td>
-                <td class="center">{{ $item['tgl_verifikasi'] ?? '-' }}</td>
-                <td>
-                    {!! $item['auditor'] ?? 'Auditor' !!}
-                </td>
-                <td class="center">
-                    <b>{{ $item['status'] ?? '-' }}</b>
-                </td>
-                <td>
-                    {{ $item['keterangan'] ?? '' }}
-                </td>
+                <td class="tg-0pky">Tanggal Terbit</td>
+                <td class="tg-0pky" style="text-align:center;">:</td>
+                <td class="tg-0pky">{{ $data['tanggal_terbit'] ?? '' }}</td>
             </tr>
-            @empty
             <tr>
-                <td colspan="10" class="center" style="padding:20px; font-style:italic;">
-                    Tidak ada data temuan untuk unit/prodi Anda.
-                </td>
+                <td class="tg-0pky">No. Revisi</td>
+                <td class="tg-0pky" style="text-align:center;">:</td>
+                <td class="tg-0pky">{{ $data['no_revisi'] ?? '00' }}</td>
             </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="rekap-section">
-        <div class="rekap-title">Rekap Mayor Minor Observasi</div>
-        <table class="rekap-table">
-            @foreach($data['categories'] as $cat)
-            <tr>
-                <td>Total {{ $cat['label'] }}</td>
-                <td style="text-align: center; width: 30px;">:</td>
-                <td class="center"><b>{{ $cat['total'] }}</b></td>
-            </tr>
-            @endforeach
         </table>
+
+        <div class="log-status">
+            <span style="display:block; margin-bottom: 5px;">LOG STATUS</span>
+            PERIODE : {{ $tahun->nama_tahun_akademik ?? ($tahun->tahun_akademik ?? '2020/2021 Genap') }}
+        </div>
+
+        <table class="main-table">
+            <thead>
+                <tr>
+                    <th style="width: 3%;">No</th>
+                    <th style="width: 5%;">No. NCR</th>
+                    <th style="width: 10%;">Tgl. Audit</th>
+                    <th style="width: 15%;">Bagian</th>
+                    <th style="width: 35%;">Macam Temuan</th>
+                    <th style="width: 10%;">Tgl. Target Perbaikan</th>
+                    <th style="width: 10%;">Tgl. Verifikasi</th>
+                    <th style="width: 12%;">Auditor</th>
+                    <th style="width: 5%;">Status Open/ Close</th>
+                    <th style="width: 15%;">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($data['data'] as $index => $item)
+                @php
+                $kategori = strtoupper($item['macam_temuan'] ?? '-');
+                @endphp
+                <tr>
+                    <td class="center">{{ $index + 1 }}</td>
+                    <td class="center">{{ $item['no_ncr'] ?? '-' }}</td>
+                    <td class="center">{{ $item['tgl_audit'] ?? '-' }}</td>
+                    <td>{{ $item['bagian'] ?? '-' }}</td>
+
+                    {{-- ========== KOLOM MACAM TEMUAN ========== --}}
+                    <td>
+                        <span class="label-temuan"><u>{{ $kategori }}</u></span>
+                        <div class="content-rich">
+                            {!! $item['uraian_temuan'] ?? '' !!}
+                        </div>
+                    </td>
+
+                    <td class="center">{{ $item['tgl_target_perbaikan'] ?? '-' }}</td>
+                    <td class="center">{{ $item['tgl_verifikasi'] ?? '-' }}</td>
+                    <td>
+                        {!! $item['auditor'] ?? 'Auditor' !!}
+                    </td>
+                    <td class="center">
+                        <b>{{ $item['status'] ?? '-' }}</b>
+                    </td>
+                    <td>
+                        {{ $item['keterangan'] ?? '' }}
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="10" class="center" style="padding:20px; font-style:italic;">
+                        Tidak ada data temuan untuk unit/prodi Anda.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="rekap-section">
+            <div class="rekap-title">Rekap Mayor Minor Observasi</div>
+            <table class="rekap-table">
+                @foreach($data['categories'] as $cat)
+                <tr>
+                    <td>Total {{ $cat['label'] }}</td>
+                    <td style="text-align: center; width: 30px;">:</td>
+                    <td class="center"><b>{{ $cat['total'] }}</b></td>
+                </tr>
+                @endforeach
+            </table>
+        </div>
+
     </div>
 
-</div>
-
-<script>
-    window.addEventListener('load', function () {
-        window.print();
-    });
-</script>
+    <script>
+        window.addEventListener('load', function() {
+            window.print();
+        });
+    </script>
 
 </body>
 </html>

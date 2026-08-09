@@ -7,6 +7,15 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <style type="text/css">
+        /* ===== FONT GLOBAL ===== */
+        * {
+            font-family: 'Aptos', sans-serif !important;
+        }
+
+        body {
+            font-family: 'Aptos', sans-serif;
+        }
+
         .tg {
             border-collapse: collapse;
             border-spacing: 0;
@@ -14,7 +23,7 @@
         }
 
         .tg td {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Aptos', sans-serif;
             font-size: 14px;
             padding: 10px 5px;
             border-style: solid;
@@ -25,7 +34,7 @@
         }
 
         .tg th {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Aptos', sans-serif;
             font-size: 14px;
             font-weight: normal;
             padding: 10px 5px;
@@ -46,6 +55,10 @@
         .tg .tg-0lax {
             text-align: left;
             vertical-align: top;
+        }
+
+        .rich-content {
+            font-family: 'Aptos', sans-serif;
         }
 
         .rich-content ul {
@@ -75,6 +88,8 @@
         .rich-content em {
             font-style: italic;
         }
+
+        /* Heading dan elemen lain juga akan memakai Aptos karena global */
     </style>
 
     <title>LAPORAN TERPENUHI</title>
@@ -156,15 +171,11 @@
                         <center>No</center>
                     </td>
 
-                    <td class="tg-0pky" style="width:40%;">
+                    <td class="tg-0pky" style="width:45%;">
                         <center>Indikator</center>
                     </td>
 
-                    <td class="tg-0pky" style="width:20%;">
-                        <center>Discussed With</center>
-                    </td>
-
-                    <td class="tg-0pky" style="width:35%;">
+                    <td class="tg-0pky" style="width:50%;">
                         <center>Recommendations and Improvement Suggestions</center>
                     </td>
                 </tr>
@@ -193,19 +204,6 @@
                         <td class="tg-0lax"
                             style="text-align:left;vertical-align:top;padding:3;">
 
-                            @if($item->discussed_with)
-                                <div class="rich-content">
-                                    {!! $item->discussed_with !!}
-                                </div>
-                            @else
-                                -
-                            @endif
-
-                        </td>
-
-                        <td class="tg-0lax"
-                            style="text-align:left;vertical-align:top;padding:3;font-family:'Times New Roman', Times, serif;">
-
                             @if($item->rekomendasi)
                                 <div class="rich-content">
                                     {!! $item->rekomendasi !!}
@@ -221,7 +219,7 @@
                 @empty
 
                     <tr>
-                        <td colspan="4"
+                        <td colspan="3"
                             class="tg-0lax"
                             style="text-align:center;padding:20px;">
                             Tidak ada data terpenuhi untuk tahun akademik yang dipilih.

@@ -18,13 +18,7 @@ class AuditeeDaftarPeriksaController extends Controller
     {
         $user = auth()->user();
 
-        $tahunAkademiks = TahunAkademik::whereIn(
-            'id',
-            PertanyaanAmiProdi::select('tahun_akademik_id')->distinct()
-        )
-        ->orderBy('tahun_akademik', 'desc')
-        ->get();
-
+        // Ambil data audit untuk unit/sub_unit auditee
         $daftarPeriksas = AuditPeriksa::with([
             'pertanyaanAmiProdi.indikator.matrix.kriteriaAudit.standar',
             'pertanyaanAmiProdi.tahunAkademik',
@@ -35,10 +29,21 @@ class AuditeeDaftarPeriksaController extends Controller
         ])
         ->whereHas('user', function ($q) use ($user) {
             $q->where('unit', $user->unit)
-            ->where('sub_unit', $user->sub_unit);
+              ->where('sub_unit', $user->sub_unit);
         })
         ->orderBy('created_at', 'asc')
         ->get();
+
+        // Ambil tahun akademik unik dari data audit yang ada
+        $tahunAkademikIds = collect()
+            ->merge($daftarPeriksas->pluck('pertanyaanAmiProdi.tahun_akademik_id'))
+            ->merge($daftarPeriksas->pluck('pertanyaanAmiUnit.tahun_akademik_id'))
+            ->unique()
+            ->filter();
+
+        $tahunAkademiks = TahunAkademik::whereIn('id', $tahunAkademikIds)
+            ->orderBy('tahun_akademik', 'desc')
+            ->get();
 
         return view('pages.auditee-daftar-periksa', compact(
             'tahunAkademiks',
@@ -62,7 +67,7 @@ class AuditeeDaftarPeriksaController extends Controller
         ])
         ->whereHas('user', function ($q) use ($user) {
             $q->where('unit', $user->unit)
-            ->where('sub_unit', $user->sub_unit);
+              ->where('sub_unit', $user->sub_unit);
         })
         ->when($tahunAkademikId, function ($query) use ($tahunAkademikId) {
             $query->where(function ($q) use ($tahunAkademikId) {
@@ -87,7 +92,7 @@ class AuditeeDaftarPeriksaController extends Controller
         // =======================
         $auditees = Auditiee::whereHas('user', function ($q) use ($user) {
             $q->where('unit', $user->unit)
-            ->where('sub_unit', $user->sub_unit);
+              ->where('sub_unit', $user->sub_unit);
         })->get();
 
         // =======================
@@ -128,7 +133,7 @@ class AuditeeDaftarPeriksaController extends Controller
         $tanggal_audit = null;
 
         if ($setting) {
-            $tanggal_audit = $setting?->tgl_audit
+            $tanggal_audit = $setting->tgl_audit
                 ? Carbon::parse($setting->tgl_audit)->translatedFormat('d F Y')
                 : null;
             $isiAkses = IsiAksesAuditor::with('auditor')
@@ -143,45 +148,45 @@ class AuditeeDaftarPeriksaController extends Controller
                 ];
             });
             $lead = $isiAkses->firstWhere('posisi', 'lead_auditor');
-                if ($lead && $lead->auditor) {
-                    $leadAuditorName = $lead->auditor->nama_auditor;
-                    $leadAuditorNidn = $lead->auditor->identity_number;
-                }
+            if ($lead && $lead->auditor) {
+                $leadAuditorName = $lead->auditor->nama_auditor;
+                $leadAuditorNidn = $lead->auditor->identity_number;
             }
+        }
 
-            // Fallback jika tidak ada lead auditor
-            if (!$leadAuditorName) {
-                $leadAuditorName = '_________________________';
-                $leadAuditorNidn = '_________________';
-            }
+        // Fallback jika tidak ada lead auditor
+        if (!$leadAuditorName) {
+            $leadAuditorName = '_________________________';
+            $leadAuditorNidn = '_________________';
+        }
 
-            $kabalai = IsiAksesAuditor::with('auditor')
-                ->where('setting_akses_auditor_id', $setting->id ?? null)
-                ->where('posisi', 'posisi_kepala_bidang_internal')
-                ->first();
+        $kabalai = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_bidang_internal')
+            ->first();
 
-            if (!$kabalai || !$kabalai->auditor) {
-                $kabalai = (object) [
-                    'auditor' => (object) [
-                        'nama_auditor' => '_________________________',
-                        'identity_number' => '_________________'
-                    ]
-                ];
-            }
+        if (!$kabalai || !$kabalai->auditor) {
+            $kabalai = (object) [
+                'auditor' => (object) [
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________'
+                ]
+            ];
+        }
 
-            $kepalaLPM = IsiAksesAuditor::with('auditor')
-                ->where('setting_akses_auditor_id', $setting->id ?? null)
-                ->where('posisi', 'posisi_kepala_lembaga_penjaminan_mutu')
-                ->first();
+        $kepalaLPM = IsiAksesAuditor::with('auditor')
+            ->where('setting_akses_auditor_id', $setting->id ?? null)
+            ->where('posisi', 'posisi_kepala_lembaga_penjaminan_mutu')
+            ->first();
 
-            if (!$kepalaLPM || !$kepalaLPM->auditor) {
-                $kepalaLPM = (object) [
-                    'auditor' => (object) [
-                        'nama_auditor' => '_________________________',
-                        'identity_number' => '_________________'
-                    ]
-                ];
-            }
+        if (!$kepalaLPM || !$kepalaLPM->auditor) {
+            $kepalaLPM = (object) [
+                'auditor' => (object) [
+                    'nama_auditor' => '_________________________',
+                    'identity_number' => '_________________'
+                ]
+            ];
+        }
 
         // =======================
         // FALLBACK AMAN

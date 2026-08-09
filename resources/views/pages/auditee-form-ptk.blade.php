@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Form PTK | SIMANTAP')
+@section('title', 'Form PTK Prodi | SIMANTAP')
 
 @section('content')
 <div
@@ -55,7 +55,7 @@
     }"
     @ptk-updated.window="updatePtkItem($event.detail)"
 >
-    <x-common.page-breadcrumb pageTitle="Form PTK (Permintaan Tindakan Koreksi)" />
+    <x-common.page-breadcrumb pageTitle="Form PTK (Permintaan Tindakan Koreksi) Prodi" />
 
     <div class="flex-1 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

@@ -33,7 +33,7 @@
     <a
         x-show="tahunAkademikId"
         x-transition.opacity.duration.200ms
-        :href="`{{ route('auditee-observasi.print') }}?tahun_akademik_id=${tahunAkademikId}`"
+        :href="`{{ route('prodi.auditee-observasi.print') }}?tahun_akademik_id=${tahunAkademikId}`"
         target="_blank"
         class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-emerald-700"
         style="display: none;"

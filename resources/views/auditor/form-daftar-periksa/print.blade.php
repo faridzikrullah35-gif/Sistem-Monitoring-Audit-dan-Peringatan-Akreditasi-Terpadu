@@ -6,13 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>DAFTAR PERIKSA ATAU PERTANYAAN AUDIT INTERNAL UNIT KERJA</title>
     <style type="text/css">
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         .tg {
             border-collapse: collapse;
             border-spacing: 0;
             margin-right: 50px;
         }
         .tg td {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             padding: 10px 5px;
             border-style: solid;
@@ -22,7 +26,6 @@
             border-color: black;
         }
         .tg th {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             font-weight: normal;
             padding: 10px 5px;
@@ -49,7 +52,6 @@
         .static td, .static th {
             border: 1px solid black;
             padding: 8px 5px;
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             vertical-align: top;
         }
@@ -66,6 +68,48 @@
         }
         u {
             text-decoration: underline;
+        }
+
+        /* ===== Rich text styling ===== */
+        .rich-text p {
+            margin: 0 0 5px 0;
+        }
+        .rich-text ul,
+        .rich-text ol {
+            margin: 0 0 5px 0;
+            padding-left: 20px;
+        }
+        .rich-text li {
+            margin-bottom: 2px;
+        }
+        .rich-text strong {
+            font-weight: bold;
+        }
+        .rich-text em {
+            font-style: italic;
+        }
+        .rich-text u {
+            text-decoration: underline;
+        }
+        .rich-text h1,
+        .rich-text h2,
+        .rich-text h3 {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .rich-text table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .rich-text table td,
+        .rich-text table th {
+            border: 1px solid black;
+            padding: 4px;
+        }
+        .rich-text {
+            word-wrap: break-word;
+            white-space: normal;
         }
     </style>
 </head>
@@ -166,9 +210,6 @@
                     
                     // Ambil indikator dari relasi isiIndikator
                     $indikator = $pertanyaan?->isiIndikator?->indikator ?? '-';
-                    
-                    // Bersihkan panduan dari tag HTML
-                    $panduan = html_entity_decode(strip_tags($item->panduan_pengisian ?? '-'), ENT_QUOTES, 'UTF-8');
                 @endphp
                 <tr>
                     <td class="tg-0lax" style="text-align:center;">{{ $i + 1 }}</td>
@@ -177,7 +218,15 @@
                     <td class="tg-0lax">{{ $item->akibat ?? '-' }}</td>
                     <td class="tg-0lax">{{ $indikator }}</td>
                     <td class="tg-0lax" style="text-align:center;">{{ $item->score->nilai_score ?? '-' }}</td>
-                    <td class="tg-0lax">{{ $panduan }}</td>
+                    
+                    {{-- ===== KOLOM PANDUAN PENGISIAN – DUKUNGAN RICH TEXT ===== --}}
+                    <td class="tg-0lax">
+                        @if($item->panduan_pengisian)
+                            <div class="rich-text">{!! $item->panduan_pengisian !!}</div>
+                        @else
+                            -
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -262,7 +311,7 @@
                 <td colspan="7" style="height: 80px;"><br><br><br></td>
             </tr>
             <tr>
-                <!-- Tanda tangan Kepala LPM (masih hardcode) -->
+                <!-- Tanda tangan Kepala LPM -->
                 <td colspan="7" style="text-align:center; vertical-align:top;"><u><u>{{ $kepalaLPM->auditor->nama_auditor }}</u></u></td>
             </tr>
             <tr>

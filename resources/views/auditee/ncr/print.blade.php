@@ -3,24 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAPORAN KETIDAKSESUAIAN (NCR) - Auditee</title>
+    <title>LAPORAN KETIDAKSESUAIAN (PTK) - prodi</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 12px;
             margin: 20px;
         }
+
         .container {
             max-width: 1100px;
             margin: 0 auto;
         }
+
         .header-table {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #000;
         }
-        .header-table td, .header-table th {
+        .header-table td,
+        .header-table th {
             border: 1px solid #000;
             padding: 6px 8px;
             vertical-align: middle;
@@ -29,6 +41,7 @@
             font-weight: bold;
             text-align: center;
         }
+
         .ncr-table {
             width: 100%;
             border-collapse: collapse;
@@ -36,7 +49,8 @@
             margin-top: 20px;
             page-break-inside: avoid;
         }
-        .ncr-table td, .ncr-table th {
+        .ncr-table td,
+        .ncr-table th {
             border: 1px solid #000;
             padding: 6px 8px;
             vertical-align: top;
@@ -48,6 +62,7 @@
         .ncr-table .value {
             font-weight: normal;
         }
+
         .center {
             text-align: center;
         }
@@ -57,12 +72,53 @@
         .page-break {
             page-break-after: always;
         }
-        /* Untuk spasi di bagian tanda tangan */
         .ttd-space {
             height: 40px;
         }
         .small-text {
             font-size: 10px;
+        }
+
+        /* ===== RICH TEXT ===== */
+        .rich-text p {
+            margin: 0 0 4px 0;
+        }
+        .rich-text ul,
+        .rich-text ol {
+            margin: 0 0 4px 0;
+            padding-left: 20px;
+        }
+        .rich-text li {
+            margin-bottom: 2px;
+        }
+        .rich-text strong {
+            font-weight: bold;
+        }
+        .rich-text em {
+            font-style: italic;
+        }
+        .rich-text u {
+            text-decoration: underline;
+        }
+        .rich-text h1,
+        .rich-text h2,
+        .rich-text h3 {
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        .rich-text table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 4px 0;
+        }
+        .rich-text table td,
+        .rich-text table th {
+            border: 1px solid black;
+            padding: 4px;
+        }
+        .rich-text {
+            word-wrap: break-word;
+            white-space: normal;
         }
     </style>
 </head>
@@ -82,7 +138,7 @@
             </tr>
             <tr>
                 <td rowspan="2" style="text-align: center; font-weight: bold; font-size: 14px;">
-                    LAPORAN KETIDAKSESUAIAN (NCR)
+                    LAPORAN KETIDAKSESUAIAN (PTK)
                 </td>
                 <td>Tanggal Terbit</td>
                 <td>:</td>
@@ -144,32 +200,47 @@
                         @endforelse
                     </td>
                 </tr>
-                {{-- Baris 4: Uraian & Kategori --}}
+
+                {{-- ===== URAIAN KETIDAKSESUAIAN (Rich Text) ===== --}}
                 <tr>
                     <td colspan="3" style="vertical-align: top;">
                         <span class="bold">URAIAN KETIDAKSESUAIAN</span>
-                        <p>{!! $item->deskripsi_uraian_temuan ?? '-' !!}</p>
+                        @if($item->deskripsi_uraian_temuan)
+                            <div class="rich-text">{!! $item->deskripsi_uraian_temuan !!}</div>
+                        @else
+                            <p>-</p>
+                        @endif
                     </td>
                     <td colspan="3" style="vertical-align: top;">
                         <span class="bold">KATEGORI TEMUAN :</span>
                         <span class="bold">{{ $item->kategori_temuan ?? '-' }}</span>
                     </td>
                 </tr>
-                {{-- Baris 5: Penyebab & Tindakan Koreksi --}}
+
+                {{-- ===== Penyebab & Tindakan Koreksi (Rich Text) ===== --}}
                 <tr>
                     <td colspan="3" style="vertical-align: top;">
                         <span class="bold">URAIAN FAKTOR PENYEBAB KETIDAKSESUAIAN :</span>
-                        <p>{{ $item->auditPeriksa->analisis_penyebab ?? '-' }}</p>
+                        @if($item->auditPeriksa->analisis_penyebab ?? null)
+                            <div class="rich-text">{!! $item->auditPeriksa->analisis_penyebab !!}</div>
+                        @else
+                            <p>-</p>
+                        @endif
                     </td>
                     <td colspan="3" style="vertical-align: top;">
                         <span class="bold">TINDAKAN KOREKSI :</span>
-                        <p>{{ $item->rencana_tindakan_perbaikan_auditee ?? '-' }}</p>
+                        @if($item->rencana_tindakan_perbaikan_auditee)
+                            <div class="rich-text">{!! $item->rencana_tindakan_perbaikan_auditee !!}</div>
+                        @else
+                            <p>-</p>
+                        @endif
                         <br>
                         <span class="bold">Tanggal Target Perbaikan :</span><br>
                         {{ $item->tanggal_target_perbaikan_auditee ? \Carbon\Carbon::parse($item->tanggal_target_perbaikan_auditee)->translatedFormat('d F Y') : '-' }}
                     </td>
                 </tr>
-                {{-- Baris 6: TTD Auditor & Auditee + Tindakan Pencegahan --}}
+
+                {{-- Baris 6: TTD Auditor & Auditee + Tindakan Pencegahan (Rich Text) --}}
                 <tr>
                     <td colspan="2">
                         <div class="center">TTD Auditor</div>
@@ -179,7 +250,11 @@
                     </td>
                     <td colspan="3" rowspan="4" style="vertical-align: top;">
                         <span class="bold">TINDAKAN PENCEGAHAN :</span><br>
-                        <p>{!! $item->tindakan_pencegahan_auditee ?? '-' !!}</p>
+                        @if($item->tindakan_pencegahan_auditee)
+                            <div class="rich-text">{!! $item->tindakan_pencegahan_auditee !!}</div>
+                        @else
+                            <p>-</p>
+                        @endif
                     </td>
                 </tr>
                 <tr>
@@ -189,7 +264,6 @@
                 <tr>
                     <td colspan="2">
                         <span class="bold">Tanggal Mulai :</span><br>
-                        {{-- Bisa ambil dari tanggal selesai atau field lain --}}
                         {{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y') : '-' }}
                     </td>
                     <td>
@@ -205,6 +279,7 @@
                         <div class="center">{{ $item->status_ncr ?? '-' }}</div>
                     </td>
                 </tr>
+
                 {{-- Baris 7: Verifikasi --}}
                 <tr>
                     <td colspan="3">
@@ -215,13 +290,15 @@
                     </td>
                     <td colspan="3" rowspan="2" style="vertical-align: top;">
                         <div class="center bold">VERIFIKASI PELAKSANAAN TINDAKAN KOREKSI DAN PENCEGAHAN</div>
+                        @if($item->verifikasi ?? null)
+                            <div class="rich-text">{!! $item->verifikasi !!}</div>
+                        @endif
                     </td>
                 </tr>
                 <tr>
                     <td colspan="3">
                         <span class="bold">Tanggal Verifikasi :</span><br>
-                        {{-- Bisa diisi jika ada field --}}
-                        -
+                        {{ $item->tanggal_verifikasi ? \Carbon\Carbon::parse($item->tanggal_verifikasi)->translatedFormat('d F Y') : '-' }}
                     </td>
                 </tr>
             </table>
@@ -237,7 +314,6 @@
 
     </div>
 
-    {{-- Script untuk otomatis print jika diakses langsung --}}
     <script>
         window.onload = function() {
             window.print();

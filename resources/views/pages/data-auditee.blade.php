@@ -1,7 +1,7 @@
 {{-- resources/views/pages/data-auditee.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Data Auditee | SIMANTAP')
+@section('title', 'Data Auditee Prodi | SIMANTAP')
 
 @section('content')
 
@@ -16,7 +16,7 @@
     class="flex flex-col min-h-screen"   {{-- 1. Bikin container fleksibel & full viewport --}}
 >
 
-    <x-common.page-breadcrumb pageTitle="Data Auditee" />
+    <x-common.page-breadcrumb pageTitle="Data Auditee Prodi" />
 
     {{-- 2. Area konten utama: flex-1 agar mendorong footer ke bawah --}}
     <div class="flex-1 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">

@@ -6,13 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style type="text/css">
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         .tg {
             border-collapse: collapse;
             border-spacing: 0;
             margin-right: 50px;
         }
         .tg td {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             padding: 10px 5px;
             border-style: solid;
@@ -22,7 +26,6 @@
             border-color: black;
         }
         .tg th {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             font-weight: normal;
             padding: 10px 5px;
@@ -41,6 +44,78 @@
         .tg .tg-0lax {
             text-align: left;
             vertical-align: top;
+        }
+        .rich-text {
+            word-break: break-word;
+        }
+
+        .rich-text p {
+            margin: 0 0 6px 0;
+        }
+
+        .rich-text ul {
+            margin: 0 0 6px 20px;
+            padding-left: 18px;
+            list-style-type: disc;
+        }
+
+        .rich-text ol {
+            margin: 0 0 6px 20px;
+            padding-left: 18px;
+            list-style-type: decimal;
+        }
+
+        .rich-text li {
+            margin-bottom: 4px;
+        }
+
+        .rich-text strong {
+            font-weight: bold;
+        }
+
+        .rich-text em {
+            font-style: italic;
+        }
+
+        .rich-text u {
+            text-decoration: underline;
+        }
+
+        .rich-text table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .rich-text table,
+        .rich-text th,
+        .rich-text td {
+            border: 1px solid #000;
+        }
+
+        .rich-text th,
+        .rich-text td {
+            padding: 4px;
+        }
+
+        /* Tambahan untuk header static */
+        .static {
+            width: 95%;
+            border-collapse: collapse;
+        }
+        .static td, .static th {
+            border: 1px solid black;
+            padding: 8px 5px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+        .static .tg-0pky {
+            font-weight: bold;
+        }
+        .center-text {
+            text-align: center;
+        }
+        u {
+            text-decoration: underline;
         }
     </style>
     <title>LAPORAN OBSERVASI</title>
@@ -109,11 +184,23 @@
                     </td>
 
                     <td class="tg-0lax" style="text-align:left; vertical-align:top; padding:3;">
-                        {{ $item->discussed_with ?? '-' }}
+                        @if(!empty($item->discussed_with))
+                            <div class="rich-text">
+                                {!! $item->discussed_with !!}
+                            </div>
+                        @else
+                            -
+                        @endif
                     </td>
 
                     <td class="tg-0lax" style="text-align:left; vertical-align:top; padding:3;">
-                        {!! $item->rekomendasi ?: '-' !!}
+                        @if(!empty($item->rekomendasi))
+                            <div class="rich-text">
+                                {!! $item->rekomendasi !!}
+                            </div>
+                        @else
+                            -
+                        @endif
                     </td>
                 </tr>
 

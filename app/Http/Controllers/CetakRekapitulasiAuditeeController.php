@@ -14,14 +14,41 @@ use Illuminate\Support\Facades\DB;
 
 class CetakRekapitulasiAuditeeController extends Controller
 {
+    /**
+     * Helper: nama relasi di AuditPeriksa ke pertanyaan asli
+     */
+    private function getPertanyaanRelation()
+    {
+        return auth()->user()->role === 'unit_kerja'
+            ? 'pertanyaanAmiUnit'
+            : 'pertanyaanAmiProdi';
+    }
+
     public function index()
     {
-        $tahunAkademikList = TahunAkademik::where('status', 'Aktif')
+        $user = auth()->user();
+        $relasiAmi = $this->getPertanyaanRelation();
+
+        // Ambil tahun akademik dari data audit yang ada untuk auditee
+        $tahunAkademikIds = AuditPeriksa::whereHas('user', function ($q) use ($user) {
+            $q->where('unit', $user->unit)
+              ->where('sub_unit', $user->sub_unit);
+        })
+        ->whereHas($relasiAmi, function ($q) {
+            $q->whereNotNull('tahun_akademik_id');
+        })
+        ->with($relasiAmi)
+        ->get()
+        ->pluck($relasiAmi . '.tahun_akademik_id')
+        ->unique()
+        ->filter()
+        ->values();
+
+        $tahunAkademikList = TahunAkademik::whereIn('id', $tahunAkademikIds)
             ->orderBy('tahun_akademik', 'asc')
             ->orderBy('semester', 'asc')
             ->get();
 
-        // Change this line:
         return view('pages.cetak-rekapitulasi-auditee', compact('tahunAkademikList'));
     }
 
@@ -30,6 +57,7 @@ class CetakRekapitulasiAuditeeController extends Controller
         try {
             $user = auth()->user();
             $tahunAkademikId = $request->query('tahun_akademik_id');
+            $relasiAmi = $this->getPertanyaanRelation();
 
             $defaultResponse = [
                 'data'           => [],
@@ -43,20 +71,17 @@ class CetakRekapitulasiAuditeeController extends Controller
                 return response()->json($defaultResponse);
             }
 
-            // Ambil audit_periksa_id berdasarkan unit/sub_unit auditee
-            $auditPeriksaIds = DB::table('audit_periksa as ap')
-                ->leftJoin('pertanyaan_ami_prodi as pap', 'ap.pertanyaan_ami_prodi_id', '=', 'pap.id')
-                ->leftJoin('pertanyaan_ami_unit as pau', 'ap.pertanyaan_ami_unit_id', '=', 'pau.id')
-                ->join('users as u', 'ap.users_id', '=', 'u.id') // auditor
-                ->where('u.unit', $user->unit)
-                ->where('u.sub_unit', $user->sub_unit)
-                ->where(function ($q) use ($tahunAkademikId) {
-                    $q->where('pap.tahun_akademik_id', $tahunAkademikId)
-                    ->orWhere('pau.tahun_akademik_id', $tahunAkademikId);
-                })
-                ->pluck('ap.id')
-                ->unique()
-                ->values();
+            // Ambil audit_periksa_id berdasarkan unit/sub_unit auditee dan filter tahun
+            $auditPeriksaIds = AuditPeriksa::whereHas('user', function ($q) use ($user) {
+                $q->where('unit', $user->unit)
+                  ->where('sub_unit', $user->sub_unit);
+            })
+            ->whereHas($relasiAmi, function ($q) use ($tahunAkademikId) {
+                $q->where('tahun_akademik_id', $tahunAkademikId);
+            })
+            ->pluck('id')
+            ->unique()
+            ->values();
 
             if ($auditPeriksaIds->isEmpty()) {
                 return response()->json($defaultResponse);

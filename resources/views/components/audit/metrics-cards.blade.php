@@ -1,6 +1,58 @@
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-5">
+@props([
+    'totalDataAmi' => 0,
+    'tahunAkademikAktif' => null,
+    'totalUnitSubUnit' => 0,
+    'totalUnit' => 0,
+    'totalSubUnit' => 0,
+    'totalAuditor' => 0,
+    'totalAuditorAktif' => 0,
+    'totalAuditorNonAktif' => 0,
+])
 
-    {{-- Total Audit Aktif --}}
+{{-- metrics-cards.blade.php --}}
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-5">
+    {{-- Tahun Akademik --}}
+    <div
+      class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
+    >
+      <div
+        class="flex items-center justify-center w-12 h-12 bg-indigo-50 rounded-xl dark:bg-indigo-500/10"
+      >
+        <svg
+          class="fill-indigo-600 dark:fill-indigo-400"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M6.75 2.25C6.75 1.83579 6.41421 1.5 6 1.5C5.58579 1.5 5.25 1.83579 5.25 2.25V3.75H3.75C2.50736 3.75 1.5 4.75736 1.5 6V18C1.5 19.2426 2.50736 20.25 3.75 20.25H20.25C21.4926 20.25 22.5 19.2426 22.5 18V6C22.5 4.75736 21.4926 3.75 20.25 3.75H18.75V2.25C18.75 1.83579 18.4142 1.5 18 1.5C17.5858 1.5 17.25 1.83579 17.25 2.25V3.75H6.75V2.25ZM3.75 5.25H20.25C20.6642 5.25 21 5.58579 21 6V8.25H3V6C3 5.58579 3.33579 5.25 3.75 5.25ZM3 9.75H21V18C21 18.4142 20.6642 18.75 20.25 18.75H3.75C3.33579 18.75 3 18.4142 3 18V9.75ZM7.5 12C7.5 11.5858 7.83579 11.25 8.25 11.25H15.75C16.1642 11.25 16.5 11.5858 16.5 12C16.5 12.4142 16.1642 12.75 15.75 12.75H8.25C7.83579 12.75 7.5 12.4142 7.5 12Z"
+            fill=""
+          />
+        </svg>
+      </div>
+
+      <div class="flex items-end justify-between mt-5">
+        <div>
+          <span class="text-sm text-gray-500 dark:text-gray-400">Tahun Akademik</span>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+              {{ $tahunAkademikAktif?->tahun_akademik ?? '-' }}
+          </h4>
+        </div>
+
+        <span
+          class="flex items-center gap-1 rounded-full bg-success-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500"
+        >
+          <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+          {{ $tahunAkademikAktif?->status ?? '-' }}
+        </span>
+      </div>
+    </div>
+
+    {{-- Total Data AMI Prodi & AMI Unit Aktif --}}
     <div
       class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
     >
@@ -26,87 +78,21 @@
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">Total Audit Aktif</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">12</h4>
+          <span class="text-sm text-gray-500 dark:text-gray-400">Total Data AMI prodi & AMI Unit Aktif</span>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+              {{ number_format($totalDataAmi) }}
+          </h4>
         </div>
-
         <span
           class="flex items-center gap-1 rounded-full bg-success-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500"
         >
-          <svg
-            class="fill-current"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M5.56462 1.62393C5.70193 1.47072 5.90135 1.37432 6.12329 1.37432C6.1236 1.37432 6.12391 1.37432 6.12422 1.37432C6.31631 1.37415 6.50845 1.44731 6.65505 1.59381L9.65514 4.5918C9.94814 4.88459 9.94831 5.35947 9.65552 5.65246C9.36273 5.94546 8.88785 5.94562 8.59486 5.65283L6.87329 3.93247L6.87329 10.125C6.87329 10.5392 6.53751 10.875 6.12329 10.875C5.70908 10.875 5.37329 10.5392 5.37329 10.125L5.37329 3.93578L3.65516 5.65282C3.36218 5.94562 2.8873 5.94547 2.5945 5.65248C2.3017 5.35949 2.30185 4.88462 2.59484 4.59182L5.56462 1.62393Z"
-              fill=""
-            />
-          </svg>
-          +3
+          <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+          Aktif
         </span>
       </div>
     </div>
-
-    {{-- Audit Selesai Bulan Ini --}}
-    <div
-      class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
-    >
-      <div
-        class="flex items-center justify-center w-12 h-12 bg-green-50 rounded-xl dark:bg-green-500/10"
-      >
-        <svg
-          class="fill-green-600 dark:fill-green-400"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M12 2.25C6.61522 2.25 2.25 6.61522 2.25 12C2.25 17.3848 6.61522 21.75 12 21.75C17.3848 21.75 21.75 17.3848 21.75 12C21.75 6.61522 17.3848 2.25 12 2.25ZM12 3.75C16.5563 3.75 20.25 7.44365 20.25 12C20.25 16.5563 16.5563 20.25 12 20.25C7.44365 20.25 3.75 16.5563 3.75 12C3.75 7.44365 7.44365 3.75 12 3.75ZM16.2803 8.21967C16.5732 8.51256 16.5732 8.98744 16.2803 9.28033L11.0303 14.5303C10.7374 14.8232 10.2626 14.8232 9.96967 14.5303L7.71967 12.2803C7.42678 11.9874 7.42678 11.5126 7.71967 11.2197C8.01256 10.9268 8.48744 10.9268 8.78033 11.2197L10.5 12.9393L15.2197 8.21967C15.5126 7.92678 15.9874 7.92678 16.2803 8.21967Z"
-              fill=""
-            />
-        </svg>
-      </div>
-
-      <div class="flex items-end justify-between mt-5">
-        <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">Selesai Bulan Ini</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">8</h4>
-        </div>
-
-        <span
-          class="flex items-center gap-1 rounded-full bg-success-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500"
-        >
-          <svg
-            class="fill-current"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M5.56462 1.62393C5.70193 1.47072 5.90135 1.37432 6.12329 1.37432C6.1236 1.37432 6.12391 1.37432 6.12422 1.37432C6.31631 1.37415 6.50845 1.44731 6.65505 1.59381L9.65514 4.5918C9.94814 4.88459 9.94831 5.35947 9.65552 5.65246C9.36273 5.94546 8.88785 5.94562 8.59486 5.65283L6.87329 3.93247L6.87329 10.125C6.87329 10.5392 6.53751 10.875 6.12329 10.875C5.70908 10.875 5.37329 10.5392 5.37329 10.125L5.37329 3.93578L3.65516 5.65282C3.36218 5.94562 2.8873 5.94547 2.5945 5.65248C2.3017 5.35949 2.30185 4.88462 2.59484 4.59182L5.56462 1.62393Z"
-              fill=""
-            />
-          </svg>
-          11.01%
-        </span>
-      </div>
-    </div>
-
-    {{-- Finding Pending --}}
+    
+    {{-- Semester --}}
     <div
       class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
     >
@@ -121,45 +107,32 @@
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M12 2.25C6.61522 2.25 2.25 6.61522 2.25 12C2.25 17.3848 6.61522 21.75 12 21.75C17.3848 21.75 21.75 17.3848 21.75 12C21.75 6.61522 17.3848 2.25 12 2.25ZM12 3.75C16.5563 3.75 20.25 7.44365 20.25 12C20.25 16.5563 16.5563 20.25 12 20.25C7.44365 20.25 3.75 16.5563 3.75 12C3.75 7.44365 7.44365 3.75 12 3.75ZM12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V13C11.25 13.4142 11.5858 13.75 12 13.75C12.4142 13.75 12.75 13.4142 12.75 13V8C12.75 7.58579 12.4142 7.25 12 7.25ZM12 15.75C11.4477 15.75 11 16.1977 11 16.75C11 17.3023 11.4477 17.75 12 17.75C12.5523 17.75 13 17.3023 13 16.75C13 16.1977 12.5523 15.75 12 15.75Z"
-              fill=""
-            />
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M5.25 4.5C5.25 3.25736 6.25736 2.25 7.5 2.25H16.5C17.7426 2.25 18.75 3.25736 18.75 4.5V18.75C18.75 19.9926 17.7426 21 16.5 21H7.5C6.25736 21 5.25 19.9926 5.25 18.75V4.5ZM7.5 3.75C7.08579 3.75 6.75 4.08579 6.75 4.5V18.75C6.75 19.1642 7.08579 19.5 7.5 19.5H16.5C16.9142 19.5 17.25 19.1642 17.25 18.75V4.5C17.25 4.08579 16.9142 3.75 16.5 3.75H7.5ZM9 7.5C9 7.08579 9.33579 6.75 9.75 6.75H14.25C14.6642 6.75 15 7.08579 15 7.5C15 7.91421 14.6642 8.25 14.25 8.25H9.75C9.33579 8.25 9 7.91421 9 7.5ZM9.75 11.25C9.33579 11.25 9 11.5858 9 12C9 12.4142 9.33579 12.75 9.75 12.75H14.25C14.6642 12.75 15 12.4142 15 12C15 11.5858 14.6642 11.25 14.25 11.25H9.75ZM9 16.5C9 16.0858 9.33579 15.75 9.75 15.75H12.75C13.1642 15.75 13.5 16.0858 13.5 16.5C13.5 16.9142 13.1642 17.25 12.75 17.25H9.75C9.33579 17.25 9 16.9142 9 16.5Z"
+            fill=""
+          />
         </svg>
       </div>
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">Finding Pending</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">5</h4>
+          <span class="text-sm text-gray-500 dark:text-gray-400">Semester</span>
+          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+              {{ $tahunAkademikAktif?->semester ?? '-' }}
+          </h4>
         </div>
 
         <span
-          class="flex items-center gap-1 rounded-full bg-error-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-error-600 dark:bg-error-500/15 dark:text-error-500"
+          class="flex items-center gap-1 rounded-full bg-gray-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400"
         >
-          <svg
-            class="fill-current"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M5.31462 10.3761C5.45194 10.5293 5.65136 10.6257 5.87329 10.6257C5.8736 10.6257 5.8739 10.6257 5.87421 10.6257C6.0663 10.6259 6.25845 10.5527 6.40505 10.4062L9.40514 7.4082C9.69814 7.11541 9.69831 6.64054 9.40552 6.34754C9.11273 6.05454 8.63785 6.05438 8.34486 6.34717L6.62329 8.06753L6.62329 1.875C6.62329 1.46079 6.28751 1.125 5.87329 1.125C5.45908 1.125 5.12329 1.46079 5.12329 1.875L5.12329 8.06422L3.40516 6.34719C3.11218 6.05439 2.6373 6.05454 2.3445 6.34752C2.0517 6.64051 2.05185 7.11538 2.34484 7.40818L5.31462 10.3761Z"
-              fill=""
-            />
-          </svg>
-          +2
+          {{ $tahunAkademikAktif?->tahun_akademik ?? '-' }}
         </span>
       </div>
     </div>
 
-    {{-- Jumlah Fakultas --}}
+    {{-- Total Unit & Sub Unit --}}
     <div
       class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6"
     >
@@ -185,15 +158,18 @@
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">Jumlah Fakultas</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">6</h4>
-        </div>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                Total Unit & Sub Unit
+            </span>
 
-        <span
-          class="flex items-center gap-1 rounded-full bg-gray-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-        >
-          Stabil
-        </span>
+            <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                {{ $totalUnitSubUnit }}
+            </h4>
+
+            <p class="mt-1 text-xs text-gray-500">
+                {{ $totalUnit }} Unit • {{ $totalSubUnit }} Sub Unit
+            </p>
+        </div>
       </div>
     </div>
 
@@ -223,16 +199,18 @@
 
       <div class="flex items-end justify-between mt-5">
         <div>
-          <span class="text-sm text-gray-500 dark:text-gray-400">Auditor Aktif</span>
-          <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">3</h4>
-        </div>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                Total Auditor
+            </span>
 
-        <span
-          class="flex items-center gap-1 rounded-full bg-success-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500"
-        >
-          <span class="h-1.5 w-1.5 rounded-full bg-success-500"></span>
-          Online
-        </span>
+            <h4 class="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+                {{ number_format($totalAuditor) }}
+            </h4>
+
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ $totalAuditorAktif }} Aktif • {{ $totalAuditorNonAktif }} Non Aktif
+            </p>
+        </div>
       </div>
     </div>
 

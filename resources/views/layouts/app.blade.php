@@ -201,6 +201,8 @@ flatpickr(".datepicker", {
 });
 </script>
 
+@stack('modals')
+
 </body>
 @stack('scripts')
 

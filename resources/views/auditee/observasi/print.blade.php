@@ -6,13 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style type="text/css">
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         .tg {
             border-collapse: collapse;
             border-spacing: 0;
             margin-right: 50px;
         }
         .tg td {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             padding: 10px 5px;
             border-style: solid;
@@ -22,7 +26,6 @@
             border-color: black;
         }
         .tg th {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             font-weight: normal;
             padding: 10px 5px;
@@ -41,6 +44,27 @@
         .tg .tg-0lax {
             text-align: left;
             vertical-align: top;
+        }
+
+        /* Tambahan untuk header static */
+        .static {
+            width: 95%;
+            border-collapse: collapse;
+        }
+        .static td, .static th {
+            border: 1px solid black;
+            padding: 8px 5px;
+            font-size: 14px;
+            vertical-align: top;
+        }
+        .static .tg-0pky {
+            font-weight: bold;
+        }
+        .center-text {
+            text-align: center;
+        }
+        u {
+            text-decoration: underline;
         }
 
         /* ===== STYLING RICH TEXT UNTUK CETAK ===== */

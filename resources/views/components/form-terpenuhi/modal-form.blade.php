@@ -42,10 +42,10 @@
             <div class="space-y-4 px-6 py-5">
 
                 {{-- Kriteria + Elemen --}}
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
 
                     {{-- Kriteria --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="kriteria" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Kriteria <span class="text-red-500">*</span>
                         </label>
@@ -65,7 +65,7 @@
                     </div>
 
                     {{-- Elemen --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="elemen" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Elemen <span class="text-red-500">*</span>
                         </label>
@@ -81,7 +81,7 @@
                 </div>
 
                 {{-- Indikator --}}
-                <div>
+                <div class="lg:col-span-12">
                     <label for="indikator" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Pilih Indikator <span class="text-red-500">*</span>
                     </label>
@@ -92,38 +92,21 @@
                     >
                         <option value="" disabled selected>Pilih Indikator</option>
                     </select>
+
+                    {{-- PREVIEW INDIKATOR --}}
+                    <div id="previewIndikatorTerpenuhi"
+                        class="hidden mt-3 rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-3">
+                        <p class="text-xs font-semibold text-blue-600 dark:text-blue-300 mb-1">
+                            Preview Indikator
+                        </p>
+                        <p id="previewIndikatorTextTerpenuhi"
+                            class="text-sm leading-6 text-gray-700 dark:text-gray-200">
+                        </p>
+                    </div>
+
                     <input type="hidden" id="isiIndikatorId" name="isi_indikator_id" value="" />
                     <input type="hidden" id="prodiInput" name="pertanyaan_ami_prodi_id" value="" />
                     <input type="hidden" id="unitInput" name="pertanyaan_ami_unit_id" value="" />
-                </div>
-
-                {{-- Discussed with (Rich Text) --}}
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Discussed with <span class="text-red-500">*</span>
-                    </label>
-                    <div class="overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
-                        <div class="flex flex-wrap items-center gap-0.5 border-b border-gray-200 bg-gray-50 px-2 py-1.5 dark:border-gray-700 dark:bg-gray-800/50">
-                            <!-- Tombol toolbar - warna sudah adaptif -->
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'bold')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Bold"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6zM6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'italic')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Italic"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M10 4h4m-2 0v16m-4 0h8"/></svg></button>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'underline')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Underline"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20h14"/></svg></button>
-                            <div class="mx-1 h-5 w-px bg-gray-300 dark:bg-gray-700"></div>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'insertUnorderedList')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Bullet List"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg></button>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'insertOrderedList')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Numbered List"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75Zm0 5.25h.008v.008H3.75V12Zm0 5.25h.008v.008H3.75v-.008Z"/></svg></button>
-                            <div class="mx-1 h-5 w-px bg-gray-300 dark:bg-gray-700"></div>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'justifyLeft')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Align Left"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/></svg></button>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'justifyCenter')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Align Center"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M3.75 6.75h16.5M6.75 12h10.5M3.75 17.25h16.5"/></svg></button>
-                            <button type="button" onclick="execTerpenuhiCmd('discussed', 'justifyRight')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Align Right"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M3.75 6.75h16.5M6.75 12h10.5M3.75 17.25h16.5"/></svg></button>
-                        </div>
-                        <div
-                            id="discussedWithEditor"
-                            contenteditable="true"
-                            data-placeholder="Siapa yang mendiskusikan? (bisa di-format)"
-                            class="min-h-[80px] px-4 py-3 text-sm text-gray-700 outline-none dark:text-gray-300 dark:bg-gray-900"
-                        ></div>
-                    </div>
-                    <input type="hidden" name="discussed_with" id="discussedWithHidden" value="" />
                 </div>
 
                 {{-- Recommendations (Rich Text) --}}
@@ -133,7 +116,7 @@
                     </label>
                     <div class="overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
                         <div class="flex flex-wrap items-center gap-0.5 border-b border-gray-200 bg-gray-50 px-2 py-1.5 dark:border-gray-700 dark:bg-gray-800/50">
-                            <!-- toolbar sama seperti di atas, gunakan class dark: -->
+                            <!-- Toolbar -->
                             <button type="button" onclick="execTerpenuhiCmd('recommendations', 'bold')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Bold"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6zM6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
                             <button type="button" onclick="execTerpenuhiCmd('recommendations', 'italic')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Italic"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M10 4h4m-2 0v16m-4 0h8"/></svg></button>
                             <button type="button" onclick="execTerpenuhiCmd('recommendations', 'underline')" class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200" title="Underline"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20h14"/></svg></button>
@@ -183,18 +166,18 @@
 </div>
 
 <style>
-    #discussedWithEditor ul, #discussedWithEditor ol,
-    #recommendationsEditor ul, #recommendationsEditor ol {
+    #recommendationsEditor ul,
+    #recommendationsEditor ol {
         margin: 0.5em 0;
         padding-left: 1.5em;
     }
-    #discussedWithEditor ul, #recommendationsEditor ul {
+    #recommendationsEditor ul {
         list-style-type: disc;
     }
-    #discussedWithEditor ol, #recommendationsEditor ol {
+    #recommendationsEditor ol {
         list-style-type: decimal;
     }
-    #discussedWithEditor li, #recommendationsEditor li {
+    #recommendationsEditor li {
         margin: 0.25em 0;
     }
     [contenteditable][data-placeholder]:empty:before {
@@ -208,6 +191,24 @@
 
 <script>
     const matrixsTerpenuhi = @json($matrixs);
+
+    // ==========================================
+    // FUNGSI PREVIEW INDIKATOR
+    // ==========================================
+    function triggerIndikatorPreviewTerpenuhi() {
+        const select = document.getElementById('indikator');
+        const selectedOption = select.options[select.selectedIndex];
+        const preview = document.getElementById('previewIndikatorTerpenuhi');
+        const previewText = document.getElementById('previewIndikatorTextTerpenuhi');
+
+        if (selectedOption && selectedOption.value && selectedOption.dataset.indikatorTeks) {
+            previewText.textContent = selectedOption.dataset.indikatorTeks;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+            previewText.textContent = '';
+        }
+    }
 </script>
 
 <script>
@@ -216,9 +217,12 @@
         const elemenSelect = document.getElementById('elemen');
         const indikatorSelect = document.getElementById('indikator');
         const formTerpenuhi = document.getElementById('formTerpenuhi');
+
+        // Sync only recommendations on submit
         if (formTerpenuhi) {
             formTerpenuhi.addEventListener('submit', () => {
-                TerpenuhiEditor.syncToHidden();
+                const recEditor = document.getElementById('recommendationsEditor');
+                document.getElementById('recommendationsHidden').value = recEditor.innerHTML;
             }, true);
         }
 
@@ -226,6 +230,12 @@
             const kriteriaId = this.value;
             elemenSelect.innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
             indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorTerpenuhi');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextTerpenuhi');
+            if (previewText) previewText.textContent = '';
+
             const filteredMatrix = matrixsTerpenuhi.filter(item => {
                 return item.kriteria_audit &&
                     item.kriteria_audit.standar &&
@@ -239,9 +249,16 @@
         elemenSelect.addEventListener('change', function () {
             const matrixId = this.value;
             indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorTerpenuhi');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextTerpenuhi');
+            if (previewText) previewText.textContent = '';
+
             const selectedMatrix = matrixsTerpenuhi.find(item => item.id == matrixId);
             if (selectedMatrix?.isi_indikator?.length > 0) {
-                selectedMatrix.isi_indikator.forEach(item => {
+                selectedMatrix.isi_indikator.forEach((item, index) => {
+                    const indikatorTeks = item.indikator;
                     if (item.pertanyaan_ami_prodi?.length > 0) {
                         const p = item.pertanyaan_ami_prodi[0];
                         indikatorSelect.innerHTML += `
@@ -249,11 +266,13 @@
                                 value="${p.id}" 
                                 data-type="prodi"
                                 data-isi_indikator_id="${item.id}"
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}"
                             >
-                                ${item.indikator}
+                                ${index + 1}. ${indikatorTeks}
                             </option>
                         `;
                     }
+
                     if (item.pertanyaan_ami_unit?.length > 0) {
                         const u = item.pertanyaan_ami_unit[0];
                         indikatorSelect.innerHTML += `
@@ -261,8 +280,9 @@
                                 value="${u.id}" 
                                 data-type="unit"
                                 data-isi_indikator_id="${item.id}"
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}"
                             >
-                                ${item.indikator}
+                                ${index + 1}. ${indikatorTeks}
                             </option>
                         `;
                     }
@@ -289,6 +309,9 @@
                     if (prodiInput) prodiInput.value = value;
                     if (unitInput) unitInput.value = '';
                 }
+
+                // Tampilkan preview
+                triggerIndikatorPreviewTerpenuhi();
             });
         }
     });
@@ -296,11 +319,11 @@
 
 <script>
     const TerpenuhiEditor = {
-        getEditor(id) {
-            return document.getElementById(id === 'discussed' ? 'discussedWithEditor' : 'recommendationsEditor');
+        getEditor() {
+            return document.getElementById('recommendationsEditor');
         },
-        execCommand(editorId, command) {
-            const editor = this.getEditor(editorId);
+        execCommand(command) {
+            const editor = this.getEditor();
             if (!editor) return;
             editor.focus();
             const selection = window.getSelection();
@@ -314,14 +337,15 @@
             document.execCommand(command, false, null);
             editor.dispatchEvent(new Event('input', { bubbles: true }));
         },
-        syncToHidden() {
-            document.getElementById('discussedWithHidden').value = document.getElementById('discussedWithEditor').innerHTML;
-            document.getElementById('recommendationsHidden').value = document.getElementById('recommendationsEditor').innerHTML;
-        },
         reset() {
-            document.getElementById('discussedWithEditor').innerHTML = '';
-            document.getElementById('recommendationsEditor').innerHTML = '';
-            this.syncToHidden();
+            const editor = this.getEditor();
+            if (editor) editor.innerHTML = '';
+            document.getElementById('recommendationsHidden').value = '';
+            // Reset preview
+            const preview = document.getElementById('previewIndikatorTerpenuhi');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextTerpenuhi');
+            if (previewText) previewText.textContent = '';
         }
     };
 
@@ -358,6 +382,8 @@
             document.getElementById('elemen').innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
             document.getElementById('indikator').innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
             document.getElementById('isiIndikatorId').value = '';
+            document.getElementById('prodiInput').value = '';
+            document.getElementById('unitInput').value = '';
             TerpenuhiEditor.reset();
         },
         ensureMethod(form, method) {
@@ -412,13 +438,15 @@
 
                 indikatorSelect.dispatchEvent(new Event('change'));
 
-                // STEP 4 - rich text
-                document.getElementById('discussedWithEditor').innerHTML =
-                    data.discussed_with || '';
+                // Setelah indikator terpilih, tampilkan preview
+                triggerIndikatorPreviewTerpenuhi();
+
+                // STEP 4 - recommendations
                 document.getElementById('recommendationsEditor').innerHTML =
                     data.rekomendasi || '';
 
-                TerpenuhiEditor.syncToHidden();
+                document.getElementById('recommendationsHidden').value =
+                    data.rekomendasi || '';
 
             } catch (err) {
                 console.error(err);
@@ -429,6 +457,8 @@
 
     function openModalFormTerpenuhi(id = null) { TerpenuhiModal.open(id); }
     function closeModalFormTerpenuhi() { TerpenuhiModal.close(); }
-    function execTerpenuhiCmd(editorId, command) { TerpenuhiEditor.execCommand(editorId, command); }
-    function syncTerpenuhiEditors() { TerpenuhiEditor.syncToHidden(); }
+    function execTerpenuhiCmd(editorId, command) {
+        // Hanya untuk recommendations, abaikan parameter editorId
+        TerpenuhiEditor.execCommand(command);
+    }
 </script>

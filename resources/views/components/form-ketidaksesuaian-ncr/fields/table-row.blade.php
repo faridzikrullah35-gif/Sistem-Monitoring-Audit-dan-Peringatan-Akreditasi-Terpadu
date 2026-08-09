@@ -130,9 +130,41 @@
         DESKRIPSI URAIAN TEMUAN
     ====================================================== --}}
     <td class="min-w-[320px] max-w-[450px] px-3 py-2.5 align-top">
-        <div class="whitespace-normal break-words text-xs text-gray-600 dark:text-gray-400">
-            {!! $deskripsiTemuan ?? '-' !!}
-        </div>
+        @if($deskripsiTemuan)
+            <div class="
+                max-w-none break-words text-xs text-gray-600 dark:text-gray-400
+
+                [&_p]:mb-2
+                [&_ul]:list-disc
+                [&_ul]:pl-6
+                [&_ul]:mb-2
+                [&_ol]:list-decimal
+                [&_ol]:pl-6
+                [&_ol]:mb-2
+                [&_li]:mb-1
+                [&_strong]:font-semibold
+                [&_em]:italic
+                [&_u]:underline
+                [&_h1]:text-base
+                [&_h1]:font-bold
+                [&_h1]:mb-2
+                [&_h2]:text-sm
+                [&_h2]:font-semibold
+                [&_h2]:mb-2
+                [&_table]:w-full
+                [&_table]:border-collapse
+                [&_table]:mb-2
+                [&_td]:border
+                [&_td]:p-2
+                [&_th]:border
+                [&_th]:p-2
+                [&_th]:font-semibold
+            ">
+                {!! $deskripsiTemuan !!}
+            </div>
+        @else
+            <span class="text-xs text-gray-400">-</span>
+        @endif
     </td>
 
     {{-- =====================================================
@@ -166,9 +198,40 @@
         Rencana Tindakan Perbaikan
     ====================================================== --}}
     <td class="min-w-[260px] max-w-[360px] px-3 py-2.5 align-top">
-        <p class="whitespace-normal break-words text-xs text-gray-600 dark:text-gray-400">
-            {{ $rencanaPerbaikan ?? '-' }}
-        </p>
+        @if($rencanaPerbaikan)
+            <div class="
+                max-w-none break-words text-xs text-gray-600 dark:text-gray-400
+                [&_p]:mb-2
+                [&_ul]:list-disc
+                [&_ul]:pl-6
+                [&_ul]:mb-2
+                [&_ol]:list-decimal
+                [&_ol]:pl-6
+                [&_ol]:mb-2
+                [&_li]:mb-1
+                [&_strong]:font-semibold
+                [&_em]:italic
+                [&_u]:underline
+                [&_h1]:text-base
+                [&_h1]:font-bold
+                [&_h1]:mb-2
+                [&_h2]:text-sm
+                [&_h2]:font-semibold
+                [&_h2]:mb-2
+                [&_table]:w-full
+                [&_table]:border-collapse
+                [&_table]:mb-2
+                [&_td]:border
+                [&_td]:p-2
+                [&_th]:border
+                [&_th]:p-2
+                [&_th]:font-semibold
+            ">
+                {!! $rencanaPerbaikan !!}
+            </div>
+        @else
+            <span class="text-xs text-gray-400">-</span>
+        @endif
     </td>
 
 
@@ -186,9 +249,40 @@
         TINDAKAN PENCEGAHAN
     ====================================================== --}}
     <td class="min-w-[260px] max-w-[360px] px-3 py-2.5 align-top">
-        <p class="whitespace-normal break-words text-xs text-gray-600 dark:text-gray-400">
-            {!! $tindakanPencegahan !!}
-        </p>
+        @if($tindakanPencegahan)
+            <div class="
+                max-w-none break-words text-xs text-gray-600 dark:text-gray-400
+                [&_p]:mb-2
+                [&_ul]:list-disc
+                [&_ul]:pl-6
+                [&_ul]:mb-2
+                [&_ol]:list-decimal
+                [&_ol]:pl-6
+                [&_ol]:mb-2
+                [&_li]:mb-1
+                [&_strong]:font-semibold
+                [&_em]:italic
+                [&_u]:underline
+                [&_h1]:text-base
+                [&_h1]:font-bold
+                [&_h1]:mb-2
+                [&_h2]:text-sm
+                [&_h2]:font-semibold
+                [&_h2]:mb-2
+                [&_table]:w-full
+                [&_table]:border-collapse
+                [&_table]:mb-2
+                [&_td]:border
+                [&_td]:p-2
+                [&_th]:border
+                [&_th]:p-2
+                [&_th]:font-semibold
+            ">
+                {!! $tindakanPencegahan !!}
+            </div>
+        @else
+            <span class="text-xs text-gray-400">-</span>
+        @endif
     </td>
 
 

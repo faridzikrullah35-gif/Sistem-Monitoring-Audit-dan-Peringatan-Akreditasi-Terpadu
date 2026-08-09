@@ -68,6 +68,9 @@ const TableRefresh = {
             '#formPeriksaTableContainer',
             '#tableNCRContainer',
             '#observationTableContainer',
+            '#penilaianTableContainer',
+            '#ewsTableContainer',
+            '#akreditasiTableContainer',
         ];
 
         for (const tableId of tables) {

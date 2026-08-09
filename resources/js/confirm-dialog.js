@@ -392,6 +392,62 @@ window.deleteTerpenuhi = (id) => {
 
 };
 
+window.deletePenilaianKinerja = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data penilaian kinerja ini?',
+        () => executeDelete({
+            url: `/prodi/penilaian-kinerja/${id}`,
+            method: 'DELETE',
+            tableId: '#penilaianTableContainer',
+        })
+    );
+
+};
+
+window.deleteAkreditasi = (id) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data akreditasi ini?',
+        () => executeDelete({
+            url: `/admin/early-warning-system/${id}`,
+            method: 'DELETE',
+            tableId: '#ewsTableContainer',
+        })
+    );
+
+};
+
+window.deleteDokumen = (id, tableId) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus dokumen ini?',
+        () => executeDelete({
+            url: `/prodi/identitas-prodi/dokumen/${id}`,
+            method: 'DELETE',
+            tableId: tableId,
+        })
+    );
+
+};
+
+window.deleteProfileProdi = (id, tableId) => {
+
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data Profil Prodi ini?',
+        () => executeDelete({
+            url: `/prodi/identitas-prodi/vmts/${id}`,
+            method: 'DELETE',
+            tableId: tableId,
+        })
+    );
+
+};
+
 // ============================================================
 // DOM INIT (SIMPLIFIED)
 // ============================================================

@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LAPORAN KETIDAKSESUAIAN (NCR)</title>
+    <title>LAPORAN KETIDAKSESUAIAN (PTK)</title>
     <style>
+        /* ===== GLOBAL FONT: Aptos Display ===== */
+        * {
+            font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Times New Roman', Times, serif;
             font-size: 13px;
             margin: 20px;
             line-height: 1.4;
@@ -24,7 +28,8 @@
             border-collapse: collapse;
             margin-bottom: 10px;
         }
-        .header-table td, .header-table th {
+        .header-table td,
+        .header-table th {
             border: 1px solid #000;
             padding: 6px;
             vertical-align: middle;
@@ -57,7 +62,8 @@
             border-collapse: collapse;
             margin-top: -1px;
         }
-        .content-table td, .content-table th {
+        .content-table td,
+        .content-table th {
             border: 1px solid #000;
             padding: 8px;
             vertical-align: top;
@@ -82,9 +88,58 @@
             height: 50px;
         }
 
+        /* ===== Rich text styling ===== */
+        .rich-text {
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+        .rich-text p {
+            margin: 0 0 4px 0;
+        }
+        .rich-text ul,
+        .rich-text ol {
+            padding-left: 20px;
+            margin: 4px 0;
+        }
+        .rich-text li {
+            margin-bottom: 2px;
+        }
+        .rich-text strong {
+            font-weight: bold;
+        }
+        .rich-text em {
+            font-style: italic;
+        }
+        .rich-text u {
+            text-decoration: underline;
+        }
+        .rich-text h1,
+        .rich-text h2,
+        .rich-text h3 {
+            font-weight: bold;
+            margin: 6px 0 4px 0;
+        }
+        .rich-text table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 4px 0;
+        }
+        .rich-text table td,
+        .rich-text table th {
+            border: 1px solid #000;
+            padding: 4px 6px;
+        }
+        .rich-text table th {
+            background: #f0f0f0;
+        }
+
         @media print {
-            body { margin: 15px; }
-            .no-print { display: none; }
+            body {
+                margin: 15px;
+            }
+            .no-print {
+                display: none;
+            }
             .page-break {
                 page-break-after: always;
             }
@@ -102,6 +157,18 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .no-print button:hover {
+            background: #1d4ed8;
+        }
+        .no-print button:last-child {
+            background: #6b7280;
+        }
+        .no-print button:last-child:hover {
+            background: #4b5563;
         }
     </style>
 </head>
@@ -115,7 +182,7 @@
                 <div style="font-size: 9px; font-weight: bold; margin-top: 3px;">UNIVERSITAS MUHAMMADIYAH BANJARMASIN</div>
             </td>
             <th class="title" rowspan="3">
-                FORMULIR<br>LAPORAN KETIDAKSESUAIAN (NCR)
+                FORMULIR<br>LAPORAN KETIDAKSESUAIAN (PTK)
             </th>
             <td class="meta-label">No. Dokumen</td>
             <td class="meta-val">UM.BJM-LPM-FORM.NCR-AMI-000</td>
@@ -155,7 +222,7 @@
                     <td>: {{ $row->auditee }}</td>
                 </tr>
 
-                {{-- URAIAN KETIDAKSESUAIAN --}}
+                {{-- ===== URAIAN KETIDAKSESUAIAN (Rich Text) ===== --}}
                 <tr>
                     <td colspan="4" class="bg-light" style="text-transform: uppercase;">Uraian Ketidaksesuaian</td>
                 </tr>
@@ -165,35 +232,51 @@
                             KATEGORI TEMUAN: {{ strtoupper($row->status_kategori) }}
                         </div>
                         <div style="clear: both; margin-top: 5px;">
-                            {!! $row->macam_temuan !!}
+                            @if($row->macam_temuan)
+                                <div class="rich-text">{!! $row->macam_temuan !!}</div>
+                            @else
+                                -
+                            @endif
                         </div>
                     </td>
                 </tr>
 
-                {{-- FAKTOR PENYEBAB & TINDAKAN KOREKSI --}}
+                {{-- ===== FAKTOR PENYEBAB & TINDAKAN KOREKSI (Rich Text) ===== --}}
                 <tr>
                     <td colspan="2" class="bg-light" style="width: 50%;">URAIAN FAKTOR PENYEBAB KETIDAKSESUAIAN:</td>
                     <td colspan="2" class="bg-light" style="width: 50%;">TINDAKAN KOREKSI:</td>
                 </tr>
                 <tr>
                     <td colspan="2" style="height: 90px;">
-                        {{ $row->faktor_penyebab }}
+                        @if($row->faktor_penyebab)
+                            <div class="rich-text">{!! $row->faktor_penyebab !!}</div>
+                        @else
+                            -
+                        @endif
                     </td>
                     <td colspan="2">
-                        {{ $row->tindakan_koreksi }}
+                        @if($row->tindakan_koreksi)
+                            <div class="rich-text">{!! $row->tindakan_koreksi !!}</div>
+                        @else
+                            -
+                        @endif
                         <div style="margin-top: 25px; font-size: 11px; font-weight: bold;">
                             Tanggal Target Perbaikan: <span style="text-decoration: underline;">{{ $row->tanggal_target }}</span>
                         </div>
                     </td>
                 </tr>
 
-                {{-- TINDAKAN PENCEGAHAN --}}
+                {{-- ===== TINDAKAN PENCEGAHAN (Rich Text) ===== --}}
                 <tr>
                     <td colspan="4" class="bg-light">TINDAKAN PENCEGAHAN:</td>
                 </tr>
                 <tr>
                     <td colspan="4" style="height: 70px;">
-                        {{ $row->tindakan_pencegahan }}
+                        @if($row->tindakan_pencegahan)
+                            <div class="rich-text">{!! $row->tindakan_pencegahan !!}</div>
+                        @else
+                            -
+                        @endif
                         <div style="margin-top: 15px; font-size: 11px;">
                             <strong>Tanggal Verifikasi:</strong> {{ $row->tanggal_verifikasi ?? '-' }}
                         </div>
@@ -230,15 +313,26 @@
 
         </div>
     @empty
-        <div style="text-align:center; padding:50px; border: 1px dashed #ccc; font-family: sans-serif;">
-            <h3>Tidak ada data Laporan Ketidaksesuaian (NCR) yang tersedia.</h3>
+        <div style="text-align:center; padding:50px; border: 1px dashed #ccc;">
+            <h3>Tidak ada data Laporan Ketidaksesuaian (PTK) yang tersedia.</h3>
         </div>
     @endforelse
 
     {{-- TOMBOL CETAK --}}
     <div class="no-print">
-        <button onclick="window.print()">🖨 Cetak Dokumen NCR</button>
-        <button onclick="window.close()" style="background:#6b7280; margin-left:10px;">✕ Tutup</button>
+        <button onclick="window.print()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+            </svg>
+            Cetak Dokumen PTK
+        </button>
+        <button onclick="window.close()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854z"/>
+            </svg>
+            Tutup
+        </button>
     </div>
 
     <script>

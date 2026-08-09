@@ -2,12 +2,11 @@
 
 <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table id="terpenuhiTableContainer" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Indikator</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Discussed with</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Recommendations & Improvement Suggestions</th>
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
@@ -20,33 +19,6 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                             {{ $item->pertanyaanAmiProdi?->isiIndikator?->indikator ?? '-' }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                            @if($item->discussed_with)
-                                <div class="
-                                    max-w-none break-words
-
-                                    [&_p]:mb-2
-
-                                    [&_ul]:list-disc
-                                    [&_ul]:pl-6
-                                    [&_ul]:mb-2
-
-                                    [&_ol]:list-decimal
-                                    [&_ol]:pl-6
-                                    [&_ol]:mb-2
-
-                                    [&_li]:mb-1
-
-                                    [&_strong]:font-semibold
-                                    [&_em]:italic
-                                    [&_u]:underline
-                                ">
-                                    {!! $item->discussed_with !!}
-                                </div>
-                            @else
-                                <span class="text-gray-400 italic">-</span>
-                            @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                             @if($item->rekomendasi)
@@ -120,7 +92,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-400">
                             <div class="flex flex-col items-center gap-2">
                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M20 13V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H13M16 19L19 22M19 16L22 19M9 10H15M9 14H12" stroke-width="1.5"/>

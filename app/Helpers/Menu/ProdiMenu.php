@@ -15,10 +15,30 @@ class ProdiMenu
             ],
 
             [
+                'icon' => 'others',
+                'name' => 'Profile',
+                'subItems' => [
+                    ['name' => 'Identitas', 'path' => '/prodi/identitas-prodi'],
+                ],
+            ],
+
+            [
+                'icon' => 'clipboard-document-check',
+                'name' => 'Data Akreditasi',
+                'subItems' => [
+                    ['name' => 'Akreditasi', 'path' => '/prodi/data-akreditasi'],
+                ],
+            ],
+
+            [
                 'icon' => 'list',
                 'name' => 'Audit Mutu Internal',
                 'subItems' => [
-
+                    [
+                        'name' => 'Penilaian Kinerja',
+                        'path' => '/prodi/penilaian-kinerja'
+                    ],
+                    
                     [
                         'name' => 'Data Auditee',
                         'path' => '/prodi/data-auditee'

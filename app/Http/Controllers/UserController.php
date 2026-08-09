@@ -14,88 +14,77 @@ class UserController extends Controller
     {
         $query = User::query();
 
-        // SEARCH (nama / email)
-        if ($request->search) {
+        // =========================
+        // SEARCH
+        // =========================
+        if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', "%{$request->search}%")
+                ->orWhere('email', 'like', "%{$request->search}%");
             });
         }
 
+        // =========================
         // FILTER ROLE
-        if ($request->role) {
+        // =========================
+        if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
-        // FILTER STATUS
-        if ($request->status !== null && $request->status !== '') {
-            $query->where('status', $request->status);
+        // =========================
+        // FILTER UNIT
+        // =========================
+        if ($request->filled('unit')) {
+            $query->where('unit', $request->unit);
         }
 
-        $users = $query->latest()->paginate(10)->withQueryString();
+        // =========================
+        // FILTER SUB UNIT
+        // =========================
+        if ($request->filled('sub_unit')) {
+            $query->where('sub_unit', $request->sub_unit);
+        }
 
-        // ambil role unik dari DB
-        $roles = User::select('role')->distinct()->pluck('role');
+        $users = $query
+            ->orderBy('created_at', 'asc')
+            ->paginate(10)
+            ->withQueryString();
 
-        // Jika request AJAX, return JSON untuk filter
-        if ($request->ajax() || $request->wantsJson()) {
+        // Dropdown
+        $roles = User::select('role')
+            ->distinct()
+            ->orderBy('role')
+            ->pluck('role');
+
+        $units = User::whereNotNull('unit')
+            ->where('unit', '!=', '')
+            ->distinct()
+            ->orderBy('unit')
+            ->pluck('unit');
+
+        $subUnits = User::whereNotNull('sub_unit')
+            ->where('sub_unit', '!=', '')
+            ->distinct()
+            ->orderBy('sub_unit')
+            ->pluck('sub_unit');
+
+        // AJAX
+        if ($request->ajax()) {
+
             $html = view('components.user.data-table', compact('users'))->render();
+
             return response()->json([
                 'success' => true,
-                'html' => $html,
-                'users' => $users,
-                'pagination' => [
-                    'from' => $users->firstItem(),
-                    'to' => $users->lastItem(),
-                    'total' => $users->total(),
-                    'links' => $users->links()->toHtml()
-                ]
+                'html' => $html
             ]);
         }
 
-        return view('pages.pengguna.pengguna', compact('users', 'roles'));
-    }
-
-    // =========================
-    // FILTER DATA
-    // =========================
-    public function filterData(Request $request)
-    {
-        $query = User::query();
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->role) {
-            $query->where('role', $request->role);
-        }
-
-        if ($request->status !== null && $request->status !== '') {
-            $query->where('status', $request->status);
-        }
-
-        $users = $query->latest()->paginate(10);
-
-        // Render partial view
-        $html = view('components.user.data-table', compact('users'))->render();
-
-        return response()->json([
-            'success' => true,
-            'html' => $html,
-            'users' => $users,
-            'pagination' => [
-                'from' => $users->firstItem(),
-                'to' => $users->lastItem(),
-                'total' => $users->total(),
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'links' => $users->links()->toHtml()
-            ]
-        ]);
+        return view('pages.pengguna.pengguna', compact(
+            'users',
+            'roles',
+            'units',
+            'subUnits'
+        ));
     }
 
     // =========================
@@ -182,5 +171,24 @@ class UserController extends Controller
         }
 
         return back()->with('success', 'User berhasil dihapus');
+    }
+
+    public function getSubUnit(Request $request)
+    {
+        $subUnits = User::query()
+            ->whereNotNull('sub_unit')
+            ->where('sub_unit', '!=', '');
+
+        if ($request->unit) {
+            $subUnits->where('unit', $request->unit);
+        }
+
+        return response()->json(
+            $subUnits
+                ->select('sub_unit')
+                ->distinct()
+                ->orderBy('sub_unit')
+                ->pluck('sub_unit')
+        );
     }
 }

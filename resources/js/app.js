@@ -1,6 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import ApexCharts from 'apexcharts';
+import * as echarts from 'echarts';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
@@ -21,6 +22,7 @@ import './components/indikator-modal.js';
 ========================= */
 window.Alpine = Alpine;
 window.ApexCharts = ApexCharts;
+window.echarts = echarts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
 window.toastr = toastr;
@@ -430,6 +432,11 @@ window.refreshSettingScoreTable = () => TableRefresh.refresh('#settingScoreTable
 window.refreshFormPeriksaTable = () => TableRefresh.refresh('#formPeriksaTableContainer');
 window.refreshNCRTable = () => TableRefresh.refresh('#tableNCRContainer');
 window.refreshObservationTable = () => TableRefresh.refresh('#observationTableContainer');
+window.refreshTerpenuhiTable = () => TableRefresh.refresh('#terpenuhiTableContainer');
+window.refreshPenilaianKinerjaTable = () => TableRefresh.refresh('#penilaianKinerjaTableContainer');
+window.refreshPenilaianTable = () => TableRefresh.refresh('#penilaianTableContainer');
+window.refreshEWSTable = () => TableRefresh.refresh('#ewsTableContainer');
+window.refreshAkreditasiTable = () => TableRefresh.refresh('#akreditasiTableContainer');
 
 // Refresh semua select dengan atribut data-auto-refresh
 window.refreshAllSelectBoxes();

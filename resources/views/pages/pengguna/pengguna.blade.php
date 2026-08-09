@@ -20,7 +20,11 @@
     </div>
 
     <!-- Komponen Pencarian & Filter -->
-    <x-user.search-filter :roles="$roles" />
+    <x-user.search-filter
+        :roles="$roles"
+        :units="$units"
+        :subUnits="$subUnits"
+    />
 
     <!-- Komponen Tabel Data -->
     <x-user.data-table :users="$users" />

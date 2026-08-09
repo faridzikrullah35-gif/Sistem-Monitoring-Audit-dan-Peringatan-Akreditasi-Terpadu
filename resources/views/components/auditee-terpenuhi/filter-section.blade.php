@@ -51,7 +51,7 @@
     <a
         x-show="showCetak"
         x-transition.opacity.duration.200ms
-        :href="`{{ route('auditee.terpenuhi.print') }}?tahun_akademik_id=${selectedYear}`"
+        :href="`{{ route('prodi.auditee.terpenuhi.print') }}?tahun_akademik_id=${selectedYear}`"
         target="_blank"
         class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-emerald-700 hover:shadow-sm"
         style="display:none;"
@@ -91,7 +91,7 @@ function filterTerpenuhiComponent() {
             this.showCetak = (this.selectedYear !== 'semua');
 
             try {
-                let url = new URL('{{ route("auditee.terpenuhi") }}');
+                let url = new URL('{{ route("prodi.auditee.terpenuhi") }}');
 
                 if (this.selectedYear !== 'semua') {
                     url.searchParams.set('tahun_akademik_id', this.selectedYear);

@@ -8,7 +8,6 @@
                 <tr>
                     <th class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">#</th>
                     <th class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Indikator</th>
-                    <th class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Discussed With</th>
                     <th class="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Recommendations & Improvement Suggestions</th>
                 </tr>
             </thead>
@@ -26,35 +25,6 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-800 dark:text-white/90 font-medium">
                             {{ $indikator }}
-                        </td>
-
-                        {{-- DISCUSSED WITH (RICH TEXT) --}}
-                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
-                            @if(!empty($item->discussed_with))
-                                <div class="
-                                    max-w-none break-words
-
-                                    [&_p]:mb-2
-
-                                    [&_ul]:list-disc
-                                    [&_ul]:pl-6
-                                    [&_ul]:mb-2
-
-                                    [&_ol]:list-decimal
-                                    [&_ol]:pl-6
-                                    [&_ol]:mb-2
-
-                                    [&_li]:mb-1
-
-                                    [&_strong]:font-semibold
-                                    [&_em]:italic
-                                    [&_u]:underline
-                                ">
-                                    {!! $item->discussed_with !!}
-                                </div>
-                            @else
-                                <span class="text-gray-400 italic">-</span>
-                            @endif
                         </td>
 
                         {{-- RECOMMENDATIONS (RICH TEXT) --}}
@@ -103,7 +73,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-16 text-center">
+                        <td colspan="3" class="px-6 py-16 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="rounded-full bg-gray-100 p-4 dark:bg-gray-800">
                                     <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-gray-400">

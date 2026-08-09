@@ -43,10 +43,10 @@
             <div class="space-y-4 px-6 py-5">
 
                 {{-- Kriteria + Elemen --}}
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
 
                     {{-- Kriteria --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="kriteria" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Kriteria <span class="text-red-500">*</span>
                         </label>
@@ -66,7 +66,7 @@
                     </div>
 
                     {{-- Elemen --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="elemen" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Elemen <span class="text-red-500">*</span>
                         </label>
@@ -82,7 +82,7 @@
                 </div>
 
                 {{-- Indikator --}}
-                <div>
+                <div class="lg:col-span-12">
                     <label for="indikator" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Pilih Indikator <span class="text-red-500">*</span>
                     </label>
@@ -93,6 +93,18 @@
                     >
                         <option value="" disabled selected>Pilih Indikator</option>
                     </select>
+
+                    {{-- PREVIEW INDIKATOR --}}
+                    <div id="previewIndikatorObservasi"
+                        class="hidden mt-3 rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-3">
+                        <p class="text-xs font-semibold text-blue-600 dark:text-blue-300 mb-1">
+                            Preview Indikator
+                        </p>
+                        <p id="previewIndikatorTextObservasi"
+                            class="text-sm leading-6 text-gray-700 dark:text-gray-200">
+                        </p>
+                    </div>
+
                     <input type="hidden" id="isiIndikatorId" name="isi_indikator_id" value="" />
                     <input type="hidden" id="prodiInput" name="pertanyaan_ami_prodi_id" value="" />
                     <input type="hidden" id="unitInput" name="pertanyaan_ami_unit_id" value="" />
@@ -205,114 +217,15 @@
 </style>
 
 <script>
+    // ==========================================
+    // GLOBAL VARIABLES
+    // ==========================================
     const matrixs = @json($matrixs);
-</script>
+    let isLoadingData = false;
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const kriteriaSelect = document.getElementById('kriteria');
-        const elemenSelect = document.getElementById('elemen');
-        const indikatorSelect = document.getElementById('indikator');
-        const formObservasi = document.getElementById('formObservasi');
-        if (formObservasi) {
-            formObservasi.addEventListener('submit', () => {
-                ObservasiEditor.syncToHidden();
-            }, true);
-        }
-
-        // =========================
-        // PILIH KRITERIA
-        // =========================
-        kriteriaSelect.addEventListener('change', function () {
-            const kriteriaId = this.value;
-            elemenSelect.innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
-            indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
-            const filteredMatrix = matrixs.filter(item => {
-                return item.kriteria_audit &&
-                    item.kriteria_audit.standar &&
-                    item.kriteria_audit.standar.id == kriteriaId;
-            });
-            filteredMatrix.forEach(item => {
-                elemenSelect.innerHTML += `<option value="${item.id}">${item.elemen}</option>`;
-            });
-        });
-
-        // =========================
-        // PILIH ELEMEN
-        // =========================
-        elemenSelect.addEventListener('change', function () {
-            const matrixId = this.value;
-            indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
-            const selectedMatrix = matrixs.find(item => item.id == matrixId);
-            if (selectedMatrix?.isi_indikator?.length > 0) {
-                selectedMatrix.isi_indikator.forEach(item => {
-
-                    if (item.pertanyaan_ami_prodi?.length > 0) {
-                        const p = item.pertanyaan_ami_prodi[0];
-
-                        indikatorSelect.innerHTML += `
-                            <option 
-                                value="${p.id}" 
-                                data-type="prodi"
-                                data-isi_indikator_id="${item.id}"
-                            >
-                                ${item.indikator}
-                            </option>
-                        `;
-                    }
-
-                    if (item.pertanyaan_ami_unit?.length > 0) {
-                        const u = item.pertanyaan_ami_unit[0];
-
-                        indikatorSelect.innerHTML += `
-                            <option 
-                                value="${u.id}" 
-                                data-type="unit"
-                                data-isi_indikator_id="${item.id}"
-                            >
-                                ${item.indikator}
-                            </option>
-                        `;
-                    }
-                });
-            }
-        });
-
-        // =========================
-        // KETIKA INDIKATOR BERUBAH
-        // =========================
-        if (indikatorSelect) {
-            indikatorSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-
-                const isiIndikatorId = selectedOption.getAttribute('data-isi_indikator_id');
-                const type = selectedOption.getAttribute('data-type');
-                const value = selectedOption.value;
-
-                // isi indikator id (tetap)
-                const hiddenField = document.getElementById('isiIndikatorId');
-                if (hiddenField) hiddenField.value = isiIndikatorId; 
-
-                const prodiInput = document.getElementById('prodiInput');
-                const unitInput = document.getElementById('unitInput');
-
-                if (type === 'unit') {
-                    if (unitInput) unitInput.value = value;
-                    if (prodiInput) prodiInput.value = '';
-                } else {
-                    if (prodiInput) prodiInput.value = value;
-                    if (unitInput) unitInput.value = '';
-                }
-            });
-        }
-    });
-</script>
-
-<script>
-    /* =========================================================
-    RICH TEXT EDITOR CORE
-    ========================================================= */
-
+    // ==========================================
+    // RICH TEXT EDITOR CORE
+    // ==========================================
     const ObservasiEditor = {
         getEditor(id) {
             return document.getElementById(
@@ -340,25 +253,209 @@
         },
 
         syncToHidden() {
-            document.getElementById('discussedWithHidden').value =
-                document.getElementById('discussedWithEditor').innerHTML;
-
-            document.getElementById('recommendationsHidden').value =
-                document.getElementById('recommendationsEditor').innerHTML;
+            const discussed = document.getElementById('discussedWithEditor');
+            const rec = document.getElementById('recommendationsEditor');
+            document.getElementById('discussedWithHidden').value = discussed ? discussed.innerHTML : '';
+            document.getElementById('recommendationsHidden').value = rec ? rec.innerHTML : '';
         },
 
         reset() {
-            document.getElementById('discussedWithEditor').innerHTML = '';
-            document.getElementById('recommendationsEditor').innerHTML = '';
+            const discussed = document.getElementById('discussedWithEditor');
+            const rec = document.getElementById('recommendationsEditor');
+            if (discussed) discussed.innerHTML = '';
+            if (rec) rec.innerHTML = '';
             this.syncToHidden();
         }
     };
 
+    // ==========================================
+    // FUNGSI PREVIEW INDIKATOR
+    // ==========================================
+    function triggerIndikatorPreviewObservasi() {
+        const select = document.getElementById('indikator');
+        const selectedOption = select.options[select.selectedIndex];
+        const preview = document.getElementById('previewIndikatorObservasi');
+        const previewText = document.getElementById('previewIndikatorTextObservasi');
 
-    /* =========================================================
-    MODAL CONTROLLER
-    ========================================================= */
+        if (selectedOption && selectedOption.value && selectedOption.dataset.indikatorTeks) {
+            previewText.textContent = selectedOption.dataset.indikatorTeks;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+            previewText.textContent = '';
+        }
+    }
 
+    // ==========================================
+    // FUNGSI LOAD ELEMEN & INDIKATOR
+    // ==========================================
+    function loadElemenByKriteria(kriteriaId, selectedElemenId = null, triggerChange = true) {
+        const elemenSelect = document.getElementById('elemen');
+        if (!elemenSelect) return Promise.reject('Elemen select not found');
+
+        return new Promise((resolve) => {
+            elemenSelect.innerHTML = '<option value="" disabled selected>Pilih Elemen</option>';
+            if (!kriteriaId) {
+                resolve(null);
+                return;
+            }
+
+            const filtered = matrixs.filter(item =>
+                item.kriteria_audit?.standar?.id == kriteriaId
+            );
+
+            filtered.forEach(item => {
+                elemenSelect.innerHTML += `<option value="${item.id}">${item.elemen}</option>`;
+            });
+
+            if (selectedElemenId && filtered.some(item => item.id == selectedElemenId)) {
+                elemenSelect.value = selectedElemenId;
+                if (triggerChange) {
+                    elemenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                resolve(selectedElemenId);
+            } else {
+                resolve(null);
+            }
+        });
+    }
+
+    function loadIndikatorByElemen(elemenId, selectedPertanyaanId = null, selectedIsiIndikatorId = null, triggerChange = true) {
+        const indikatorSelect = document.getElementById('indikator');
+        if (!indikatorSelect) return Promise.reject('Indikator select not found');
+
+        return new Promise((resolve) => {
+            indikatorSelect.innerHTML = '<option value="" disabled selected>Pilih Indikator</option>';
+            // Sembunyikan preview saat reload
+            const preview = document.getElementById('previewIndikatorObservasi');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextObservasi');
+            if (previewText) previewText.textContent = '';
+
+            if (!elemenId) {
+                resolve(null);
+                return;
+            }
+
+            const selectedMatrix = matrixs.find(item => item.id == elemenId);
+            if (selectedMatrix?.isi_indikator?.length > 0) {
+                selectedMatrix.isi_indikator.forEach((item, index) => {
+                    const indikatorTeks = item.indikator;
+                    if (item.pertanyaan_ami_prodi?.length > 0) {
+                        const p = item.pertanyaan_ami_prodi[0];
+                        indikatorSelect.innerHTML += `
+                            <option 
+                                value="${p.id}" 
+                                data-type="prodi"
+                                data-isi_indikator_id="${item.id}"
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}"
+                            >
+                                ${index + 1}. ${indikatorTeks}
+                            </option>
+                        `;
+                    }
+
+                    if (item.pertanyaan_ami_unit?.length > 0) {
+                        const u = item.pertanyaan_ami_unit[0];
+                        indikatorSelect.innerHTML += `
+                            <option 
+                                value="${u.id}" 
+                                data-type="unit"
+                                data-isi_indikator_id="${item.id}"
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}"
+                            >
+                                ${index + 1}. ${indikatorTeks}
+                            </option>
+                        `;
+                    }
+                });
+            }
+
+            if (selectedPertanyaanId) {
+                let found = false;
+                for (let i = 0; i < indikatorSelect.options.length; i++) {
+                    if (indikatorSelect.options[i].value == selectedPertanyaanId) {
+                        indikatorSelect.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) {
+                    const selectedOption = indikatorSelect.options[indikatorSelect.selectedIndex];
+
+                    const hiddenIsi = document.getElementById('isiIndikatorId');
+                    if (hiddenIsi) {
+                        hiddenIsi.value = selectedIsiIndikatorId || selectedOption?.getAttribute('data-isi_indikator_id') || '';
+                    }
+
+                    const type = selectedOption?.getAttribute('data-type') || '';
+                    const value = selectedOption?.value || '';
+                    const prodiInput = document.getElementById('prodiInput');
+                    const unitInput = document.getElementById('unitInput');
+                    if (prodiInput) prodiInput.value = type === 'prodi' ? value : '';
+                    if (unitInput) unitInput.value = type === 'unit' ? value : '';
+
+                    if (triggerChange) {
+                        indikatorSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    // Tampilkan preview setelah set value
+                    triggerIndikatorPreviewObservasi();
+                    resolve(selectedPertanyaanId);
+                } else {
+                    console.warn('Selected pertanyaan ID not found:', selectedPertanyaanId);
+                    resolve(null);
+                }
+            } else {
+                resolve(null);
+            }
+        });
+    }
+
+    // ==========================================
+    // LOAD DATA EDIT
+    // ==========================================
+    async function loadEditDataToForm(id) {
+        try {
+            isLoadingData = true;
+
+            const response = await fetch(`/auditor/form-observasi/${id}/edit`);
+            if (!response.ok) throw new Error('Gagal mengambil data');
+            const { data } = await response.json();
+
+            // Set kriteria
+            const kriteriaSelect = document.getElementById('kriteria');
+            if (kriteriaSelect && data.kriteria_id) {
+                kriteriaSelect.value = data.kriteria_id;
+                await loadElemenByKriteria(data.kriteria_id, data.matrixs_id, false);
+            }
+
+            // Set indikator
+            if (data.matrixs_id) {
+                const pertanyaanId = data.pertanyaan_ami_unit_id ?? data.pertanyaan_ami_prodi_id;
+                await loadIndikatorByElemen(
+                    data.matrixs_id,
+                    pertanyaanId,
+                    data.isi_indikator_id,
+                    true
+                );
+            }
+
+            // Set rich text
+            document.getElementById('discussedWithEditor').innerHTML = data.discussed_with || '';
+            document.getElementById('recommendationsEditor').innerHTML = data.rekomendasi || '';
+            ObservasiEditor.syncToHidden();
+
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengambil data Observasi.');
+        } finally {
+            isLoadingData = false;
+        }
+    }
+
+    // ==========================================
+    // MODAL CONTROLLER
+    // ==========================================
     const ObservasiModal = {
         open(id = null) {
             const modal = document.getElementById('userModal');
@@ -371,19 +468,13 @@
             if (id) {
                 title.textContent = 'Ubah Data Observasi';
                 hiddenId.value = id;
-
                 form.action = `/auditor/form-observasi/${id}`;
-
                 this.ensureMethod(form, 'PUT');
-
-                this.loadEditData(id);
-
+                loadEditDataToForm(id);
             } else {
                 title.textContent = 'Tambah Data Observasi';
                 hiddenId.value = '';
-
                 form.action = "{{ route('form-observasi.store') }}";
-
                 this.removeMethod(form);
             }
 
@@ -393,101 +484,84 @@
 
         close() {
             const modal = document.getElementById('userModal');
-
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-
             this.resetForm();
         },
 
         resetForm() {
             document.getElementById('kriteria').selectedIndex = 0;
-
             document.getElementById('elemen').innerHTML =
                 '<option value="" disabled selected>Pilih Elemen</option>';
-
             document.getElementById('indikator').innerHTML =
                 '<option value="" disabled selected>Pilih Indikator</option>';
-
             document.getElementById('isiIndikatorId').value = '';
-
+            document.getElementById('prodiInput').value = '';
+            document.getElementById('unitInput').value = '';
+            // Reset preview
+            const preview = document.getElementById('previewIndikatorObservasi');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextObservasi');
+            if (previewText) previewText.textContent = '';
             ObservasiEditor.reset();
         },
 
         ensureMethod(form, method) {
             let input = form.querySelector('input[name="_method"]');
-
             if (!input) {
                 input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = '_method';
                 form.appendChild(input);
             }
-
             input.value = method;
         },
 
         removeMethod(form) {
             const input = form.querySelector('input[name="_method"]');
             if (input) input.remove();
-        },
-
-        async loadEditData(id) {
-            try {
-                const res = await fetch(`/auditor/form-observasi/${id}/edit`);
-                if (!res.ok) throw new Error('Gagal load data');
-
-                const { data } = await res.json();
-
-                // SET FORM BASIC
-                document.getElementById('kriteria').value = data.kriteria_id;
-                document.getElementById('kriteria')
-                    .dispatchEvent(new Event('change'));
-
-                await new Promise(r => setTimeout(r, 150));
-
-                const elemenSelect = document.getElementById('elemen');
-                elemenSelect.value = data.matrixs_id;
-
-                // ⚠️ penting: trigger AFTER value set
-                elemenSelect.dispatchEvent(new Event('change'));
-
-                await new Promise(r => setTimeout(r, 200));
-
-                const indikatorSelect = document.getElementById('indikator');
-
-                const targetId =
-                    data.pertanyaan_ami_unit_id ??
-                    data.pertanyaan_ami_prodi_id;
-
-                [...indikatorSelect.options].forEach(opt => {
-                    if (opt.value == targetId) {
-                        opt.selected = true;
-                    }
-                });
-
-                indikatorSelect.dispatchEvent(new Event('change'));
-
-                // rich text
-                document.getElementById('discussedWithEditor').innerHTML =
-                    data.discussed_with || '';
-
-                document.getElementById('recommendationsEditor').innerHTML =
-                    data.rekomendasi || '';
-
-                ObservasiEditor.syncToHidden();
-
-            } catch (err) {
-                console.error(err);
-                alert('Gagal mengambil data observasi');
-            }
         }
     };
 
-    /* =========================================================
-    GLOBAL FUNCTIONS (FOR HTML ONCLICK)
-    ========================================================= */
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        const kriteriaSelect = document.getElementById('kriteria');
+        const elemenSelect = document.getElementById('elemen');
+        const indikatorSelect = document.getElementById('indikator');
 
+        kriteriaSelect.addEventListener('change', function () {
+            if (isLoadingData) return;
+            loadElemenByKriteria(this.value, null, true);
+        });
+
+        elemenSelect.addEventListener('change', function () {
+            if (isLoadingData) return;
+            loadIndikatorByElemen(this.value, null, null, true);
+        });
+
+        indikatorSelect.addEventListener('change', function () {
+            if (isLoadingData) return;
+            const option = this.options[this.selectedIndex];
+            document.getElementById('isiIndikatorId').value = option?.getAttribute('data-isi_indikator_id') || '';
+            const type = option?.getAttribute('data-type') || '';
+            const value = option?.value || '';
+            document.getElementById('prodiInput').value = type === 'prodi' ? value : '';
+            document.getElementById('unitInput').value = type === 'unit' ? value : '';
+            // Tampilkan preview
+            triggerIndikatorPreviewObservasi();
+        });
+
+        const form = document.getElementById('formObservasi');
+        if (form) {
+            form.addEventListener('submit', () => ObservasiEditor.syncToHidden(), true);
+        }
+    });
+
+    // ==========================================
+    // GLOBAL FUNGSI (untuk onclick HTML)
+    // ==========================================
     function openModalFormObservasi(id = null) {
         ObservasiModal.open(id);
     }

@@ -43,10 +43,10 @@
             <div class="space-y-5 px-6 py-5">
 
                 {{-- Baris: Pilih Kriteria + Elemen + Indikator --}}
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
 
                     {{-- Pilih Kriteria --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="kriteria"
                             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Pilih Kriteria <span class="text-red-500">*</span>
@@ -71,7 +71,7 @@
                     </div>
 
                     {{-- Pilih Elemen --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="elemen"
                             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Pilih Elemen <span class="text-red-500">*</span>
@@ -90,7 +90,7 @@
                     </div>
 
                     {{-- Pilih Indikator --}}
-                    <div>
+                    <div class="lg:col-span-12">
                         <label for="indikator"
                             class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Pilih Indikator <span class="text-red-500">*</span>
@@ -106,6 +106,17 @@
                                 Pilih Indikator
                             </option>
                         </select>
+
+                        {{-- PREVIEW INDIKATOR --}}
+                        <div id="previewIndikatorPeriksa"
+                            class="hidden mt-3 rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 p-3">
+                            <p class="text-xs font-semibold text-blue-600 dark:text-blue-300 mb-1">
+                                Preview Indikator
+                            </p>
+                            <p id="previewIndikatorTextPeriksa"
+                                class="text-sm leading-6 text-gray-700 dark:text-gray-200">
+                            </p>
+                        </div>
                     </div>
 
                 </div>
@@ -285,6 +296,24 @@
 <script>
     const matrixs = @json($matrixs);
     console.log(matrixs);
+
+    // ==========================================
+    // FUNGSI PREVIEW INDIKATOR
+    // ==========================================
+    function triggerIndikatorPreviewPeriksa() {
+        const select = document.getElementById('indikator');
+        const selectedOption = select.options[select.selectedIndex];
+        const preview = document.getElementById('previewIndikatorPeriksa');
+        const previewText = document.getElementById('previewIndikatorTextPeriksa');
+
+        if (selectedOption && selectedOption.value && selectedOption.dataset.indikatorTeks) {
+            previewText.textContent = selectedOption.dataset.indikatorTeks;
+            preview.classList.remove('hidden');
+        } else {
+            preview.classList.add('hidden');
+            previewText.textContent = '';
+        }
+    }
 </script>
 
 <script>
@@ -308,6 +337,12 @@
                 `<option value="" disabled selected>
                     Pilih Indikator
                 </option>`;
+
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorPeriksa');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextPeriksa');
+            if (previewText) previewText.textContent = '';
 
             const filteredMatrix = matrixs.filter(item => {
 
@@ -336,6 +371,12 @@
                     Pilih Indikator
                 </option>`;
 
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorPeriksa');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextPeriksa');
+            if (previewText) previewText.textContent = '';
+
             const selectedMatrix = matrixs.find(item =>
                 item.id == matrixId
             );
@@ -348,17 +389,26 @@
                 selectedMatrix.isi_indikator.length > 0
             ) {
 
-                selectedMatrix.isi_indikator.forEach(item => {
+                selectedMatrix.isi_indikator.forEach((item, index) => {
 
+                    const indikatorTeks = item.indikator;
                     indikatorSelect.innerHTML += `
-                        <option value="${item.id}">
-                            ${item.indikator}
+                        <option value="${item.id}" 
+                                data-indikator-teks="${indikatorTeks.replace(/"/g, '&quot;')}">
+                            ${index + 1}. ${indikatorTeks}
                         </option>
                     `;
                 });
             }
         });
 
+        // Event change pada indikator untuk menampilkan preview
+        indikatorSelect.addEventListener('change', function () {
+            triggerIndikatorPreviewPeriksa();
+        });
+
+        // Saat modal dibuka, jika ada nilai yang sudah dipilih, trigger preview
+        // Ini akan dipanggil di openModalFormPeriksa setelah nilai di-set
     });
 </script>
 
@@ -438,6 +488,12 @@
         const editor = document.getElementById('panduanEditor');
         const form = document.getElementById('formPeriksa');
 
+        // Sembunyikan preview saat pertama buka
+        const preview = document.getElementById('previewIndikatorPeriksa');
+        if (preview) preview.classList.add('hidden');
+        const previewText = document.getElementById('previewIndikatorTextPeriksa');
+        if (previewText) previewText.textContent = '';
+
         // =====================
         // MODE EDIT
         // =====================
@@ -480,6 +536,8 @@
                     setTimeout(() => {
                         if (indikatorSelect && rowData.isi_indikator_id) {
                             indikatorSelect.value = rowData.isi_indikator_id;
+                            // Trigger preview setelah value di-set
+                            triggerIndikatorPreviewPeriksa();
                         }
                     }, 150);
 
@@ -565,6 +623,9 @@
 
                             document.getElementById('indikator').value =
                                 indikator.id;
+
+                            // Trigger preview setelah value di-set
+                            triggerIndikatorPreviewPeriksa();
                         }
 
                     }, 150);
@@ -599,6 +660,12 @@
             document.getElementById('score').selectedIndex = 0;
 
             editor.innerHTML = '';
+
+            // Sembunyikan preview
+            const preview = document.getElementById('previewIndikatorPeriksa');
+            if (preview) preview.classList.add('hidden');
+            const previewText = document.getElementById('previewIndikatorTextPeriksa');
+            if (previewText) previewText.textContent = '';
         }
 
         // show modal
@@ -610,6 +677,11 @@
         const modal = document.getElementById('userModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+        // Reset preview saat modal ditutup
+        const preview = document.getElementById('previewIndikatorPeriksa');
+        if (preview) preview.classList.add('hidden');
+        const previewText = document.getElementById('previewIndikatorTextPeriksa');
+        if (previewText) previewText.textContent = '';
     }
 
     function triggerEvent(element, eventName) {

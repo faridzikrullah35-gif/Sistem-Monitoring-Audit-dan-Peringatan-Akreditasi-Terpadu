@@ -151,14 +151,29 @@ function deleteIndikatorRow(id) {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': getCSRF() },
             })
-                .then(r => r.json())
-                .then(res => {
+                .then(async (r) => {
+                    const contentType = r.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        throw new Error('Server error (bukan JSON). Cek log Laravel.');
+                    }
+
+                    const res = await r.json();
+
+                    if (!r.ok) {
+                        window.toast?.error(res.message || 'Gagal menghapus data');
+                        return;
+                    }
+
                     window.toast?.success(res.message);
 
                     state.tempIndikators =
                         state.tempIndikators.filter(i => i.id !== id);
 
                     renderIndikatorTable();
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.toast?.error('Gagal menghapus: ' + err.message);
                 });
         }
     );

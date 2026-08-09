@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Cetak Rekapitulasi AMI - Auditee | SIMANTAP')
+@section('title', 'Cetak Rekapitulasi AMI - Prodi | SIMANTAP')
 
 @section('content')
     <div class="flex min-h-screen flex-col">
-        <x-common.page-breadcrumb pageTitle="Cetak Rekapitulasi AMI (Auditee)" />
+        <x-common.page-breadcrumb pageTitle="Cetak Rekapitulasi AMI Prodi" />
 
         <div class="flex-1">
             <div

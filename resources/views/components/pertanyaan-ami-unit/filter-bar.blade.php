@@ -1,3 +1,7 @@
+@php
+    $filterOptions = $filterAksesOptions ?? [];
+@endphp
+
 <div 
     x-data="pertanyaanFilter()"
     class="p-4 lg:p-5 bg-gray-50/50 dark:bg-gray-900/20"
@@ -6,61 +10,63 @@
 
         <!-- Filter Tahun -->
         <div class="w-full lg:w-56">
-
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Tahun Akademik
             </label>
-
             <select 
                 x-model="tahun"
                 @change="fetchData()"
                 class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-                <option value="">
-                    Semua Tahun Akademik
-                </option>
-
+                <option value="">Semua Tahun Akademik</option>
                 @foreach($tahunAkademik as $item)
-                    <option value="{{ $item->id }}">
-                        {{ $item->tahun_akademik }} - {{ $item->semester }}
-                    </option>
+                    <option value="{{ $item->id }}">{{ $item->tahun_akademik }} - {{ $item->semester }}</option>
                 @endforeach
-
             </select>
         </div>
 
         <!-- Filter Kriteria -->
         <div class="w-full lg:w-64">
-
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                 Kriteria
             </label>
-
             <select 
                 x-model="kriteria"
                 @change="fetchData()"
                 class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-                <option value="">
-                    Semua Kriteria
-                </option>
-
+                <option value="">Semua Kriteria</option>
                 @foreach($kriteria as $item)
-                    <option value="{{ $item->id }}">
-                        {{ $item->nama }}
-                    </option>
+                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
                 @endforeach
-
             </select>
         </div>
 
-        <!-- Reset -->
+        <!-- Filter Akses -->
+        <div class="w-full lg:w-72">
+            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                Akses (Role - Unit - Sub Unit)
+            </label>
+            <select 
+                x-model="aksesFilter"
+                @change="fetchData()"
+                class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <option value="">Semua Akses</option>
+                @if(count($filterOptions) > 0)
+                    @foreach($filterOptions as $option)
+                        <option value="{{ $option['value'] }}">{{ $option['label'] }}</option>
+                    @endforeach
+                @else
+                    <option value="" disabled>Belum ada data akses</option>
+                @endif
+            </select>
+        </div>
+
+        <!-- Reset & Hapus -->
         <div class="flex items-end justify-between w-full gap-2">
 
-            <!-- LEFT SIDE -->
             <div class="flex items-end gap-2">
-
-                <!-- Reset Filter -->
                 <button 
                     @click="resetFilter"
                     type="button"
@@ -69,9 +75,8 @@
                     Reset Filter
                 </button>
 
-                <!-- Delete Filter -->
                 <button 
-                    x-show="tahun || kriteria"
+                    x-show="tahun || kriteria || aksesFilter"
                     x-transition
                     type="button"
                     @click="deleteFiltered()"
@@ -79,12 +84,9 @@
                 >
                     Hapus Data Filter
                 </button>
-
             </div>
 
-            <!-- RIGHT SIDE -->
             <div class="flex items-end">
-
                 <button
                     type="button"
                     @click="deleteAllGlobal()"
@@ -92,12 +94,10 @@
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 2c-4.97 0-9 3.58-9 8 0 3.53 2.59 6.5 6.13 7.34L9 22h6l-.13-4.66C18.41 16.5 21 13.53 21 10c0-4.42-4.03-8-9-8zm-3 8a1 1 0 110-2 1 1 0 010 2zm6 0a1 1 0 110-2 1 1 0 010 2z"/>
+                            d="M19 7L18.132 19.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.994-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h8" />
                     </svg>
-
                     Delete All Data Tabel
                 </button>
-
             </div>
 
         </div>
@@ -108,16 +108,13 @@
 <script>
 function pertanyaanFilter() {
     return {
-
         tahun: '',
         kriteria: '',
+        aksesFilter: '',
 
         async fetchData(pageUrl = null) {
-
             try {
-
                 let url = pageUrl || '{{ route("pertanyaan-ami-unit.index") }}';
-
                 const params = new URLSearchParams();
 
                 if (this.tahun) {
@@ -126,6 +123,10 @@ function pertanyaanFilter() {
 
                 if (this.kriteria) {
                     params.append('kriteria_id', this.kriteria);
+                }
+
+                if (this.aksesFilter) {
+                    params.append('akses_filter', this.aksesFilter);
                 }
 
                 if (params.toString()) {
@@ -139,31 +140,25 @@ function pertanyaanFilter() {
                 });
 
                 const html = await response.text();
-
                 document.querySelector('#pertanyaanTableContainer').innerHTML = html;
 
             } catch (error) {
-
                 console.error(error);
-
             }
         },
 
         resetFilter() {
-
             this.tahun = '';
             this.kriteria = '';
-
+            this.aksesFilter = '';
             this.fetchData();
         },
 
         async deleteFiltered() {
-
             confirmDelete(
                 'Hapus Data Terfilter',
                 'Yakin mau hapus semua data sesuai filter saat ini?',
                 async () => {
-
                     const params = new URLSearchParams();
 
                     if (this.tahun) {
@@ -174,10 +169,13 @@ function pertanyaanFilter() {
                         params.append('kriteria_id', this.kriteria);
                     }
 
+                    if (this.aksesFilter) {
+                        params.append('akses_filter', this.aksesFilter);
+                    }
+
                     const url = `{{ route('pertanyaan-ami-unit.delete-filtered') }}?` + params.toString();
 
                     try {
-
                         const response = await fetch(url, {
                             method: 'DELETE',
                             headers: {
@@ -190,38 +188,28 @@ function pertanyaanFilter() {
                         const result = await response.json();
 
                         if (result.success) {
-
                             window.toast.success(result.message);
-
                             this.fetchData();
-
                         } else {
-
                             window.toast.error(result.message);
-
                         }
 
                     } catch (error) {
-
                         console.error(error);
                         window.toast.error('Terjadi kesalahan');
-
                     }
                 }
             );
         },
 
         async deleteAllGlobal() {
-
             const url = '/admin/pertanyaan-ami-unit/delete-all';
 
             confirmDelete(
                 '⚠ Hapus Semua Data',
                 'Ini akan menghapus SEMUA data pertanyaan AMI Unit. Tindakan ini tidak bisa dibatalkan. Lanjutkan?',
                 async () => {
-
                     try {
-
                         const response = await fetch(url, {
                             method: 'DELETE',
                             headers: {
@@ -234,84 +222,53 @@ function pertanyaanFilter() {
                         const result = await response.json();
 
                         if (result.success) {
-
                             window.toast.success(result.message);
-
                             this.fetchData();
-
                         } else {
-
                             window.toast.error(result.message);
-
                         }
 
                     } catch (error) {
-
                         console.error(error);
-
                         window.toast.error('Terjadi kesalahan saat menghapus semua data.');
-
                     }
-
                 }
             );
         }
-
     }
 }
 </script>
 
 <script>
-
 document.addEventListener('click', async function(e) {
-
     const link = e.target.closest('.pagination a');
-
     if (!link) return;
-
     e.preventDefault();
 
     try {
-
         const response = await fetch(link.href, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
-
         const html = await response.text();
-
         document.querySelector('#pertanyaanTableContainer').innerHTML = html;
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-
         console.error(error);
-
     }
 });
 
 window.showToast = function(type, message) {
-
     const colors = {
         success: 'bg-green-600',
         error: 'bg-red-600',
         info: 'bg-blue-600',
     };
-
     const el = document.createElement('div');
     el.className = `${colors[type] || 'bg-gray-800'} text-white px-4 py-2 rounded-lg shadow-lg fixed top-5 right-5 z-50`;
     el.innerText = message;
-
     document.body.appendChild(el);
-
-    setTimeout(() => {
-        el.remove();
-    }, 3000);
+    setTimeout(() => { el.remove(); }, 3000);
 };
-
 </script>

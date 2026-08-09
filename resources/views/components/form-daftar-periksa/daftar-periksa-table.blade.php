@@ -99,9 +99,50 @@
 
                     {{-- PANDUAN --}}
                     <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 min-w-[220px] whitespace-normal break-words">
-                        <div>
-                            {!! $item->panduan_pengisian !!}
-                        </div>
+                        @if($item->panduan_pengisian)
+                            <div class="
+                                max-w-none break-words
+
+                                [&_p]:mb-2
+
+                                [&_ul]:list-disc
+                                [&_ul]:pl-6
+                                [&_ul]:mb-2
+
+                                [&_ol]:list-decimal
+                                [&_ol]:pl-6
+                                [&_ol]:mb-2
+
+                                [&_li]:mb-1
+
+                                [&_strong]:font-semibold
+                                [&_em]:italic
+                                [&_u]:underline
+
+                                [&_h1]:text-lg
+                                [&_h1]:font-bold
+                                [&_h1]:mb-2
+
+                                [&_h2]:text-base
+                                [&_h2]:font-semibold
+                                [&_h2]:mb-2
+
+                                [&_table]:w-full
+                                [&_table]:border-collapse
+                                [&_table]:mb-2
+
+                                [&_td]:border
+                                [&_td]:p-2
+
+                                [&_th]:border
+                                [&_th]:p-2
+                                [&_th]:font-semibold
+                            ">
+                                {!! $item->panduan_pengisian !!}
+                            </div>
+                        @else
+                            <span class="text-gray-400 italic">-</span>
+                        @endif
                     </td>
 
                     {{-- AKSI --}}

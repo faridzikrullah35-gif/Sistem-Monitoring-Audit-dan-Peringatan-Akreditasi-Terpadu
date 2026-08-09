@@ -198,20 +198,27 @@ window.editAuditor = function (id) {
     `;
 
     posisiCell.innerHTML = `
-        <div class="flex gap-4">
-
+    <div class="grid grid-cols-2 gap-2 text-left">
             <label class="flex items-center gap-2">
                 <input type="radio" name="edit-posisi-${id}" value="lead_auditor"
                     ${currentPosisi === 'lead_auditor' ? 'checked' : ''}>
-                <span class="text-sm">Lead</span>
+                <span class="text-sm">Lead Auditor</span>
             </label>
-
             <label class="flex items-center gap-2">
                 <input type="radio" name="edit-posisi-${id}" value="anggota"
                     ${currentPosisi === 'anggota' ? 'checked' : ''}>
                 <span class="text-sm">Anggota</span>
             </label>
-
+            <label class="flex items-center gap-2">
+                <input type="radio" name="edit-posisi-${id}" value="posisi_kepala_bidang_internal"
+                    ${currentPosisi === 'posisi_kepala_bidang_internal' ? 'checked' : ''}>
+                <span class="text-sm">Kepala Bidang Internal</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="radio" name="edit-posisi-${id}" value="posisi_kepala_lembaga_penjaminan_mutu"
+                    ${currentPosisi === 'posisi_kepala_lembaga_penjaminan_mutu' ? 'checked' : ''}>
+                <span class="text-sm">Kepala Lembaga Penjaminan Mutu</span>
+            </label>
         </div>
     `;
 

@@ -1,7 +1,7 @@
 {{-- resources/views/pages/auditee-daftar-periksa.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Daftar Periksa | SIMANTAP')
+@section('title', 'Daftar Periksa Prodi | SIMANTAP')
 
 @section('content')
 <div
@@ -46,7 +46,7 @@
     }"
     class="flex flex-col min-h-screen"
 >
-    <x-common.page-breadcrumb pageTitle="Daftar Periksa" />
+    <x-common.page-breadcrumb pageTitle="Daftar Periksa Prodi" />
 
     <div class="flex-1 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
         {{-- HEADER dengan Filter --}}
