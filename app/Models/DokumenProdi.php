@@ -23,11 +23,11 @@ class DokumenProdi extends Model
 
     protected $casts = [
         'tanggal_penetapan' => 'date',
-        'tanggal_revisi' => 'date',
+        'tanggal_revisi'    => 'date',
     ];
 
-    public function profil()
+    public function profilProdi()
     {
-        return $this->belongsTo(ProfilProdi::class);
+        return $this->belongsTo(ProfilProdi::class, 'profil_prodi_id');
     }
 }

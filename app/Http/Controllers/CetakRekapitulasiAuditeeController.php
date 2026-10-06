@@ -9,8 +9,10 @@ use App\Models\FormTerpenuhi;
 use App\Models\AuditPeriksa;
 use App\Models\SettingScore;
 use App\Models\User;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CetakRekapitulasiAuditeeController extends Controller
 {
@@ -62,9 +64,9 @@ class CetakRekapitulasiAuditeeController extends Controller
             $defaultResponse = [
                 'data'           => [],
                 'categories'     => [],
-                'no_dokumen'     => 'UM.BJM-LPM-FORM.DR-AMI-00',
-                'tanggal_terbit' => now()->format('d F Y'),
-                'no_revisi'      => '00',
+                'no_dokumen'     => '-',
+                'tanggal_terbit' => '-',
+                'no_revisi'      => '-',
             ];
 
             if (!$tahunAkademikId) {
@@ -99,6 +101,19 @@ class CetakRekapitulasiAuditeeController extends Controller
                 ->whereIn('id', $auditPeriksaIds)
                 ->get()
                 ->keyBy('id');
+            
+            $firstAudit = $auditMap->first();
+            $auditorUserId = $firstAudit ? $firstAudit->users_id : null;
+            $headerCetak = null;
+            if ($auditorUserId) {
+                $headerCetak = SettingHeaderCetak::where('auditor_id', $auditorUserId)
+                    ->first();
+            }
+            $headerNoDokumen = $headerCetak?->no_dokumen ?? '-';
+            $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+                ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+                : '-';
+            $headerNoRevisi = $headerCetak?->no_revisi ?? '-';
 
             // Ambil data temuan (NCR)
             $temuan = AuditPtk::with('user')
@@ -197,9 +212,9 @@ class CetakRekapitulasiAuditeeController extends Controller
             return response()->json([
                 'data'           => $items,
                 'categories'     => $categories,
-                'no_dokumen'     => $defaultResponse['no_dokumen'],
-                'tanggal_terbit' => $defaultResponse['tanggal_terbit'],
-                'no_revisi'      => $defaultResponse['no_revisi'],
+                'no_dokumen'     => $headerNoDokumen,
+                'tanggal_terbit' => $headerTanggalTerbit,
+                'no_revisi'      => $headerNoRevisi,
             ]);
 
         } catch (\Throwable $e) {

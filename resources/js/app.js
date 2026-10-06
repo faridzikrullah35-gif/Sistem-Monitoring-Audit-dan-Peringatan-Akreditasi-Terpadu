@@ -17,6 +17,10 @@ import { initAjaxForms, refreshSelectBox, refreshSelectBoxes, refreshAllSelectBo
 import './components/isi-akses-auditor';
 import './components/indikator-modal.js';
 
+import $ from 'jquery';
+import 'select2';
+import 'select2/dist/css/select2.min.css';
+
 /* =========================
    GLOBAL SETUP
 ========================= */
@@ -26,6 +30,8 @@ window.echarts = echarts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
 window.toastr = toastr;
+window.$ = $;
+window.jQuery = $;
 
 /* =========================
    TOAST WRAPPER (FIX TOTAL)
@@ -437,6 +443,12 @@ window.refreshPenilaianKinerjaTable = () => TableRefresh.refresh('#penilaianKine
 window.refreshPenilaianTable = () => TableRefresh.refresh('#penilaianTableContainer');
 window.refreshEWSTable = () => TableRefresh.refresh('#ewsTableContainer');
 window.refreshAkreditasiTable = () => TableRefresh.refresh('#akreditasiTableContainer');
+window.refreshRoleTable = () => TableRefresh.refresh('#roleTableContainer');
+window.refreshtentangKamiTable = () => TableRefresh.refresh('#tentangKamiTableContainer');
+window.refreshHakAksesFakultasTable = () => TableRefresh.refresh('#tableFakultasContainer');
+window.refreshBeritaTable = () => TableRefresh.refresh('#beritaTableContainer');
+window.refreshSintaTable = () => TableRefresh.refresh('#sintaTableContainer');
+window.refreshPenelitianTable = () => TableRefresh.refresh('#penelitianTableContainer');
 
 // Refresh semua select dengan atribut data-auto-refresh
 window.refreshAllSelectBoxes();

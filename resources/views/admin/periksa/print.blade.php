@@ -187,20 +187,30 @@
             <td class="logo-cell" rowspan="3">
                 <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo">
             </td>
+
             <th class="title" style="width:60%;" rowspan="3">
                 DAFTAR PERIKSA ATAU PERTANYAAN<br>
                 AUDIT INTERNAL UNIT KERJA
             </th>
+
             <td class="label">No Dokumen</td>
-            <td style="width:25%;">UM.BJM-LPM-FORM.DP-AMI-002</td>
+            <td style="width:25%;">
+                {{ $noDokumen }}
+            </td>
         </tr>
+
         <tr>
             <td class="label">Tanggal Terbit</td>
-            <td>{{ now()->format('d-m-Y') }}</td>
+            <td>
+                {{ $tanggalTerbit }}
+            </td>
         </tr>
+
         <tr>
             <td class="label">No. Revisi</td>
-            <td>00</td>
+            <td>
+                {{ $noRevisi }}
+            </td>
         </tr>
     </table>
 

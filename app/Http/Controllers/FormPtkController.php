@@ -11,6 +11,7 @@ use App\Models\AuditPeriksa;
 use App\Models\Auditiee;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -182,6 +183,16 @@ class FormPtkController extends Controller
         */
         $firstAudit = $ptkList->first();
         $auditorUserId = $firstAudit ? $firstAudit->users_id : null;
+        $headerCetak = null;
+        if ($auditorUserId) {
+            $headerCetak = SettingHeaderCetak::where('auditor_id', $auditorUserId)
+                ->first();
+        }
+        $headerNoDokumen = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi = $headerCetak?->no_revisi ?? '-';
 
         $setting = null;
         if ($auditorUserId) {
@@ -290,7 +301,10 @@ class FormPtkController extends Controller
             'kepalaLPM',
             'tanggal_audit',
             'lokasi_audit',
-            'tahunAkademikId'
+            'tahunAkademikId',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi'
         ));
     }
 }

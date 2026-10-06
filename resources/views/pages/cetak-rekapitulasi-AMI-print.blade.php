@@ -197,25 +197,50 @@
         <table class="header-table">
             <tr>
                 <th rowspan="3" class="logo-cell">
-                    <img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75" alt="Logo">
+                    <img
+                        src="https://lpm.umbjm.ac.id/img/logo/a.png"
+                        height="70"
+                        width="75"
+                        alt="Logo"
+                    >
                 </th>
-                <td class="tg-0pky" style="width: 65%;">FORMULIR</td>
-                <td class="tg-0pky" style="width: 10%;">No Dokumen</td>
-                <td class="tg-0pky" style="width: 1%; text-align:center;">:</td>
-                <td class="tg-0pky" style="width: 24%;">{{ $data['no_dokumen'] ?? 'UM.BJM-LPM-FORM.DR-AMI-00' }}</td>
+                <td class="tg-0pky" style="width: 65%;">
+                    FORMULIR
+                </td>
+                <td class="tg-0pky" style="width: 10%;">
+                    No Dokumen
+                </td>
+                <td class="tg-0pky" style="width: 1%; text-align:center;">
+                    :
+                </td>
+                <td class="tg-0pky" style="width: 24%;">
+                    {{ $data['no_dokumen'] ?? '-' }}
+                </td>
             </tr>
             <tr>
                 <td class="title-cell" rowspan="2">
                     DAFTAR REKAPITULASI KETIDAKSESUAIAN DAN PERMINTAAN TINDAKAN PERBAIKAN
                 </td>
-                <td class="tg-0pky">Tanggal Terbit</td>
-                <td class="tg-0pky" style="text-align:center;">:</td>
-                <td class="tg-0pky">{{ $data['tanggal_terbit'] ?? '' }}</td>
+                <td class="tg-0pky">
+                    Tanggal Terbit
+                </td>
+                <td class="tg-0pky" style="text-align:center;">
+                    :
+                </td>
+                <td class="tg-0pky">
+                    {{ $data['tanggal_terbit'] ?? '-' }}
+                </td>
             </tr>
             <tr>
-                <td class="tg-0pky">No. Revisi</td>
-                <td class="tg-0pky" style="text-align:center;">:</td>
-                <td class="tg-0pky">{{ $data['no_revisi'] ?? '00' }}</td>
+                <td class="tg-0pky">
+                    No. Revisi
+                </td>
+                <td class="tg-0pky" style="text-align:center;">
+                    :
+                </td>
+                <td class="tg-0pky">
+                    {{ $data['no_revisi'] ?? '-' }}
+                </td>
             </tr>
         </table>
 

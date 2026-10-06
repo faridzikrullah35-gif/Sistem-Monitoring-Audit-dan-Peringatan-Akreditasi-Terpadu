@@ -181,10 +181,9 @@
         <div class="container">
             <div class="text-center">
                 <span class="section-label"><i class="fas fa-exclamation-triangle"></i> Early Warning System</span>
-                <h1 class="section-title">Status Akreditasi &amp; <span>Peringatan Dini</span></h1>
+                <h1 class="section-title">Early Warning System Status Akreditasi</h1>
                 <p style="color: var(--text-light); max-width: 700px; margin: 0 auto 20px;">
-                    Pantau status akreditasi, tanggal kadaluarsa, dan jadwal upcoming TS (Triwulan/Semester)
-                    setiap program studi secara real-time.
+                    Pantau status akreditasi & tanggal kadaluarsa setiap program studi secara real-time.
                 </p>
                 <a href="{{ route('landing') }}" class="btn-back">
                     <i class="fas fa-arrow-left"></i> Kembali ke Beranda

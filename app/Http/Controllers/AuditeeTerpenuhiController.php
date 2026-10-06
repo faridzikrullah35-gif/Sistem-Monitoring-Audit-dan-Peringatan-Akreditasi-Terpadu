@@ -6,7 +6,9 @@ use App\Models\FormTerpenuhi;
 use App\Models\PertanyaanAmiProdi;
 use App\Models\PertanyaanAmiUnit;
 use App\Models\TahunAkademik;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AuditeeTerpenuhiController extends Controller
 {
@@ -119,6 +121,18 @@ class AuditeeTerpenuhiController extends Controller
         }
 
         $terpenuhiItems = $query->orderBy('id', 'asc')->get();
+        $firstTerpenuhi = $terpenuhiItems->first();
+        $auditorUserId = $firstTerpenuhi ? $firstTerpenuhi->users_id : null;
+        $headerCetak = null;
+        if ($auditorUserId) {
+            $headerCetak = SettingHeaderCetak::where('auditor_id', $auditorUserId)
+                ->first();
+        }
+        $headerNoDokumen = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi = $headerCetak?->no_revisi ?? '-';
 
         // Ambil nama tahun akademik untuk judul
         $tahunAkademik = null;
@@ -130,6 +144,12 @@ class AuditeeTerpenuhiController extends Controller
             $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
         }
 
-        return view('auditee.terpenuhi.print', compact('terpenuhiItems', 'tahunAkademik'));
+        return view('auditee.terpenuhi.print', compact(
+            'terpenuhiItems',
+            'tahunAkademik',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi'
+        ));
     }
 }

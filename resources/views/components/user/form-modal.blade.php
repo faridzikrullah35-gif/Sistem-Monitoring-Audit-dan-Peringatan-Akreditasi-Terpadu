@@ -33,7 +33,7 @@
                     <div class="px-6 py-5 space-y-5 flex-1">
 
                         <x-user.fields.basic-info />
-                        <x-user.fields.role-access />
+                        <x-user.fields.role-access :roles="$roles" />
 
                     </div>
 
@@ -77,7 +77,6 @@
 // ============================================================
 // 1. FUNGSI MODAL (open, close, clear errors)
 // ============================================================
-
 async function openModal(type, id = null) {
     const modal = document.getElementById('userModal');
     const form = document.getElementById('userForm');

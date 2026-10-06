@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Auditiee;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
+use App\Models\SettingHeaderCetak;
 use Carbon\Carbon;
 
 class HasilAuditDaftarPeriksaController extends Controller
@@ -99,13 +100,26 @@ class HasilAuditDaftarPeriksaController extends Controller
             ->get();
 
         $units = User::whereNotNull('unit')->distinct()->pluck('unit');
+        
+        // SUBUNIT: ambil semua subunit unik (buat fallback)
         $subUnits = User::whereNotNull('sub_unit')->distinct()->pluck('sub_unit');
+        
+        // SUBUNIT PER UNIT: untuk dependen dropdown
+        $subUnitsByUnit = User::whereNotNull('unit')
+            ->whereNotNull('sub_unit')
+            ->get()
+            ->groupBy('unit')
+            ->map(function ($items) {
+                return $items->pluck('sub_unit')->unique()->values()->toArray();
+            })
+            ->toArray();
 
         return view('pages.hasil-audit-daftar-periksa', compact(
             'data',
             'tahunAkademiks',
             'units',
-            'subUnits'
+            'subUnits',
+            'subUnitsByUnit'
         ));
     }
 
@@ -149,8 +163,13 @@ class HasilAuditDaftarPeriksaController extends Controller
         // AUDITOR PEMILIK AUDIT
         // =======================
         $auditorUserId = $data->first()->users_id;
-
         $auditorUser = User::find($auditorUserId);
+        $settingHeader = SettingHeaderCetak::latest('id')->first();
+        $noDokumen = $settingHeader?->no_dokumen ?? '-';
+        $tanggalTerbit = $settingHeader?->tanggal_terbit
+            ? Carbon::parse($settingHeader->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $noRevisi = $settingHeader?->no_revisi ?? '-';
 
         // =======================
         // TRANSFORM DATA TABEL
@@ -361,7 +380,10 @@ class HasilAuditDaftarPeriksaController extends Controller
             'leadAuditorName',
             'leadAuditorNidn',
             'kabalai',
-            'kepalaLPM'
+            'kepalaLPM',
+            'noDokumen',
+            'tanggalTerbit',
+            'noRevisi'
         ));
     }
 }

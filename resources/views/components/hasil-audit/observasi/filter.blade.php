@@ -24,15 +24,12 @@
         </select>
     </div>
 
-    {{-- Subunit --}}
+    {{-- Subunit (DEPENDEN) --}}
     <div>
         <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Subunit</label>
         <select id="filter-subunit"
                 class="dropdown-arrow w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-sky-500">
             <option value="">Pilih Subunit</option>
-            @foreach($subUnits as $sub)
-                <option value="{{ $sub }}">{{ $sub }}</option>
-            @endforeach
         </select>
     </div>
 
@@ -66,6 +63,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const printBtn = document.getElementById('btn-print');
     const tableContainer = document.getElementById('table-container');
 
+    // ==========================================
+    // DATA SUBUNIT PER UNIT (dari server)
+    // ==========================================
+    const subUnitData = @json($subUnitsByUnit);
+    
+    // Simpan semua subunit untuk fallback reset
+    const allSubUnits = @json($subUnits);
+
+    // ==========================================
+    // FUNGSI UPDATE SUBUNIT
+    // ==========================================
+    function updateSubunitOptions(selectedUnit = null) {
+        // Clear current options
+        subunit.innerHTML = '<option value="">Pilih Subunit</option>';
+        
+        // HANYA tampilkan subunit jika ada unit yang dipilih
+        if (selectedUnit && subUnitData[selectedUnit]) {
+            const subunits = subUnitData[selectedUnit];
+            subunits.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub;
+                option.textContent = sub;
+                subunit.appendChild(option);
+            });
+        }
+        // Jika tidak ada unit yang dipilih, subunit tetap kosong
+    }
+
+    // ==========================================
+    // FUNGSI LAINNYA
+    // ==========================================
     function getFilters() {
         return {
             tahun_akademik_id: tahun.value,
@@ -100,24 +128,49 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => console.error('AJAX Error:', err));
     }
 
-    [tahun, unit, subunit].forEach(el => {
-        el.addEventListener('change', function () {
-            toggleButtons();
-            updatePrintUrl();
-            fetchData();
-        });
-    });
-
-    resetBtn.addEventListener('click', function () {
-        tahun.value = '';
-        unit.value = '';
-        subunit.value = '';
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    
+    // Unit change -> update subunit
+    unit.addEventListener('change', function () {
+        const selectedUnit = this.value;
+        updateSubunitOptions(selectedUnit);
         toggleButtons();
         updatePrintUrl();
         fetchData();
     });
 
-    // Inisialisasi awal
+    // Tahun change
+    tahun.addEventListener('change', function () {
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
+    });
+
+    // Subunit change
+    subunit.addEventListener('change', function () {
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', function () {
+        tahun.value = '';
+        unit.value = '';
+        subunit.value = '';
+        updateSubunitOptions(null); // Subunit jadi kosong
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
+    });
+
+    // ==========================================
+    // INISIALISASI AWAL
+    // ==========================================
+    // Subunit KOSONG (karena unit belum dipilih)
+    updateSubunitOptions(null);
     toggleButtons();
     updatePrintUrl();
 });

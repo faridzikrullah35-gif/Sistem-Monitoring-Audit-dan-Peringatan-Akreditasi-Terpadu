@@ -4,6 +4,7 @@ namespace App\Services\Prodi;
 
 use App\Models\ProfilProdi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProfilProdiService
 {
@@ -21,12 +22,22 @@ class ProfilProdiService
     {
         $profil = $this->profil();
 
-        $profil->update([
-            'visi'     => $data['visi'],
-            'misi'     => $data['misi'],
-            'tujuan'   => $data['tujuan'],
-            'sasaran'  => $data['sasaran'],
-        ]);
+        $updateData = [
+            'visi'          => $data['visi'],
+            'misi'          => $data['misi'],
+            'tujuan'        => $data['tujuan'],
+            'sasaran'       => $data['sasaran'],
+            'tgl_penetapan' => $data['tgl_penetapan'],
+        ];
+
+        if (isset($data['file']) && $data['file']) {
+            $updateData['file'] = $data['file']->store(
+                'profil-prodi/vmts',
+                'public'
+            );
+        }
+
+        $profil->update($updateData);
 
         return $profil->fresh();
     }
@@ -38,12 +49,29 @@ class ProfilProdiService
     {
         $profil = ProfilProdi::findOrFail($id);
 
-        $profil->update([
-            'visi'     => $data['visi'],
-            'misi'     => $data['misi'],
-            'tujuan'   => $data['tujuan'],
-            'sasaran'  => $data['sasaran'],
-        ]);
+        $updateData = [
+            'visi'          => $data['visi'],
+            'misi'          => $data['misi'],
+            'tujuan'        => $data['tujuan'],
+            'sasaran'       => $data['sasaran'],
+            'tgl_penetapan' => $data['tgl_penetapan'],
+        ];
+
+        if (isset($data['file']) && $data['file']) {
+
+            // Hapus file lama jika ada
+            if ($profil->file && Storage::disk('public')->exists($profil->file)) {
+                Storage::disk('public')->delete($profil->file);
+            }
+
+            // Simpan file baru
+            $updateData['file'] = $data['file']->store(
+                'profil-prodi/vmts',
+                'public'
+            );
+        }
+
+        $profil->update($updateData);
 
         return $profil->fresh();
     }
@@ -87,7 +115,12 @@ class ProfilProdiService
 
     public function deleteVmts($id)
     {
-        return ProfilProdi::destroy($id);
+        $profil = ProfilProdi::findOrFail($id);
+
+        if ($profil->file && Storage::disk('public')->exists($profil->file)) {
+            Storage::disk('public')->delete($profil->file);
+        }
+
+        return $profil->delete();
     }
-    
 }

@@ -7,13 +7,16 @@
 
     <div class="space-y-6">
         <x-identitas-prodi.vmts :profil="$profil" />
+        <x-identitas-prodi.sosial-media :sosialMedia="$sosialMedia" />
         <x-identitas-prodi.rip :dokumenRip="$dokumenRip" />
         <x-identitas-prodi.renstra :dokumenRenstra="$dokumenRenstra" />
         <x-identitas-prodi.renop :dokumenRenop="$dokumenRenop" />
+        <x-identitas-prodi.kegiatan-benchmarking :kegiatanBenchmarking="$kegiatanBenchmarking" />
         <x-identitas-prodi.mou :dokumenMou="$dokumenMou" />
-        <x-identitas-prodi.dtps />
-        <x-identitas-prodi.mahasiswa />
-        <x-identitas-prodi.rasio />
+        <x-identitas-prodi.dtps :dtps="$profil" />
+        <x-identitas-prodi.Jabatan-Fungsional :jabatan="$profil" />
+        <x-identitas-prodi.mahasiswa :mahasiswa="$profil" />
+        <x-identitas-prodi.rasio :profil="$profil" />
     </div>
 @endsection
 
@@ -25,6 +28,16 @@
 
     const updateRouteBase =
     "{{ route('prodi.identitas-prodi.dokumen.update',['id'=>'__ID__']) }}";
+
+    // ======================================================
+    // MAPPING KATEGORI KE NAMA LENGKAP
+    // ======================================================
+    const categoryNames = {
+        'RIP': 'Rencana Induk Pengembangan',
+        'RENSTRA': 'Rencana Strategis',
+        'RENOP': 'Rencana Operasional',
+        'MOU': 'Kerjasama MoU / MoA'
+    };
 
     // ======================================================
     // RESET DATEPICKER
@@ -71,64 +84,38 @@
     // ======================================================
     // OPEN MODAL TAMBAH
     // ======================================================
-
     function openModal(modalId){
-
         const modal=document.getElementById(modalId);
-
         if(!modal) return;
-
         modal.classList.remove("hidden");
-
         document.body.style.overflow="hidden";
-
         const form=modal.querySelector("form");
-
         if(!form) return;
-
         form.reset();
-
         resetDatepicker(form);
-
         form.action="{{ route('prodi.identitas-prodi.dokumen.store') }}";
-
         const method=form.querySelector('[name="_method"]');
-
         if(method){
-
             method.value="POST";
-
         }
-
         const file=form.querySelector('[name="file"]');
-
         if(file){
-
             file.required=true;
-
             file.value="";
-
         }
-
         clearValidationErrors(form);
-
         const title=modal.querySelector("h3");
-
         const kategori=form.querySelector('[name="kategori"]');
-
         if(title && kategori){
-
-            title.innerText="Tambah "+kategori.value;
-
+            const fullName = categoryNames[kategori.value] || kategori.value;
+            title.innerText="Tambah "+fullName;
         }
-
     }
 
 
     // ======================================================
     // OPEN MODAL EDIT
     // ======================================================
-
     function openEditModal(
         modalId,
         id,
@@ -137,59 +124,33 @@
         revisi,
         keterangan
     ){
-
         const modal=document.getElementById(modalId);
-
         if(!modal) return;
-
         modal.classList.remove("hidden");
-
         document.body.style.overflow="hidden";
-
         const form=modal.querySelector("form");
-
         if(!form) return;
-
         form.action=updateRouteBase.replace("__ID__",id);
-
         const method=form.querySelector('[name="_method"]');
-
         if(method){
-
             method.value="PUT";
-
         }
-
         form.querySelector('[name="nama_dokumen"]').value=nama ?? "";
-
         form.querySelector('[name="keterangan"]').value=keterangan ?? "";
-
         setDatepicker(form,"tanggal_penetapan",penetapan);
-
         setDatepicker(form,"tanggal_revisi",revisi);
-
         const file=form.querySelector('[name="file"]');
-
         if(file){
-
             file.required=false;
-
             file.value="";
-
         }
-
         clearValidationErrors(form);
-
         const title=modal.querySelector("h3");
-
         const kategori=form.querySelector('[name="kategori"]');
-
         if(title && kategori){
-
-            title.innerText="Edit "+kategori.value;
-
+            const fullName = categoryNames[kategori.value] || kategori.value;
+            title.innerText="Edit "+fullName;
         }
-
     }
 
 
@@ -316,7 +277,7 @@
     AJAX SUBMIT + TOASTR + AUTO REFRESH TABLE
     ========================================================= */
 
-    // 🔥 HANYA UNTUK DOKUMEN (RIP, RENSTRA, RENOP, MOU)
+    // HANYA UNTUK DOKUMEN (RIP, RENSTRA, RENOP, MOU)
     // Form VMTS ditangani oleh listener sendiri
     document.addEventListener("submit", async function (e) {
 
@@ -429,10 +390,20 @@
         }
     }
 
-    // Buka modal untuk EDIT
-    function openEditModalVmts(modalId, id, visi, misi, tujuan, sasaran) {
+    // Buka modal untuk EDIT VMTS
+    function openEditModalVmts(
+        modalId,
+        id,
+        visi,
+        misi,
+        tujuan,
+        sasaran,
+        file,
+        tglPenetapan
+    ) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
+
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
 
@@ -443,10 +414,18 @@
         form.action = updateRoute.replace('__ID__', id);
 
         const methodInput = form.querySelector('[name="_method"]');
-        if (methodInput) methodInput.value = 'PUT';
+        if (methodInput) {
+            methodInput.value = 'PUT';
+        }
 
         const idInput = document.getElementById('editId');
-        if (idInput) idInput.value = id;
+        if (idInput) {
+            idInput.value = id;
+        }
+
+        // ==================================================
+        // ISI EDITOR VMTS
+        // ==================================================
 
         setVmtsEditorContent('visiEditorModal', visi);
         setVmtsEditorContent('misiEditorModal', misi);
@@ -455,8 +434,92 @@
 
         syncVmtsEditors();
 
+        // ==================================================
+        // ISI TANGGAL PENETAPAN
+        // ==================================================
+
+        const tanggalInput = document.getElementById('tglPenetapanVmts');
+
+        if (tanggalInput) {
+
+            if (tanggalInput._flatpickr) {
+
+                tanggalInput._flatpickr.setDate(
+                    tglPenetapan || null,
+                    true
+                );
+
+            } else {
+
+                tanggalInput.value = tglPenetapan || '';
+
+            }
+        }
+
+        // ==================================================
+        // FILE LAMA
+        // ==================================================
+
+        const fileInput = form.querySelector('[name="file"]');
+
+        if (fileInput) {
+            fileInput.required = false;
+            fileInput.value = '';
+        }
+
+        // Tampilkan file lama
+        const existingFileContainer = document.getElementById('existingVmtsFile');
+
+        if (existingFileContainer) {
+
+            if (file) {
+
+                const fileUrl = "{{ asset('storage') }}/" + file.replace(/^\/+/, '');
+
+                existingFileContainer.innerHTML = `
+                    <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-medium text-gray-500">
+                                    File saat ini
+                                </p>
+
+                                <p class="truncate text-sm text-gray-700">
+                                    ${file.split('/').pop()}
+                                </p>
+                            </div>
+
+                            <a
+                                href="${fileUrl}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="shrink-0 rounded-lg bg-blue-50 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                            >
+                                Lihat File
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+            } else {
+
+                existingFileContainer.innerHTML = `
+                    <div class="mt-2 text-xs text-gray-500">
+                        Belum ada file yang diunggah.
+                    </div>
+                `;
+            }
+        }
+
+        // ==================================================
+        // TITLE
+        // ==================================================
+
         const title = modal.querySelector('h3');
-        if (title) title.innerText = 'Edit VMTS';
+
+        if (title) {
+            title.innerText = 'Edit VMTS';
+        }
 
         clearValidationErrors(form);
     }
@@ -493,10 +556,44 @@
         clearValidationErrors(form);
     }
 
-    // Hapus VMTS
+    // Hapus VMTS - PAKAI CUSTOM CONFIRM DIALOG DARI CONFIRM-DIALOG.JS
     async function deleteVmts(id, tableSelector) {
-        if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
+        // Coba gunakan confirmDialog dari window
+        if (window.confirmDialog && typeof window.confirmDialog === 'function') {
+            window.confirmDialog(
+                'Konfirmasi Hapus',
+                'Yakin ingin menghapus data VMTS?',
+                async function() {
+                    await executeDeleteVmts(id, tableSelector);
+                },
+                function() {
+                    // On Cancel - tidak melakukan apa-apa
+                    console.log('Delete dibatalkan');
+                }
+            );
+        } 
+        // Coba gunakan confirmDialog dari window (nama lain)
+        else if (window.showConfirmDialog && typeof window.showConfirmDialog === 'function') {
+            window.showConfirmDialog(
+                'Konfirmasi Hapus',
+                'Yakin ingin menghapus data VMTS?',
+                async function() {
+                    await executeDeleteVmts(id, tableSelector);
+                },
+                function() {
+                    // On Cancel
+                }
+            );
+        }
+        // Fallback ke confirm bawaan
+        else {
+            if (!confirm('Yakin ingin menghapus data VMTS?')) return;
+            await executeDeleteVmts(id, tableSelector);
+        }
+    }
 
+    // Fungsi eksekusi delete yang terpisah
+    async function executeDeleteVmts(id, tableSelector) {
         const csrf = document.querySelector('meta[name="csrf-token"]').content;
         const url = "{{ route('prodi.identitas-prodi.vmts.destroy', ['id' => '__ID__']) }}".replace('__ID__', id);
 
@@ -515,16 +612,30 @@
                 throw new Error(data.message || 'Gagal menghapus.');
             }
 
-            window.toast?.success(data.message || 'Data berhasil dihapus.');
+            if (window.toast) {
+                window.toast.success(data.message || 'VMTS berhasil dihapus.');
+            } else if (window.toastr) {
+                toastr.success(data.message || 'VMTS berhasil dihapus.');
+            } else {
+                alert(data.message || 'VMTS berhasil dihapus.');
+            }
 
             if (typeof window.refreshTable === 'function') {
                 await window.refreshTable(tableSelector);
+            } else if (typeof window.refreshVmtsTable === 'function') {
+                await window.refreshVmtsTable();
             } else {
                 location.reload();
             }
         } catch (err) {
             console.error(err);
-            window.toast?.error(err.message);
+            if (window.toast) {
+                window.toast.error(err.message);
+            } else if (window.toastr) {
+                toastr.error(err.message);
+            } else {
+                alert(err.message);
+            }
         }
     }
 
@@ -545,23 +656,3 @@
 
 </script>
 @endpush
-
-<style>
-    .rich-editor-wrapper [contenteditable] ul {
-    list-style-type: disc !important;
-    list-style-position: outside !important;
-    padding-left: 24px !important;
-    margin: 8px 0 !important;
-    }
-
-    .rich-editor-wrapper [contenteditable] ol {
-        list-style-type: decimal !important;
-        list-style-position: outside !important;
-        padding-left: 24px !important;
-        margin: 8px 0 !important;
-    }
-
-    .rich-editor-wrapper [contenteditable] li {
-        display: list-item !important;
-    }
-</style>

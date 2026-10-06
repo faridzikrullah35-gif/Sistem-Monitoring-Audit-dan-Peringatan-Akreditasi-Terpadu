@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Helpers\Menu\AdminMenu;
 use App\Helpers\Menu\AuditorMenu;
 use App\Helpers\Menu\ProdiMenu;
+use App\Helpers\Menu\FakultasMenu;
 
 class MenuHelper
 {
@@ -32,46 +33,166 @@ class MenuHelper
         $menuItems = [];
         $otherItems = [];
 
-        switch ($user->role) {
+        // =====================================================
+        // ADMIN ASLI
+        // role = admin
+        // =====================================================
+        if ($user->role === 'admin') {
 
-            case 'admin':
-                $menuItems = AdminMenu::get();
-                $otherItems = AdminMenu::getOthers();
-                break;
+            $menuItems = AdminMenu::get();
+            $otherItems = AdminMenu::getOthers();
 
-            case 'auditor':
-            case 'unit_kerja':
-                $menuItems = AuditorMenu::get();
-                break;
-
-            case 'prodi':
-                $menuItems = ProdiMenu::get();
-                break;
-
-            default:
-                $menuItems = [];
-                $otherItems = [];
-                break;
         }
 
-        // tambahkan global menu
+        // =====================================================
+        // ADMIN LPM
+        // role = unit_kerja
+        // unit = LPM
+        //
+        // LPM memiliki akses:
+        // - Menu Admin
+        // - Menu Audit Mutu Internal
+        // - Menu Profile Prodi
+        //
+        // Tetapi:
+        // - Dashboard hanya satu (Dashboard Admin)
+        // - Tidak mengambil Dashboard Auditor
+        // - Tidak mengambil Dashboard Prodi
+        // =====================================================
+        elseif ($user->isAdminAccess()) {
+
+            $adminMenu = AdminMenu::get();
+            $auditorMenu = AuditorMenu::get();
+            $prodiMenu = ProdiMenu::get();
+
+            // -------------------------------------------------
+            // Ambil Profile dari ProdiMenu
+            // -------------------------------------------------
+            $prodiProfile = collect($prodiMenu)
+                ->first(function ($item) {
+                    return ($item['name'] ?? '') === 'Profile';
+                });
+
+            // -------------------------------------------------
+            // Bersihkan menu Auditor
+            //
+            // Buang:
+            // - Dashboard Auditor
+            // - Profile Auditor jika ada
+            //
+            // Karena LPM sudah menggunakan Dashboard Admin
+            // dan Profile versi Prodi.
+            // -------------------------------------------------
+            $auditorMenu = array_values(
+                array_filter($auditorMenu, function ($item) {
+
+                    $name = $item['name'] ?? '';
+
+                    return !in_array($name, [
+                        'Dashboard',
+                        'Profile',
+                    ], true);
+                })
+            );
+
+            // -------------------------------------------------
+            // Gabungkan:
+            // Admin + Auditor tanpa Dashboard/Profile
+            // -------------------------------------------------
+            $menuItems = array_merge(
+                $adminMenu,
+                $auditorMenu
+            );
+
+            // -------------------------------------------------
+            // Tambahkan Profile versi Prodi
+            // -------------------------------------------------
+            if ($prodiProfile) {
+                $menuItems[] = $prodiProfile;
+            }
+
+            $otherItems = AdminMenu::getOthers();
+        }
+
+        // =====================================================
+        // ROLE LAIN
+        // =====================================================
+        else {
+
+            switch ($user->role) {
+
+                // -------------------------------------------------
+                // AUDITOR
+                // -------------------------------------------------
+                case 'auditor':
+
+                    $menuItems = AuditorMenu::get();
+
+                    break;
+
+                // -------------------------------------------------
+                // UNIT KERJA
+                //
+                // Unit Kerja biasa = Auditee
+                // menggunakan menu Prodi.
+                //
+                // Unit Kerja LPM sudah ditangani
+                // oleh isAdminAccess() di atas.
+                // -------------------------------------------------
+                case 'unit_kerja':
+
+                    $menuItems = ProdiMenu::get();
+
+                    break;
+
+                // -------------------------------------------------
+                // PRODI
+                // -------------------------------------------------
+                case 'prodi':
+
+                    $menuItems = ProdiMenu::get();
+
+                    break;
+
+                // -------------------------------------------------
+                // FAKULTAS
+                // -------------------------------------------------
+                case 'fakultas':
+
+                    $menuItems = FakultasMenu::get();
+
+                    break;
+
+                // -------------------------------------------------
+                // ROLE TIDAK DIKENAL
+                // -------------------------------------------------
+                default:
+
+                    $menuItems = [];
+                    $otherItems = [];
+
+                    break;
+            }
+        }
+
+        // =====================================================
+        // GLOBAL MENU
+        // =====================================================
         $otherItems = array_merge(
             $otherItems,
             self::getGlobalItems()
         );
 
         return [
-
             [
                 'title' => 'Menu',
-                'items' => $menuItems
+                'items' => $menuItems,
             ],
 
             [
                 'title' => 'Lainnya',
-                'items' => $otherItems
-            ]
-
+                'items' => $otherItems,
+            ],
         ];
     }
 
@@ -111,6 +232,26 @@ class MenuHelper
                         
             'clipboard-document-check' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5.25H7.5A2.25 2.25 0 0 0 5.25 7.5v11.25A2.25 2.25 0 0 0 7.5 21h9A2.25 2.25 0 0 0 18.75 18.75V7.5A2.25 2.25 0 0 0 16.5 5.25H15M9 5.25A2.25 2.25 0 0 1 11.25 3h1.5A2.25 2.25 0 0 1 15 5.25M9 5.25A2.25 2.25 0 0 0 11.25 7.5h1.5A2.25 2.25 0 0 0 15 5.25m-6.75 8.25 2.25 2.25 5.25-5.25"/>
+            </svg>',
+
+            'landing-page' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 5.5C4 4.67157 4.67157 4 5.5 4H18.5C19.3284 4 20 4.67157 20 5.5V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V5.5Z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+                <path d="M4 8H20"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"/>
+                <path d="M7 6H7.01M9.5 6H9.51"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"/>
+                <path d="M7 12H17M7 15H14M7 18H11"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"/>
             </svg>',
         ];
 

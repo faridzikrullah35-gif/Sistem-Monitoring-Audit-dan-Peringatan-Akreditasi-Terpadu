@@ -71,6 +71,12 @@ const TableRefresh = {
             '#penilaianTableContainer',
             '#ewsTableContainer',
             '#akreditasiTableContainer',
+            '#roleTableContainer',
+            '#tentangKamiTableContainer',
+            '#tableFakultasContainer',
+            '#beritaTableContainer',
+            '#sintaTableContainer',
+            '#penelitianTableContainer',
         ];
 
         for (const tableId of tables) {

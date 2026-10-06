@@ -11,6 +11,7 @@ use App\Models\SettingScore;
 use App\Models\User;
 use App\Models\AksesPertanyaanProdi;
 use App\Models\AksesPertanyaanUnit;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -52,13 +53,18 @@ class CetakRekapitulasiController extends Controller
         $user = auth()->user();
         $userId = $user->id;
         $tahunAkademikId = $request->query('tahun_akademik_id');
+        $settingHeader = SettingHeaderCetak::where('auditor_id', $userId)
+            ->where('role', $user->role)
+            ->first();
 
         $defaultResponse = [
             'data' => [],
             'categories' => [],
-            'no_dokumen' => 'UM.BJM-LPM-FORM.DR-AMI-00',
-            'tanggal_terbit' => date('d F Y'),
-            'no_revisi' => '00',
+            'no_dokumen' => $settingHeader?->no_dokumen ?? '-',
+            'tanggal_terbit' => $settingHeader?->tanggal_terbit
+                ? $settingHeader->tanggal_terbit->format('d-m-Y')
+                : '-',
+            'no_revisi' => $settingHeader?->no_revisi ?? '-',
         ];
 
         if (!$tahunAkademikId) {
@@ -215,9 +221,11 @@ class CetakRekapitulasiController extends Controller
         return response()->json([
             'data' => $items,
             'categories' => $categories,
-            'no_dokumen' => 'UM.BJM-LPM-FORM.DR-AMI-00',
-            'tanggal_terbit' => date('d F Y'),
-            'no_revisi' => '00',
+            'no_dokumen' => $settingHeader?->no_dokumen ?? '-',
+            'tanggal_terbit' => $settingHeader?->tanggal_terbit
+                ? $settingHeader->tanggal_terbit->format('d-m-Y')
+                : '-',
+            'no_revisi' => $settingHeader?->no_revisi ?? '-',
         ]);
     }
 

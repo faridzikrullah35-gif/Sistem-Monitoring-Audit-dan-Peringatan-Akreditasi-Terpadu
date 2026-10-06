@@ -4,93 +4,98 @@
 
 <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
     <div class="mb-4 flex items-center justify-between">
-        <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">RENOP</h4>
+        <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">Rencana Operasional</h4>
         <button type="button" class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-800" onclick="openModal('modalRenop')">
             <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Tambah
         </button>
     </div>
 
-    <!-- PENTING: id ini yang dipakai TableRefresh, data-url wajib biar refreshTable() gak return false diam-diam -->
-    <div id="renopTableContainer" class="overflow-x-auto" data-url="{{ route('prodi.identitas-prodi') }}">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                <tr>
-                    <th class="px-4 py-3">No</th>
-                    <th class="px-4 py-3">Nama Dokumen</th>
-                    <th class="px-4 py-3">File</th>
-                    <th class="px-4 py-3">Tgl Penetapan</th>
-                    <th class="px-4 py-3">Tgl Revisi</th>
-                    <th class="px-4 py-3">Keterangan</th>
-                    <th class="px-4 py-3 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($dokumenRenop ?? [] as $item)
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <td class="px-4 py-2">{{ $loop->iteration }}</td>
-                    <td class="px-4 py-2">{{ $item->nama_dokumen }}</td>
-                    <td class="px-4 py-2">
-                        <a href="{{ Storage::url($item->file) }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
-                            {{ basename($item->file) }}
-                        </a>
-                    </td>
-                    <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tanggal_penetapan)->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2">{{ $item->tanggal_revisi ? \Carbon\Carbon::parse($item->tanggal_revisi)->format('d/m/Y') : '-' }}</td>
-                    <td class="px-4 py-2">{{ $item->keterangan ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center">
-                        <div class="flex items-center justify-center gap-2">
-
-                            <!-- EDIT -->
-                            <button
-                                type="button"
-                                onclick="openEditModal(
-                                    'modalRenop',
-                                    {{ $item->id }},
-                                    '{{ $item->nama_dokumen }}',
-                                    '{{ $item->tanggal_penetapan }}',
-                                    '{{ $item->tanggal_revisi }}',
-                                    '{{ $item->keterangan }}'
-                                )"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all duration-200"
+    <div class="relative w-full rounded-lg border border-gray-200 dark:border-gray-700">
+        <div id="renopTableContainer" class="overflow-auto" style="max-height: 600px;" data-url="{{ route('prodi.identitas-prodi') }}">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead>
+                    <tr>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">No</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Nama Dokumen</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">File</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Tgl Penetapan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Tgl Revisi</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Keterangan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-center text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($dokumenRenop ?? [] as $item)
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                        <td class="px-4 py-2">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2">{{ $item->nama_dokumen }}</td>
+                        <td class="px-4 py-2">
+                            <a 
+                                href="{{ Storage::url($item->file) }}" 
+                                target="_blank" 
+                                class="text-blue-600 hover:underline dark:text-blue-400"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                                Edit
-                            </button>
-
-                            <!-- DELETE -->
-                            <button
-                                type="button"
-                                onclick="deleteDokumen({{ $item->id }}, '#renopTableContainer')"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Hapus
-                            </button>
-
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada data RENOP.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+                                Download PDF
+                            </a>
+                        </td>
+                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tanggal_penetapan)->format('d/m/Y') }}</td>
+                        <td class="px-4 py-2">{{ $item->tanggal_revisi ? \Carbon\Carbon::parse($item->tanggal_revisi)->format('d/m/Y') : '-' }}</td>
+                        <td class="px-4 py-2">{{ $item->keterangan ?? '-' }}</td>
+                        <td class="px-4 py-2 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button
+                                    type="button"
+                                    onclick="openEditModal(
+                                        'modalRenop',
+                                        {{ $item->id }},
+                                        '{{ $item->nama_dokumen }}',
+                                        '{{ $item->tanggal_penetapan }}',
+                                        '{{ $item->tanggal_revisi }}',
+                                        '{{ $item->keterangan }}'
+                                    )"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all duration-200"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    onclick="deleteDokumen({{ $item->id }}, '#renopTableContainer')"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada data Rencana Operasional.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>        
     </div>
 </div>
 
 <!-- Modal RENOP -->
-<div id="modalRenop" tabindex="-1" class="modal-overlay fixed inset-0 z-50 hidden h-full w-full overflow-y-auto bg-black/50 p-4" data-table-id="#renopTableContainer">
-    <div class="relative mx-auto max-w-md top-20">
-        <div class="relative rounded-lg bg-white shadow dark:bg-gray-800">
+<div id="modalRenop" 
+     tabindex="-1" 
+     class="modal-overlay fixed inset-0 z-50 hidden h-full w-full overflow-y-auto bg-black/50 p-4" 
+     style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
+     data-table-id="#renopTableContainer"
+     onclick="event.stopPropagation();">
+    <div class="relative mx-auto max-w-md top-20" onclick="event.stopPropagation();">
+        <div class="relative rounded-lg bg-white shadow dark:bg-gray-800" onclick="event.stopPropagation();">
             <div class="flex items-center justify-between rounded-t border-b p-4 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah RENOP</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modalRenopTitle">Tambah Rencana Operasional</h3>
                 <button type="button" class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg p-1.5 text-sm dark:hover:bg-gray-700 dark:hover:text-white" onclick="closeModal('modalRenop')">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>

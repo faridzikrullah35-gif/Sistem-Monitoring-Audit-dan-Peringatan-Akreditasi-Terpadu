@@ -13,6 +13,7 @@ use App\Models\IsiAksesAuditor;
 use App\Models\Auditiee;
 use App\Models\AksesPertanyaanProdi;
 use App\Models\AksesPertanyaanUnit;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -135,6 +136,9 @@ class FormKetidaksesuaianNcrController extends Controller
         $user = auth()->user();
         $userId = auth()->id();
         $tahunAkademikId = $request->tahun_akademik_id;
+        $settingHeaderCetak = SettingHeaderCetak::where('auditor_id', auth()->id())
+            ->where('role', auth()->user()->role)
+            ->first();
 
         /*
         |----------------------------------------
@@ -157,7 +161,7 @@ class FormKetidaksesuaianNcrController extends Controller
                 });
             });
         })
-        ->orderBy('id', 'desc')
+        ->orderBy('created_at', 'asc')
         ->get();
 
         /*
@@ -287,7 +291,8 @@ class FormKetidaksesuaianNcrController extends Controller
             'kepalaLPM',
             'tanggal_audit',
             'lokasi_audit',
-            'tahunAkademikId'
+            'tahunAkademikId',
+            'settingHeaderCetak',
         ));
     }
 

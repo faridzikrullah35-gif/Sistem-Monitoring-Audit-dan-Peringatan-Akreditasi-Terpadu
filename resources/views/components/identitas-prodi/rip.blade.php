@@ -2,95 +2,139 @@
     'dokumenRip'
 ])
 
+@php
+    $totalRip = ($dokumenRip ?? collect())->count();
+    $perPageOptions = [];
+    $baseOptions = [5, 10, 25, 50, 100];
+    foreach ($baseOptions as $opt) {
+        if ($opt < $totalRip) $perPageOptions[] = $opt;
+    }
+    if ($totalRip > 0) $perPageOptions[] = $totalRip;
+    $defaultPerPage = $totalRip > 10 ? 10 : ($totalRip > 0 ? $totalRip : 10);
+@endphp
+
 <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
     <div class="mb-4 flex items-center justify-between">
-        <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">RIP</h4>
+        <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">Rencana Induk Pengembangan</h4>
         <button type="button" class="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-700 dark:hover:bg-blue-800" onclick="openModal('modalRip')">
             <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Tambah
         </button>
     </div>
 
-    <!-- PENTING: id ini yang dipakai TableRefresh -->
-    <div id="ripTableContainer" class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                <tr>
-                    <th class="px-4 py-3">No</th>
-                    <th class="px-4 py-3">Nama Dokumen</th>
-                    <th class="px-4 py-3">File</th>
-                    <th class="px-4 py-3">Tgl Penetapan</th>
-                    <th class="px-4 py-3">Tgl Revisi</th>
-                    <th class="px-4 py-3">Keterangan</th>
-                    <th class="px-4 py-3 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($dokumenRip ?? [] as $item)
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <td class="px-4 py-2">{{ $loop->iteration }}</td>
-                    <td class="px-4 py-2">{{ $item->nama_dokumen }}</td>
-                    <td class="px-4 py-2">
-                        <a href="{{ Storage::url($item->file) }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
-                            {{ basename($item->file) }}
-                        </a>
-                    </td>
-                    <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tanggal_penetapan)->format('d/m/Y') }}</td>
-                    <td class="px-4 py-2">{{ $item->tanggal_revisi ? \Carbon\Carbon::parse($item->tanggal_revisi)->format('d/m/Y') : '-' }}</td>
-                    <td class="px-4 py-2">{{ $item->keterangan ?? '-' }}</td>
-                    <td class="px-4 py-2 text-center">
-                        <div class="flex items-center justify-center gap-2">
-
-                            <!-- EDIT -->
-                            <button
-                                type="button"
-                                onclick="openEditModal(
-                                    'modalRip',
-                                    {{ $item->id }},
-                                    '{{ $item->nama_dokumen }}',
-                                    '{{ $item->tanggal_penetapan }}',
-                                    '{{ $item->tanggal_revisi }}',
-                                    '{{ $item->keterangan }}'
-                                )"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all duration-200"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                                Edit
-                            </button>
-
-                            <!-- DELETE -->
-                            <button
-                                type="button"
-                                onclick="deleteDokumen({{ $item->id }}, '#ripTableContainer')"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Hapus
-                            </button>
-
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="7" class="text-center py-4 text-gray-500">Belum ada data RIP.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+    {{-- Toolbar: Info + Per Page --}}
+    <div class="mb-3 flex flex-col sm:flex-row items-center justify-between gap-3 
+                bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2.5">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            <span id="ripTotalDisplay">
+                Total: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $totalRip }}</span> data
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <label for="ripPerPage" class="text-sm text-gray-500 dark:text-gray-400">Tampilkan:</label>
+            <select id="ripPerPage" class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                @if($totalRip > 0)
+                    @foreach($perPageOptions as $option)
+                        @php
+                            $isAll = $option === $totalRip;
+                            $isSelected = $option === $defaultPerPage;
+                        @endphp
+                        <option value="{{ $option }}" {{ $isSelected ? 'selected' : '' }}>
+                            @if($isAll && $totalRip > 100) Semua ({{ $totalRip }})
+                            @elseif($isAll) Semua
+                            @else {{ $option }}
+                            @endif
+                        </option>
+                    @endforeach
+                @else
+                    <option value="10">10</option>
+                @endif
+            </select>
+        </div>
     </div>
+
+    <div class="relative w-full rounded-lg border border-gray-200 dark:border-gray-700">
+        <div id="ripTableScroll" class="overflow-auto" style="max-height: 600px;">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead>
+                    <tr>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">No</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Nama Dokumen</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">File</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Tgl Penetapan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Tgl Revisi</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Keterangan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-center text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-300">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="ripTableBody">
+                    @forelse($dokumenRip ?? [] as $item)
+                    <tr class="rip-row border-b border-gray-200 dark:border-gray-700">
+                        <td class="px-4 py-2 no">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2">{{ $item->nama_dokumen }}</td>
+                        <td class="px-4 py-2">
+                            <a href="{{ Storage::url($item->file) }}" target="_blank" class="text-blue-600 hover:underline dark:text-blue-400">
+                                Download PDF
+                            </a>
+                        </td>
+                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tanggal_penetapan)->format('d/m/Y') }}</td>
+                        <td class="px-4 py-2">{{ $item->tanggal_revisi ? \Carbon\Carbon::parse($item->tanggal_revisi)->format('d/m/Y') : '-' }}</td>
+                        <td class="px-4 py-2">{{ $item->keterangan ?? '-' }}</td>
+                        <td class="px-4 py-2 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button type="button"
+                                    onclick="openEditModal(
+                                        'modalRip',
+                                        {{ $item->id }},
+                                        '{{ $item->nama_dokumen }}',
+                                        '{{ $item->tanggal_penetapan }}',
+                                        '{{ $item->tanggal_revisi }}',
+                                        '{{ $item->keterangan }}'
+                                    )"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button type="button"
+                                    onclick="deleteDokumen({{ $item->id }}, '#ripTableScroll')"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr id="ripEmptyState">
+                        <td colspan="7" class="text-center py-4 text-gray-500">Belum ada data Rencana Induk Pengembangan.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Pagination Controls --}}
+    <div id="ripPaginationContainer" class="mt-4"></div>
 </div>
 
 <!-- Modal RIP -->
-<div id="modalRip" tabindex="-1" class="modal-overlay fixed inset-0 z-50 hidden h-full w-full overflow-y-auto bg-black/50 p-4" data-table-id="#ripTableContainer">
-    <div class="relative mx-auto max-w-md top-20">
-        <div class="relative rounded-lg bg-white shadow dark:bg-gray-800">
+<div id="modalRip" 
+     tabindex="-1" 
+     class="modal-overlay fixed inset-0 z-50 hidden h-full w-full overflow-y-auto bg-black/50 p-4" 
+     style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
+     data-table-id="#ripTableScroll"
+     onclick="event.stopPropagation();">
+    <div class="relative mx-auto max-w-md top-20" onclick="event.stopPropagation();">
+        <div class="relative rounded-lg bg-white shadow dark:bg-gray-800" onclick="event.stopPropagation();">
             <div class="flex items-center justify-between rounded-t border-b p-4 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Tambah RIP</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modalRipTitle">Tambah Rencana Induk Pengembangan</h3>
                 <button type="button" class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg p-1.5 text-sm dark:hover:bg-gray-700 dark:hover:text-white" onclick="closeModal('modalRip')">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
@@ -131,3 +175,128 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+// ============================================================
+//  RIP PAGINATION (Client-side, tanpa reload)
+// ============================================================
+window.ripPaginationState = {
+    currentPage: 1,
+    perPage: {{ $defaultPerPage }},
+    totalData: {{ $totalRip }}
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const perPageSelect = document.getElementById('ripPerPage');
+    if (perPageSelect) {
+        perPageSelect.addEventListener('change', function() {
+            window.ripPaginationState.perPage = parseInt(this.value);
+            window.ripPaginationState.currentPage = 1;
+            renderRipPagination();
+        });
+    }
+    renderRipPagination();
+});
+
+window.renderRipPagination = function() {
+    const state = window.ripPaginationState;
+    const allRows = Array.from(document.querySelectorAll('.rip-row'));
+    state.totalData = allRows.length;
+
+    const totalDisplay = document.getElementById('ripTotalDisplay');
+    if (totalDisplay) {
+        totalDisplay.innerHTML = `Total: <span class="font-semibold text-gray-800 dark:text-gray-200">${state.totalData}</span> data`;
+    }
+
+    const totalPages = Math.ceil(state.totalData / state.perPage) || 1;
+    if (state.currentPage > totalPages) state.currentPage = totalPages;
+    if (state.currentPage < 1) state.currentPage = 1;
+
+    const startIndex = (state.currentPage - 1) * state.perPage;
+    const endIndex = Math.min(startIndex + state.perPage, state.totalData);
+
+    allRows.forEach((row, index) => {
+        if (index >= startIndex && index < endIndex) {
+            row.style.display = '';
+            const td = row.querySelector('td.no');
+            if (td) td.textContent = index + 1;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    const emptyRow = document.getElementById('ripEmptyState');
+    if (emptyRow) emptyRow.style.display = state.totalData === 0 ? '' : 'none';
+
+    renderRipPaginationControls(state.currentPage, totalPages, state.totalData, startIndex, endIndex);
+};
+
+function renderRipPaginationControls(currentPage, totalPages, totalData, from, to) {
+    const container = document.getElementById('ripPaginationContainer');
+    if (!container) return;
+    if (totalData === 0) { container.innerHTML = ''; return; }
+
+    const fromDisplay = from + 1;
+    let html = `
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 
+                    bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Menampilkan <span class="font-semibold text-gray-700 dark:text-gray-300">${fromDisplay}</span>
+                sampai <span class="font-semibold text-gray-700 dark:text-gray-300">${to}</span>
+                dari <span class="font-semibold text-gray-700 dark:text-gray-300">${totalData}</span> data
+            </div>
+    `;
+
+    if (totalPages > 1) {
+        html += `<nav class="flex items-center gap-1">`;
+        html += `<button type="button" onclick="goToRipPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}
+            class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+                ${currentPage <= 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>`;
+
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+        if (startPage > 1) {
+            html += createRipPageButton(1, currentPage);
+            if (startPage > 2) html += `<span class="px-2 text-gray-400">...</span>`;
+        }
+        for (let i = startPage; i <= endPage; i++) html += createRipPageButton(i, currentPage);
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) html += `<span class="px-2 text-gray-400">...</span>`;
+            html += createRipPageButton(totalPages, currentPage);
+        }
+
+        html += `<button type="button" onclick="goToRipPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}
+            class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+                ${currentPage >= totalPages ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button></nav>`;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function createRipPageButton(page, currentPage) {
+    const isActive = page === currentPage;
+    return `<button type="button" onclick="goToRipPage(${page})"
+        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+            ${isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+        ${page}
+    </button>`;
+}
+
+window.goToRipPage = function(page) {
+    const state = window.ripPaginationState;
+    const totalPages = Math.ceil(state.totalData / state.perPage) || 1;
+    if (page < 1 || page > totalPages || page === state.currentPage) return;
+    state.currentPage = page;
+    renderRipPagination();
+    document.getElementById('ripTableScroll')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+</script>
+@endpush

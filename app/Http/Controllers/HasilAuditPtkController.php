@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Auditiee;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
+use App\Models\SettingHeaderCetak;
 use Carbon\Carbon;
 
 class HasilAuditPtkController extends Controller
@@ -134,15 +135,15 @@ class HasilAuditPtkController extends Controller
                 \App\Models\PertanyaanAmiProdi::select('tahun_akademik_id')
                     ->whereIn('id', function ($q) {
                         $q->select('pertanyaan_ami_prodi_id')
-                          ->from('audit_ptk')
-                          ->whereNotNull('pertanyaan_ami_prodi_id');
+                        ->from('audit_ptk')
+                        ->whereNotNull('pertanyaan_ami_prodi_id');
                     })
                     ->union(
                         \App\Models\PertanyaanAmiUnit::select('tahun_akademik_id')
                             ->whereIn('id', function ($q) {
                                 $q->select('pertanyaan_ami_unit_id')
-                                  ->from('audit_ptk')
-                                  ->whereNotNull('pertanyaan_ami_unit_id');
+                                ->from('audit_ptk')
+                                ->whereNotNull('pertanyaan_ami_unit_id');
                             })
                     )
             )
@@ -150,13 +151,26 @@ class HasilAuditPtkController extends Controller
             ->get();
 
         $units = User::whereNotNull('unit')->distinct()->pluck('unit');
+        
+        // SUBUNIT: ambil semua subunit unik (buat fallback)
         $subUnits = User::whereNotNull('sub_unit')->distinct()->pluck('sub_unit');
+        
+        // SUBUNIT PER UNIT: untuk dependen dropdown
+        $subUnitsByUnit = User::whereNotNull('unit')
+            ->whereNotNull('sub_unit')
+            ->get()
+            ->groupBy('unit')
+            ->map(function ($items) {
+                return $items->pluck('sub_unit')->unique()->values()->toArray();
+            })
+            ->toArray();
 
         return view('pages.hasil-audit-ptk', compact(
             'data',
             'tahunAkademiks',
             'units',
-            'subUnits'
+            'subUnits',
+            'subUnitsByUnit'
         ));
     }
 
@@ -193,6 +207,12 @@ class HasilAuditPtkController extends Controller
     $first = $data->first();
     $auditorUserId = $first->users_id;
     $auditorUser = User::find($auditorUserId);
+    $settingHeader = SettingHeaderCetak::latest('id')->first();
+    $noDokumen = $settingHeader?->no_dokumen ?? '-';
+    $tanggalTerbit = $settingHeader?->tanggal_terbit
+        ? Carbon::parse($settingHeader->tanggal_terbit)->format('d-m-Y')
+        : '-';
+    $noRevisi = $settingHeader?->no_revisi ?? '-';
 
     // Ambil setting akses auditor untuk tanggal audit
     $setting = SettingAksesAuditor::where('user_id', $auditorUserId)->first();
@@ -310,7 +330,10 @@ class HasilAuditPtkController extends Controller
         'lokasi_audit',
         'auditees',
         'auditors',
-        'tanggal_audit_print'
+        'tanggal_audit_print',
+        'noDokumen',
+        'tanggalTerbit',
+        'noRevisi'
     ));
 }
 }

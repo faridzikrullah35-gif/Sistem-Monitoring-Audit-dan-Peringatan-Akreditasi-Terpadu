@@ -235,7 +235,7 @@
                 <td style="width: 50%; font-size: 14px; letter-spacing: 1px;">FORMULIR<br></td>
                 <td style="width: 12%;">No Dokumen</td>
                 <td style="width: 1%; text-align:center;">:</td>
-                <td style="width: 27%;">UM.BJM-LPM-FORM.DR-AMI-00</td>
+                <td style="width: 27%;">{{ $no_dokumen }}</td>
             </tr>
             <tr>
                 <td class="title-cell" rowspan="2">
@@ -243,20 +243,14 @@
                 </td>
                 <td>Tanggal Terbit</td>
                 <td style="text-align:center;">:</td>
-                <td>{{ now()->translatedFormat('d F Y') }}</td>
+                <td>{{ $tanggal_terbit }}</td>
             </tr>
             <tr>
                 <td>No. Revisi</td>
                 <td style="text-align:center;">:</td>
-                <td>00</td>
+                <td>{{ $no_revisi }}</td>
             </tr>
         </table>
-
-        {{-- LOG STATUS --}}
-        <div class="log-status">
-            <span style="display:block; margin-bottom: 3px;">LOG STATUS</span>
-            PERIODE : {{ $tahunNama }}
-        </div>
 
         {{-- TABEL UTAMA --}}
         <table class="main-table">

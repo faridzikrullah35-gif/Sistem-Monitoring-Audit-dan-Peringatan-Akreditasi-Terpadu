@@ -9,6 +9,7 @@ use App\Models\PertanyaanAmiUnit;
 use App\Models\TahunAkademik;
 use App\Models\AksesPertanyaanProdi;
 use App\Models\AksesPertanyaanUnit;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 
 class FormTerpenuhiController extends Controller
@@ -134,7 +135,8 @@ class FormTerpenuhiController extends Controller
      */
     public function print(Request $request)
     {
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
         $tahunAkademikId = $request->tahun_akademik_id;
         $relasiPertanyaan = $this->getPertanyaanRelation();
 
@@ -152,6 +154,11 @@ class FormTerpenuhiController extends Controller
         ->orderBy('id', 'asc')
         ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | TAHUN AKADEMIK
+        |--------------------------------------------------------------------------
+        */
         $tahunAkademik = null;
         if ($tahunAkademikId) {
             $tahunAkademik = TahunAkademik::find($tahunAkademikId);
@@ -159,10 +166,37 @@ class FormTerpenuhiController extends Controller
             $first = $terpenuhiItems->first();
             $pertanyaan = $first->{$relasiPertanyaan};
             $tahunId = $pertanyaan->tahun_akademik_id ?? null;
-            $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
+            $tahunAkademik = $tahunId
+                ? TahunAkademik::find($tahunId)
+                : null;
         }
 
-        return view('auditor.form-terpenuhi.print', compact('terpenuhiItems', 'tahunAkademik'));
+        /*
+        |--------------------------------------------------------------------------
+        | SETTING HEADER CETAK
+        |--------------------------------------------------------------------------
+        */
+        $settingHeader = SettingHeaderCetak::where('auditor_id', $userId)
+            ->where('role', $user->role)
+            ->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEFAULT JIKA BELUM DISETTING
+        |--------------------------------------------------------------------------
+        */
+        $noDokumen = $settingHeader?->no_dokumen ?? '-';
+        $tanggalTerbit = $settingHeader?->tanggal_terbit
+            ? $settingHeader->tanggal_terbit->format('d-m-Y')
+            : '-';
+        $revisi = $settingHeader?->no_revisi ?? '-';
+        return view('auditor.form-terpenuhi.print', compact(
+            'terpenuhiItems',
+            'tahunAkademik',
+            'noDokumen',
+            'tanggalTerbit',
+            'revisi'
+        ));
     }
 
     /**

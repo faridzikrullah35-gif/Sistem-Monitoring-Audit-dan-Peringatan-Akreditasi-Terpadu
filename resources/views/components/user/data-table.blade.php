@@ -57,58 +57,55 @@
                         </td>
 
                         <!-- Aksi -->
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex items-center justify-end gap-2">
-                            
-                            <!-- Tombol Edit (Kuning) -->
-                            <button 
-                                onclick="openModal('edit', {{ $user->id }})"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg 
-                                    bg-amber-100 hover:bg-amber-200 
-                                    text-amber-700 hover:text-amber-900 
-                                    dark:bg-amber-900/30 dark:hover:bg-amber-900/50 
-                                    dark:text-amber-400 dark:hover:text-amber-300
-                                    transition-all duration-200 
-                                    focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2
-                                    dark:focus:ring-offset-gray-800"
-                                title="Edit user"
-                            >
-                                <!-- Icon Pencil (edit) -->
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                <span class="hidden sm:inline">Edit</span>
-                            </button>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end gap-2">
+                                
+                                <!-- Tombol Edit (Kuning) -->
+                                <button 
+                                    onclick="openModal('edit', {{ $user->id }})"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg 
+                                        bg-amber-100 hover:bg-amber-200 
+                                        text-amber-700 hover:text-amber-900 
+                                        dark:bg-amber-900/30 dark:hover:bg-amber-900/50 
+                                        dark:text-amber-400 dark:hover:text-amber-300
+                                        transition-all duration-200 
+                                        focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2
+                                        dark:focus:ring-offset-gray-800"
+                                    title="Edit user"
+                                >
+                                    <!-- Icon Pencil (edit) -->
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span class="hidden sm:inline">Edit</span>
+                                </button>
 
-                            <!-- Tombol Hapus (Merah) -->
-                            <button 
-                                type="button"
-                                data-action
-                                data-table-id="userTableContainer"
-                                data-url="{{ route('pengguna.delete', $user->id) }}"
-                                data-method="POST"
-                                data-confirm="Yakin ingin menghapus user {{ $user->name }}?"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg 
-                                    bg-red-100 hover:bg-red-200 
-                                    text-red-700 hover:text-red-900 
-                                    dark:bg-red-900/30 dark:hover:bg-red-900/50 
-                                    dark:text-red-400 dark:hover:text-red-300
-                                    transition-all duration-200 
-                                    focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                                    dark:focus:ring-offset-gray-800"
-                                title="Hapus user"
-                            >
-                                <!-- Icon Trash (hapus) -->
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span class="hidden sm:inline">Hapus</span>
-                            </button>
+                                <!-- Tombol Hapus -->
+                                <button
+                                    type="button"
+                                    onclick="deleteUser({{ $user->id }}, '{{ $user->name }}')"
+                                    class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-all hover:bg-red-100 hover:text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+                                >
+                                    <svg
+                                        class="h-3.5 w-3.5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="2"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
 
-                        </div>
-                    </td>
+                                    <span>Hapus</span>
+                                </button>
+
+                            </div>
+                        </td>
 
                     </tr>
                     @empty
@@ -145,3 +142,62 @@
         </div>
     </div>
 </div>
+
+<script>
+    // =====================================================
+    // DELETE USER (Pakai confirmDelete dari app.js)
+    // =====================================================
+    window.deleteUser = (id, name) => {
+        if (typeof confirmDelete === 'function') {
+            confirmDelete(
+                'Konfirmasi Hapus',
+                `Yakin ingin menghapus user "${name}"? Data yang terkait dengan user ini juga akan ikut terhapus.`,
+                () => {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    if (!csrfToken) {
+                        window.toast?.error('CSRF token tidak ditemukan.');
+                        return;
+                    }
+
+                    fetch(`/admin/others/pengguna/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(async response => {
+                        let data = {};
+                        try {
+                            data = await response.json();
+                        } catch (e) {
+                            throw new Error('Terjadi kesalahan pada server.');
+                        }
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Gagal menghapus user.');
+                        }
+                        return data;
+                    })
+                    .then(data => {
+                        window.toast?.success(data.message || 'User berhasil dihapus.');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    })
+                    .catch(error => {
+                        console.error('[Delete User Error]', error);
+                        window.toast?.error(error.message || 'Terjadi kesalahan saat menghapus user.');
+                    });
+                }
+            );
+        } else {
+            // Fallback ke confirm bawaan
+            if (!confirm(`Yakin ingin menghapus user "${name}"?`)) {
+                return;
+            }
+            // Lanjutkan proses hapus
+            executeDeleteUser(id);
+        }
+    };
+</script>

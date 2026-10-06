@@ -24,13 +24,32 @@
         <select
             x-model="filters.role"
             @change="fetchData()"
-            class="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            class="px-4 py-2.5 rounded-xl
+                border border-gray-200 dark:border-gray-600
+                bg-gray-50 dark:bg-gray-800
+                text-sm text-gray-900 dark:text-gray-100
+                focus:ring-2 focus:ring-indigo-500
+                focus:outline-none"
         >
             <option value="">Semua Role</option>
+
             @foreach($roles as $role)
-                <option value="{{ $role }}" class="dark:bg-gray-700 dark:text-gray-100">
-                    {{ ucfirst(str_replace('_',' ',$role)) }}
-                </option>
+                @php
+                    $roleName = is_object($role)
+                        ? $role->name
+                        : (is_array($role)
+                            ? ($role['name'] ?? '')
+                            : $role);
+                @endphp
+
+                @if($roleName)
+                    <option
+                        value="{{ $roleName }}"
+                        class="dark:bg-gray-700 dark:text-gray-100"
+                    >
+                        {{ ucwords(str_replace('_', ' ', $roleName)) }}
+                    </option>
+                @endif
             @endforeach
         </select>
 

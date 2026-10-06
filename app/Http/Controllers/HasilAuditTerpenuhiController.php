@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Auditiee;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
+use App\Models\SettingHeaderCetak;
 use Carbon\Carbon;
 
 class HasilAuditTerpenuhiController extends Controller
@@ -109,15 +110,15 @@ class HasilAuditTerpenuhiController extends Controller
                 \App\Models\PertanyaanAmiProdi::select('tahun_akademik_id')
                     ->whereIn('id', function ($q) {
                         $q->select('pertanyaan_ami_prodi_id')
-                          ->from('form_terpenuhi')
-                          ->whereNotNull('pertanyaan_ami_prodi_id');
+                        ->from('form_terpenuhi')
+                        ->whereNotNull('pertanyaan_ami_prodi_id');
                     })
                     ->union(
                         \App\Models\PertanyaanAmiUnit::select('tahun_akademik_id')
                             ->whereIn('id', function ($q) {
                                 $q->select('pertanyaan_ami_unit_id')
-                                  ->from('form_terpenuhi')
-                                  ->whereNotNull('pertanyaan_ami_unit_id');
+                                ->from('form_terpenuhi')
+                                ->whereNotNull('pertanyaan_ami_unit_id');
                             })
                     )
             )
@@ -125,13 +126,26 @@ class HasilAuditTerpenuhiController extends Controller
             ->get();
 
         $units = User::whereNotNull('unit')->distinct()->pluck('unit');
+        
+        // SUBUNIT: ambil semua subunit unik (buat fallback)
         $subUnits = User::whereNotNull('sub_unit')->distinct()->pluck('sub_unit');
+        
+        // SUBUNIT PER UNIT: untuk dependen dropdown
+        $subUnitsByUnit = User::whereNotNull('unit')
+            ->whereNotNull('sub_unit')
+            ->get()
+            ->groupBy('unit')
+            ->map(function ($items) {
+                return $items->pluck('sub_unit')->unique()->values()->toArray();
+            })
+            ->toArray();
 
         return view('pages.hasil-audit-terpenuhi', compact(
             'data',
             'tahunAkademiks',
             'units',
-            'subUnits'
+            'subUnits',
+            'subUnitsByUnit'
         ));
     }
 
@@ -180,6 +194,13 @@ class HasilAuditTerpenuhiController extends Controller
         $first = $data->first();
         $auditorUserId = $first->users_id;
         $auditorUser = User::find($auditorUserId);
+
+        $settingHeader = SettingHeaderCetak::latest('id')->first();
+        $noDokumen = $settingHeader?->no_dokumen ?? '-';
+        $tanggalTerbit = $settingHeader?->tanggal_terbit
+            ? Carbon::parse($settingHeader->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $noRevisi = $settingHeader?->no_revisi ?? '-';
 
         $tahunYangDigunakan = $tahunAkademikId;
         if (!$tahunYangDigunakan && $data->isNotEmpty()) {
@@ -231,7 +252,10 @@ class HasilAuditTerpenuhiController extends Controller
             'lokasi_audit',
             'auditees',
             'auditors',
-            'tanggal_audit_print'
+            'tanggal_audit_print',
+            'noDokumen',
+            'tanggalTerbit',
+            'noRevisi'
         ));
     }
 }

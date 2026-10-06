@@ -172,7 +172,12 @@ export function initAjaxForms() {
                 if (window.toast) {
                     window.toast.success(data.message);
                 }
-                
+
+                // Broadcast sukses secara generik (dipakai app.js utk update UI,
+                // dan bisa didengar modal-modal custom lain via window.addEventListener('app:success', ...)
+                // untuk close/refresh mandiri — konsisten dgn executeDeleteAction() di app.js).
+                window.dispatchEvent(new CustomEvent('app:success', { detail: data }));
+
                 // === REFRESH SELECT BOXES ===
                 // Method 1: From form attribute
                 if (selectIdsToRefresh.length > 0) {

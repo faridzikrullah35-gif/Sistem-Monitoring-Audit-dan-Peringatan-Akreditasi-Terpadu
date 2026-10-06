@@ -144,12 +144,8 @@
     @include('components.landing.hero')
     @include('components.landing.stats')
     @include('components.landing.about')
-    @include('components.landing.services')
     @include('components.landing.ews')
     @include('components.landing.structure')
-    @include('components.landing.news')
-    @include('components.landing.documents')
-    @include('components.landing.mitra')
     @include('components.landing.cta')
     @include('components.landing.footer')
 

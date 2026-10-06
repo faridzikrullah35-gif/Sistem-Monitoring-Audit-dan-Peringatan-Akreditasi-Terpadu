@@ -22,30 +22,65 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-           if (Auth::user()->role === 'admin') {
-            return redirect()->route('admin.dashboard')
-                ->with('success', 'Login berhasil!');
+
+            $user = Auth::user();
+
+            // ==================================================
+            // ADMIN
+            // ==================================================
+            if ($user->role === 'admin') {
+                return redirect()
+                    ->route('admin.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            // ==================================================
+            // AUDITOR
+            // ==================================================
+            if ($user->role === 'auditor') {
+                return redirect()
+                    ->route('auditor.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            // ==================================================
+            // UNIT KERJA LPM
+            // Role tetap unit_kerja, tetapi LPM memiliki
+            // akses/dashboard Admin.
+            // ==================================================
+            if (
+                $user->role === 'unit_kerja' &&
+                strcasecmp(trim($user->unit), 'LPM') === 0
+            ) {
+                return redirect()
+                    ->route('admin.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            // ==================================================
+            // PRODI & UNIT KERJA LAINNYA
+            // Sama-sama menggunakan Dashboard Auditee.
+            // ==================================================
+            if (in_array($user->role, ['prodi', 'unit_kerja'])) {
+                return redirect()
+                    ->route('prodi.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            // ==================================================
+            // FAKULTAS
+            // ==================================================
+            if ($user->role === 'fakultas') {
+                return redirect()
+                    ->route('fakultas.dashboard')
+                    ->with('success', 'Login berhasil!');
+            }
+
+            abort(403);
         }
 
-        if (Auth::user()->role === 'auditor') {
-            return redirect()->route('auditor.dashboard')
-                ->with('success', 'Login berhasil!');
-        }
-
-        if (Auth::user()->role === 'prodi') {
-            return redirect()->route('prodi.dashboard')
-                ->with('success', 'Login berhasil!');
-        }
-
-        if (Auth::user()->role === 'unit_kerja') {
-            return redirect()->route('auditor.dashboard')
-                ->with('success', 'Login berhasil!');
-        }
-
-        abort(403);
-        }
-
-        return redirect()->route('login')
+        return redirect()
+            ->route('login')
             ->with('error', 'Email atau password salah.');
     }
 

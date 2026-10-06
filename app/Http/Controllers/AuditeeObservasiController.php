@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\FormObservasi;
 use App\Models\TahunAkademik;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AuditeeObservasiController extends Controller
 {
@@ -116,7 +118,18 @@ class AuditeeObservasiController extends Controller
         }
 
         $observasiItems = $query->orderBy('id', 'asc')->get();
-
+        $firstObservasi = $observasiItems->first();
+        $auditorUserId = $firstObservasi ? $firstObservasi->users_id : null;
+        $headerCetak = null;
+        if ($auditorUserId) {
+            $headerCetak = SettingHeaderCetak::where('auditor_id', $auditorUserId)
+                ->first();
+        }
+        $headerNoDokumen = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi = $headerCetak?->no_revisi ?? '-';
         // Ambil nama tahun akademik untuk judul
         $tahunAkademik = null;
         if ($tahunAkademikId) {
@@ -127,6 +140,12 @@ class AuditeeObservasiController extends Controller
             $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
         }
 
-        return view('auditee.observasi.print', compact('observasiItems', 'tahunAkademik'));
+        return view('auditee.observasi.print', compact(
+            'observasiItems',
+            'tahunAkademik',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi'
+        ));
     }
 }

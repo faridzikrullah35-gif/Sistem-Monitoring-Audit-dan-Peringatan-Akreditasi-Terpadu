@@ -8,6 +8,7 @@ use App\Models\TahunAkademik;
 use App\Models\Auditiee;
 use App\Models\SettingAksesAuditor;
 use App\Models\IsiAksesAuditor;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -79,7 +80,7 @@ class AuditeeDaftarPeriksaController extends Controller
                 });
             });
         })
-        ->orderBy('id', 'desc')
+        ->orderBy('id', 'asc')
         ->get();
 
         $lokasi_audit = implode(' - ', array_filter([
@@ -115,6 +116,16 @@ class AuditeeDaftarPeriksaController extends Controller
         // Ambil users_id dari data audit pertama (jika ada)
         $firstAudit = $data->first();
         $auditorUserId = $firstAudit ? $firstAudit->users_id : null;
+        $headerCetak = null;
+        if ($auditorUserId) {
+            $headerCetak = SettingHeaderCetak::where('auditor_id', $auditorUserId)
+                ->first();
+        }
+        $headerNoDokumen = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi = $headerCetak?->no_revisi ?? '-';
 
         // Cari setting berdasarkan auditor yang membuat audit
         $setting = null;
@@ -213,6 +224,9 @@ class AuditeeDaftarPeriksaController extends Controller
             'leadAuditorNidn',
             'kabalai',
             'kepalaLPM',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
         ));
     }
 }

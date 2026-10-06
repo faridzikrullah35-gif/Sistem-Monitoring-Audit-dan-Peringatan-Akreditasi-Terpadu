@@ -3,80 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>LAPORAN KETIDAKSESUAIAN (PTK) - prodi</title>
-    <style>
-        /* ===== GLOBAL FONT: Aptos Display ===== */
+    <style type="text/css">
+        /* ===== GLOBAL FONT ===== */
         * {
             font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-size: 12px;
             margin: 20px;
+            padding: 0;
+            background: #fff;
+            color: #1a1a1a;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .header-table {
+        /* ===== TABEL UTAMA ===== */
+        .table-main {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #000;
-        }
-        .header-table td,
-        .header-table th {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            vertical-align: middle;
-        }
-        .header-table th {
-            font-weight: bold;
-            text-align: center;
+            font-size: 13px;
         }
 
-        .ncr-table {
-            width: 100%;
-            border-collapse: collapse;
+        .table-main td,
+        .table-main th {
             border: 1px solid #000;
-            margin-top: 20px;
-            page-break-inside: avoid;
-        }
-        .ncr-table td,
-        .ncr-table th {
-            border: 1px solid #000;
-            padding: 6px 8px;
+            padding: 8px 10px;
             vertical-align: top;
-        }
-        .ncr-table .label {
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        .ncr-table .value {
-            font-weight: normal;
+            line-height: 1.5;
         }
 
-        .center {
+        .table-main .label {
+            font-weight: 700;
+            width: 15%;
+        }
+
+        .table-main .colon {
+            width: 1%;
             text-align: center;
+            font-weight: 700;
         }
-        .bold {
-            font-weight: bold;
+
+        .table-main .value {
+            width: 34%;
         }
-        .page-break {
-            page-break-after: always;
+
+        /* ===== HEADER FORM ===== */
+        .table-header {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
-        .ttd-space {
-            height: 40px;
+
+        .table-header td,
+        .table-header th {
+            border: 1px solid #000;
+            padding: 8px 10px;
+            vertical-align: middle;
+            line-height: 1.5;
         }
-        .small-text {
-            font-size: 10px;
+
+        .table-header .header-title {
+            font-weight: 700;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .table-header .label-doc {
+            font-weight: 700;
+            text-align: center;
+            width: 15%;
+        }
+
+        .table-header .value-doc {
+            width: 40%;
+            padding: 8px 12px;
+        }
+
+        .table-header .logo-cell {
+            text-align: center;
+            vertical-align: middle;
+            width: 15%;
+        }
+
+        .table-header .logo-cell img {
+            max-height: 70px;
+            width: auto;
         }
 
         /* ===== RICH TEXT ===== */
@@ -92,7 +108,7 @@
             margin-bottom: 2px;
         }
         .rich-text strong {
-            font-weight: bold;
+            font-weight: 700;
         }
         .rich-text em {
             font-style: italic;
@@ -103,7 +119,7 @@
         .rich-text h1,
         .rich-text h2,
         .rich-text h3 {
-            font-weight: bold;
+            font-weight: 700;
             margin: 4px 0;
         }
         .rich-text table {
@@ -113,211 +129,255 @@
         }
         .rich-text table td,
         .rich-text table th {
-            border: 1px solid black;
-            padding: 4px;
+            border: 1px solid #000;
+            padding: 4px 6px;
         }
         .rich-text {
             word-wrap: break-word;
             white-space: normal;
         }
+
+        /* ===== PAGE BREAK ===== */
+        .page-break {
+            page-break-before: always;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 2px dashed #ccc;
+        }
+
+        .page-break:first-of-type {
+            page-break-before: auto;
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 16px;
+            color: #6c757d;
+        }
+
+        /* ===== PRINT STYLE ===== */
+        @media print {
+            body {
+                margin: 10px 15px;
+                padding: 0;
+            }
+
+            .table-main td,
+            .table-main th,
+            .table-header td,
+            .table-header th {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .table-header .header-title {
+                font-size: 14px;
+            }
+
+            .page-break {
+                page-break-before: always;
+                border-top: none;
+                margin-top: 0;
+                padding-top: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
 
-        {{-- HEADER FORMULIR --}}
-        <table class="header-table">
-            <tr>
-                <td rowspan="3" style="width: 80px; text-align: center;">
-                    <img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75">
-                </td>
-                <th style="width: 60%;">FORMULIR</th>
-                <td style="width: 12%;">No Dokumen</td>
-                <td style="width: 1%;">:</td>
-                <td style="width: 25%;">UM.BJM-LPM-FORM.NCR-AMI-000</td>
-            </tr>
-            <tr>
-                <td rowspan="2" style="text-align: center; font-weight: bold; font-size: 14px;">
-                    LAPORAN KETIDAKSESUAIAN (PTK)
-                </td>
-                <td>Tanggal Terbit</td>
-                <td>:</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>No. Revisi</td>
-                <td>:</td>
-                <td>00</td>
-            </tr>
-        </table>
+    @php
+        $noDokumen = 'UM.BJM-LPM-FORM.NCR-AMI-000';
+        $tanggalTerbit = now()->format('d-m-Y');
+        $revisi = '00';
+    @endphp
 
-        {{-- LOOP SETIAP NCR --}}
-        @forelse ($ptkList as $index => $item)
-            <table class="ncr-table">
-                {{-- Baris 1: No NCR & Tanggal --}}
+    {{-- ============================================================ --}}
+    {{-- HEADER FORM --}}
+    {{-- ============================================================ --}}
+    <table class="table-header">
+        <tr>
+            <td class="logo-cell" rowspan="4">
+                <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo">
+            </td>
+            <td class="header-title" colspan="3">
+                FORMULIR LAPORAN KETIDAKSESUAIAN (PTK)
+            </td>
+        </tr>
+        <tr>
+            <td class="label-doc">No Dokumen</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $headerNoDokumen ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td class="label-doc">Tanggal Terbit</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $headerTanggalTerbit ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td class="label-doc">No. Revisi</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $headerNoRevisi ?? '-' }}</td>
+        </tr>
+    </table>
+
+    {{-- ============================================================ --}}
+    {{-- LOOP NCR ITEMS --}}
+    {{-- ============================================================ --}}
+    @foreach($ptkList as $index => $item)
+        <div class="{{ $loop->first ? '' : 'page-break' }}">
+            <table class="table-main">
+                {{-- BARIS 1: No NCR & Tanggal --}}
                 <tr>
-                    <td class="label" style="width: 12%;">No NCR</td>
-                    <td style="width: 2%;">:</td>
-                    <td style="width: 25%;">{{ $item->no_ncr ?? '-' }}</td>
-                    <td class="label" style="width: 12%;">Tanggal</td>
-                    <td style="width: 2%;">:</td>
-                    <td style="width: 25%;">
-                        {{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y') : '-' }}
-                    </td>
+                    <td class="label"><b>No NCR</b></td>
+                    <td class="colon">:</td>
+                    <td class="value"><b>{{ $item->no_ncr ?? '-' }}</b></td>
+                    <td class="label"><b>Tanggal</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y') : '-' }}</td>
                 </tr>
-                {{-- Baris 2: Klausul & Divisi/Lokasi --}}
+
+                {{-- BARIS 2: Klausul/Dokumen & Divisi/Lokasi --}}
                 <tr>
-                    <td class="label">Klausul/Dokumen</td>
-                    <td>:</td>
-                    <td>{{ $item->klausul_dokumen ?? '-' }}</td>
-                    <td class="label">Divisi/Lokasi</td>
-                    <td>:</td>
-                    <td>
-                        {{ $item->user->unit ?? '' }} {{ $item->user->sub_unit ?? '' }}
-                    </td>
+                    <td class="label"><b>Klausul/Dokumen</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $item->klausul_dokumen ?? '-' }}</td>
+                    <td class="label"><b>Divisi/Lokasi</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $item->user->unit ?? '' }} {{ $item->user->sub_unit ?? '' }}</td>
                 </tr>
-                {{-- Baris 3: Auditor & Auditee --}}
+
+                {{-- BARIS 3: Auditor & Auditee --}}
                 <tr>
-                    <td class="label" style="vertical-align: top;">Auditor</td>
-                    <td style="vertical-align: top;">:</td>
-                    <td style="vertical-align: top;">
+                    <td class="label" style="vertical-align:top;"><b>Auditor</b></td>
+                    <td class="colon" style="vertical-align:top;">:</td>
+                    <td style="vertical-align:top;">
                         @forelse($auditors ?? [] as $a)
-                            {{ $a['nama'] }}
-                            {!! !empty($a['role']) ? '<b>(' . $a['role'] . ')</b>' : '' !!}
-                            <br>
+                            {{ $a['nama'] }} {!! !empty($a['role']) ? '<b>('.$a['role'].')</b>' : '' !!}<br>
                         @empty
                             -
                         @endforelse
                     </td>
-
-                    <td class="label" style="vertical-align: top;">Auditee</td>
-                    <td style="vertical-align: top;">:</td>
-                    <td style="vertical-align: top;">
+                    <td class="label" style="vertical-align:top;"><b>Auditee</b></td>
+                    <td class="colon" style="vertical-align:top;">:</td>
+                    <td style="vertical-align:top;">
                         @forelse($auditees ?? [] as $a)
-                            {{ $a->nama_auditiee }}<br>
+                            {{ $a->nama_auditiee ?? $a }}<br>
                         @empty
                             -
                         @endforelse
                     </td>
                 </tr>
 
-                {{-- ===== URAIAN KETIDAKSESUAIAN (Rich Text) ===== --}}
+                {{-- BARIS 4: Uraian Ketidaksesuaian & Kategori Temuan --}}
                 <tr>
-                    <td colspan="3" style="vertical-align: top;">
-                        <span class="bold">URAIAN KETIDAKSESUAIAN</span>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>URAIAN KETIDAKSESUAIAN</b><br>
                         @if($item->deskripsi_uraian_temuan)
                             <div class="rich-text">{!! $item->deskripsi_uraian_temuan !!}</div>
                         @else
-                            <p>-</p>
+                            -
                         @endif
                     </td>
-                    <td colspan="3" style="vertical-align: top;">
-                        <span class="bold">KATEGORI TEMUAN :</span>
-                        <span class="bold">{{ $item->kategori_temuan ?? '-' }}</span>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>KATEGORI TEMUAN :</b>
+                        <b>{{ $item->kategori_temuan ?? '-' }}</b>
                     </td>
                 </tr>
 
-                {{-- ===== Penyebab & Tindakan Koreksi (Rich Text) ===== --}}
+                {{-- BARIS 5: Analisis Penyebab & Akibat --}}
                 <tr>
-                    <td colspan="3" style="vertical-align: top;">
-                        <span class="bold">URAIAN FAKTOR PENYEBAB KETIDAKSESUAIAN :</span>
-                        @if($item->auditPeriksa->analisis_penyebab ?? null)
-                            <div class="rich-text">{!! $item->auditPeriksa->analisis_penyebab !!}</div>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>ANALISIS PENYEBAB :</b><br>
+                        @if($item->analisis_penyebab)
+                            <div class="rich-text">{!! $item->analisis_penyebab !!}</div>
                         @else
-                            <p>-</p>
+                            -
                         @endif
                     </td>
-                    <td colspan="3" style="vertical-align: top;">
-                        <span class="bold">TINDAKAN KOREKSI :</span>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>AKIBAT :</b><br>
+                        @if($item->akibat)
+                            <div class="rich-text">{!! $item->akibat !!}</div>
+                        @else
+                            -
+                        @endif
+                    </td>
+                </tr>
+
+                {{-- BARIS 6: Rencana Tindakan Perbaikan & Tanggal Target --}}
+                <tr>
+                    <td colspan="6" style="padding:10px; vertical-align:top;">
+                        <b>RENCANA TINDAKAN PERBAIKAN :</b><br>
                         @if($item->rencana_tindakan_perbaikan_auditee)
                             <div class="rich-text">{!! $item->rencana_tindakan_perbaikan_auditee !!}</div>
                         @else
-                            <p>-</p>
+                            -
                         @endif
                         <br>
-                        <span class="bold">Tanggal Target Perbaikan :</span><br>
+                        <b>Tanggal Target Perbaikan :</b><br>
                         {{ $item->tanggal_target_perbaikan_auditee ? \Carbon\Carbon::parse($item->tanggal_target_perbaikan_auditee)->translatedFormat('d F Y') : '-' }}
                     </td>
                 </tr>
 
-                {{-- Baris 6: TTD Auditor & Auditee + Tindakan Pencegahan (Rich Text) --}}
+                {{-- BARIS 7: TTD Auditee & Tindakan Pencegahan --}}
                 <tr>
-                    <td colspan="2">
-                        <div class="center">TTD Auditor</div>
+                    <td colspan="1" style="text-align:center; vertical-align:middle;">
+                        <b>TTD Auditee</b>
                     </td>
-                    <td>
-                        <div class="center">TTD Auditee</div>
-                    </td>
-                    <td colspan="3" rowspan="4" style="vertical-align: top;">
-                        <span class="bold">TINDAKAN PENCEGAHAN :</span><br>
+                    <td colspan="5" style="padding:10px; vertical-align:top;">
+                        <b>TINDAKAN PENCEGAHAN :</b><br>
                         @if($item->tindakan_pencegahan_auditee)
                             <div class="rich-text">{!! $item->tindakan_pencegahan_auditee !!}</div>
                         @else
-                            <p>-</p>
+                            -
                         @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" class="ttd-space"></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <span class="bold">Tanggal Mulai :</span><br>
-                        {{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y') : '-' }}
-                    </td>
-                    <td>
-                        <div class="center">Tanggal</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <span class="bold">Tanggal Selesai :</span><br>
-                        {{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y') : '-' }}
-                    </td>
-                    <td>
-                        <div class="center">{{ $item->status_ncr ?? '-' }}</div>
                     </td>
                 </tr>
 
-                {{-- Baris 7: Verifikasi --}}
+                {{-- BARIS 8: Tanggal Mulai & Tanggal Selesai & Status --}}
                 <tr>
-                    <td colspan="3">
-                        <div class="center">TTD Auditor</div>
-                        <br><br>
-                        <br><br>
-                        <br><br>
-                    </td>
-                    <td colspan="3" rowspan="2" style="vertical-align: top;">
-                        <div class="center bold">VERIFIKASI PELAKSANAAN TINDAKAN KOREKSI DAN PENCEGAHAN</div>
-                        @if($item->verifikasi ?? null)
-                            <div class="rich-text">{!! $item->verifikasi !!}</div>
-                        @endif
-                    </td>
+                    <td class="label"><b>Tanggal Mulai</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->translatedFormat('d F Y') : '-' }}</td>
+                    <td class="label"><b>Tanggal Selesai</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $item->tanggal_selesai ? \Carbon\Carbon::parse($item->tanggal_selesai)->translatedFormat('d F Y') : '-' }}</td>
                 </tr>
+
+                {{-- BARIS 9: Status --}}
                 <tr>
-                    <td colspan="3">
-                        <span class="bold">Tanggal Verifikasi :</span><br>
-                        {{ $item->tanggal_verifikasi ? \Carbon\Carbon::parse($item->tanggal_verifikasi)->translatedFormat('d F Y') : '-' }}
+                    <td class="label"><b>Status</b></td>
+                    <td class="colon">:</td>
+                    <td class="value" colspan="4">
+                        <b>{{ $item->status_ncr ?? '-' }}</b>
                     </td>
                 </tr>
             </table>
+        </div>
+    @endforeach
 
-            {{-- Tambahkan page break setelah setiap NCR kecuali yang terakhir --}}
-            @if (!$loop->last)
-                <div class="page-break"></div>
-            @endif
+    {{-- ============================================================ --}}
+    {{-- EMPTY STATE --}}
+    {{-- ============================================================ --}}
+    @if($ptkList->isEmpty())
+        <div class="empty-state">
+            <p>Tidak ada data NCR untuk tahun akademik yang dipilih.</p>
+        </div>
+    @endif
 
-        @empty
-            <p style="margin-top: 30px; text-align: center;">Tidak ada data NCR untuk dicetak.</p>
-        @endforelse
-
-    </div>
-
-    <script>
+    {{-- ============================================================ --}}
+    {{-- AUTO PRINT --}}
+    {{-- ============================================================ --}}
+    <script type="text/javascript">
         window.onload = function() {
             window.print();
         };
     </script>
+
 </body>
 </html>

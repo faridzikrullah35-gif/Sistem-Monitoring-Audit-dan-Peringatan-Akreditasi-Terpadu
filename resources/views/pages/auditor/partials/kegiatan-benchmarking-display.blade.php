@@ -1,0 +1,260 @@
+@props(['kegiatanBenchmarking' => collect()])
+
+@php
+    $prefix = 'kbdisplay';
+    $totalKb = $kegiatanBenchmarking->count();
+    $perPageOptions = [];
+    $baseOptions = [5, 10, 25, 50, 100];
+    foreach ($baseOptions as $opt) {
+        if ($opt < $totalKb) $perPageOptions[] = $opt;
+    }
+    if ($totalKb > 0) $perPageOptions[] = $totalKb;
+    $defaultPerPage = $totalKb > 10 ? 10 : ($totalKb > 0 ? $totalKb : 10);
+@endphp
+
+<div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+    <div class="mb-4 flex items-center justify-between">
+        <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">Kegiatan Benchmarking</h4>
+        <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+            View Only
+        </span>
+    </div>
+
+    {{-- Toolbar: Info + Per Page --}}
+    @if($totalKb > 0)
+    <div class="mb-3 flex flex-col sm:flex-row items-center justify-between gap-3 
+                bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2.5">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+            <span id="{{ $prefix }}TotalDisplay">
+                Total: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $totalKb }}</span> data
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <label for="{{ $prefix }}PerPage" class="text-sm text-gray-500 dark:text-gray-400">Tampilkan:</label>
+            <select id="{{ $prefix }}PerPage" class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                @foreach($perPageOptions as $option)
+                    @php
+                        $isAll = $option === $totalKb;
+                        $isSelected = $option === $defaultPerPage;
+                    @endphp
+                    <option value="{{ $option }}" {{ $isSelected ? 'selected' : '' }}>
+                        @if($isAll && $totalKb > 100) Semua ({{ $totalKb }})
+                        @elseif($isAll) Semua
+                        @else {{ $option }}
+                        @endif
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    @endif
+
+    {{-- TABLE --}}
+    <div class="relative w-full rounded-lg border border-gray-200 dark:border-gray-700">
+        <div id="{{ $prefix }}TableScroll" class="overflow-auto" style="max-height: 600px;">
+            <table class="w-full border-collapse text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead>
+                    <tr>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-300">No</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-300">Laporan Kegiatan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-300">Tanggal Pelaksanaan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-300">Keterangan</th>
+                        <th class="sticky top-0 z-30 bg-gray-50 px-4 py-3 text-xs uppercase text-gray-700 dark:bg-gray-900 dark:text-gray-300">File</th>
+                    </tr>
+                </thead>
+                <tbody id="{{ $prefix }}TableBody">
+                    @forelse($kegiatanBenchmarking as $item)
+                    <tr class="{{ $prefix }}-row border-b border-gray-200 dark:border-gray-700">
+                        <td class="px-4 py-2 no">{{ $loop->iteration }}</td>
+                        <td class="px-4 py-2">{{ $item->laporan_kegiatan }}</td>
+                        <td class="px-4 py-2">
+                            {{ $item->tgl_pelaksanaan
+                                ? \Carbon\Carbon::parse($item->tgl_pelaksanaan)->translatedFormat('d F Y')
+                                : '-' }}
+                        </td>
+                        <td class="px-4 py-2">{{ $item->keterangan ?? '-' }}</td>
+                        <td class="px-4 py-2">
+                            @if($item->file)
+                                <a href="{{ asset('storage/' . ltrim($item->file, '/')) }}"
+                                   target="_blank"
+                                   class="inline-flex items-center gap-1.5 text-blue-600 hover:underline dark:text-blue-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Lihat File
+                                </a>
+                            @else
+                                <span class="text-gray-400 dark:text-gray-500">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr id="{{ $prefix }}EmptyState">
+                        <td colspan="5" class="text-center py-8 text-gray-400 dark:text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <span class="text-sm font-medium">Belum ada data Kegiatan Benchmarking</span>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Pagination Controls --}}
+    <div id="{{ $prefix }}PaginationContainer" class="mt-4"></div>
+</div>
+
+@push('scripts')
+<script>
+// ============================================================
+//  KEGIATAN BENCHMARKING DISPLAY PAGINATION (Client-side)
+// ============================================================
+(function() {
+    'use strict';
+
+    const PREFIX = '{{ $prefix }}';
+    const state = {
+        currentPage: 1,
+        perPage: {{ $defaultPerPage }},
+        totalData: {{ $totalKb }}
+    };
+
+    function getRows() {
+        return Array.from(document.querySelectorAll('.' + PREFIX + '-row'));
+    }
+
+    function render() {
+        const allRows = getRows();
+        state.totalData = allRows.length;
+
+        const totalDisplay = document.getElementById(PREFIX + 'TotalDisplay');
+        if (totalDisplay) {
+            totalDisplay.innerHTML = `Total: <span class="font-semibold text-gray-800 dark:text-gray-200">${state.totalData}</span> data`;
+        }
+
+        const totalPages = Math.ceil(state.totalData / state.perPage) || 1;
+        if (state.currentPage > totalPages) state.currentPage = totalPages;
+        if (state.currentPage < 1) state.currentPage = 1;
+
+        const startIndex = (state.currentPage - 1) * state.perPage;
+        const endIndex = Math.min(startIndex + state.perPage, state.totalData);
+
+        allRows.forEach((row, index) => {
+            if (index >= startIndex && index < endIndex) {
+                row.style.display = '';
+                const td = row.querySelector('td.no');
+                if (td) td.textContent = index + 1;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const emptyRow = document.getElementById(PREFIX + 'EmptyState');
+        if (emptyRow) emptyRow.style.display = state.totalData === 0 ? '' : 'none';
+
+        renderControls(state.currentPage, totalPages, state.totalData, startIndex, endIndex);
+    }
+
+    function renderControls(currentPage, totalPages, totalData, from, to) {
+        const container = document.getElementById(PREFIX + 'PaginationContainer');
+        if (!container) return;
+        if (totalData === 0) { container.innerHTML = ''; return; }
+
+        const fromDisplay = from + 1;
+        let html = `
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 
+                        bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-3">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Menampilkan <span class="font-semibold text-gray-700 dark:text-gray-300">${fromDisplay}</span>
+                    sampai <span class="font-semibold text-gray-700 dark:text-gray-300">${to}</span>
+                    dari <span class="font-semibold text-gray-700 dark:text-gray-300">${totalData}</span> data
+                </div>
+        `;
+
+        if (totalPages > 1) {
+            html += `<nav class="flex items-center gap-1">`;
+            html += `<button type="button" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''}
+                class="pagination-btn inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+                    ${currentPage <= 1 ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>`;
+
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            if (endPage - startPage + 1 < maxVisiblePages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
+
+            if (startPage > 1) {
+                html += createBtn(1, currentPage);
+                if (startPage > 2) html += `<span class="px-2 text-gray-400">...</span>`;
+            }
+            for (let i = startPage; i <= endPage; i++) html += createBtn(i, currentPage);
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-2 text-gray-400">...</span>`;
+                html += createBtn(totalPages, currentPage);
+            }
+
+            html += `<button type="button" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''}
+                class="pagination-btn inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+                    ${currentPage >= totalPages ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button></nav>`;
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+
+        container.querySelectorAll('.pagination-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                goToPage(parseInt(this.getAttribute('data-page')));
+            });
+        });
+    }
+
+    function createBtn(page, currentPage) {
+        const isActive = page === currentPage;
+        return `<button type="button" data-page="${page}"
+            class="pagination-btn inline-flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors
+                ${isActive ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+            ${page}
+        </button>`;
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(state.totalData / state.perPage) || 1;
+        if (page < 1 || page > totalPages || page === state.currentPage) return;
+        state.currentPage = page;
+        render();
+        document.getElementById(PREFIX + 'TableScroll')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function init() {
+        const perPageSelect = document.getElementById(PREFIX + 'PerPage');
+        if (perPageSelect) {
+            perPageSelect.addEventListener('change', function() {
+                state.perPage = parseInt(this.value);
+                state.currentPage = 1;
+                render();
+            });
+        }
+        render();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+@endpush

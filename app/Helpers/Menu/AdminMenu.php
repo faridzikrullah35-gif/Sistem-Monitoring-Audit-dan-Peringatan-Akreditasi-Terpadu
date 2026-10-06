@@ -15,6 +15,16 @@ class AdminMenu
             ],
 
             [
+                'icon' => 'landing-page',
+                'name' => 'Setting Profile & Landing',
+                'subItems' => [
+                    ['name' => 'Setting Profile Admin', 'path' => '/admin/setting-profile-admin'],
+                    ['name' => 'Setting Konten Landing Page', 'path' => '/admin/setting-landing-page'],
+                    ['name' => 'Sarana Prasarana', 'path' => '/admin/sarpras'],
+                ],
+            ],
+
+            [
                 'icon' => 'clipboard-document-check',
                 'name' => 'Data Akreditasi',
                 'subItems' => [
@@ -27,6 +37,7 @@ class AdminMenu
                 'icon' => 'task',
                 'name' => 'Manajemen Audit',
                 'subItems' => [
+                    ['name' => 'Setting Header Cetak', 'path' => '/admin/setting-header-cetak'],
                     ['name' => 'Data Auditor', 'path' => '/admin/data-auditor'],
                     ['name' => 'Setting Tahun Akademik', 'path' => '/admin/setting-tahun-akademik'],
                     ['name' => 'Setting Kriteria', 'path' => '/admin/setting-kriteria'],
@@ -50,15 +61,15 @@ class AdminMenu
                 ],
             ],
 
-            [
-                'icon' => 'charts',
-                'name' => 'Temuan & Tindak Lanjut',
-                'subItems' => [
-                    ['name' => 'Temuan Audit', 'path' => '/temuan'],
-                    ['name' => 'Rekomendasi', 'path' => '/rekomendasi'],
-                    ['name' => 'Tindak Lanjut', 'path' => '/tindak-lanjut'],
-                ],
-            ],
+            // [
+            //     'icon' => 'charts',
+            //     'name' => 'Temuan & Tindak Lanjut',
+            //     'subItems' => [
+            //         ['name' => 'Temuan Audit', 'path' => '/temuan'],
+            //         ['name' => 'Rekomendasi', 'path' => '/rekomendasi'],
+            //         ['name' => 'Tindak Lanjut', 'path' => '/tindak-lanjut'],
+            //     ],
+            // ],
         ];
     }
 
@@ -75,10 +86,13 @@ class AdminMenu
                         'name' => 'Tambah Pengguna & Pengaturan Pengguna',
                         'path' => '/admin/others/pengguna',
                     ],
+                    [
+                        'name' => 'Setting Hak Akses Fakultas',
+                        'path' => '/admin/setting-hak-akses-fakultas',
+                    ],
 
                 ],
             ],
-
         ];
     }
 }

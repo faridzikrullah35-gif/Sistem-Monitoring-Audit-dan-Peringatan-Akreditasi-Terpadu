@@ -3,6 +3,14 @@
 @php
     $segments = request()->segments();
     $url = url('/');
+    
+    // Mapping untuk mengubah segment URL menjadi label yang lebih baik
+    $segmentLabels = [
+        'sarpras' => 'Sarana Prasarana',
+        // Tambahkan mapping lain jika diperlukan
+        // 'ptk' => 'PTK',
+        // 'akreditasi' => 'Akreditasi',
+    ];
 @endphp
 
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -57,7 +65,15 @@
             @foreach($filteredSegments as $index => $segment)
                 @php
                     $url .= '/' . $segment;
-                    $name = ucfirst(str_ireplace('ptk', 'PTK', str_replace('-', ' ', $segment)));
+                    
+                    // Cek apakah ada mapping khusus untuk segment ini
+                    $name = $segmentLabels[$segment] ?? ucfirst(str_ireplace('ptk', 'PTK', str_replace('-', ' ', $segment)));
+                    
+                    // Jika segment adalah 'sarpras' dan ini adalah segment terakhir, 
+                    // dan pageTitle mengandung "Kelola", tampilkan "Kelola Sarana Prasarana"
+                    if ($segment === 'sarpras' && $loop->last && str_contains($pageTitle, 'Kelola')) {
+                        $name = 'Kelola Sarana Prasarana';
+                    }
                 @endphp
 
                 @if($loop->last)

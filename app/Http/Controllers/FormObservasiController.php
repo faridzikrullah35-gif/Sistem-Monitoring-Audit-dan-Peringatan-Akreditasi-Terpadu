@@ -9,6 +9,7 @@ use App\Models\PertanyaanAmiUnit;
 use App\Models\TahunAkademik;
 use App\Models\AksesPertanyaanProdi;
 use App\Models\AksesPertanyaanUnit;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 
 class FormObservasiController extends Controller
@@ -134,9 +135,14 @@ class FormObservasiController extends Controller
      */
     public function print(Request $request)
     {
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
         $tahunAkademikId = $request->tahun_akademik_id;
         $relasiPertanyaan = $this->getPertanyaanRelation();
+        // Ambil data setting header cetak
+        $settingHeaderCetak = SettingHeaderCetak::where('auditor_id', $userId)
+            ->where('role', $user->role)
+            ->first();
 
         // Ambil data observasi milik user, dengan filter tahun jika ada
         $observasiItems = FormObservasi::with([
@@ -164,7 +170,11 @@ class FormObservasiController extends Controller
             $tahunAkademik = $tahunId ? TahunAkademik::find($tahunId) : null;
         }
 
-        return view('auditor.form-observasi.print', compact('observasiItems', 'tahunAkademik'));
+        return view('auditor.form-observasi.print', compact(
+            'observasiItems',
+            'tahunAkademik',
+            'settingHeaderCetak'
+        ));
     }
 
     /**

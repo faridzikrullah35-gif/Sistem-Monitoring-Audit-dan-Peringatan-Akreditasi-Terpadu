@@ -17,12 +17,36 @@ class ProfilProdi extends Model
         'misi',
         'tujuan',
         'sasaran',
-        'jumlah_dtps_magister',
-        'jumlah_dtps_doktor',
-        'jumlah_aa',
-        'jumlah_lk',
-        'jumlah_gb',
+        'file',
+        'tgl_penetapan',
+
+        // DTPS
+        'jumlah_magister',
+        'jumlah_doktor',
+        'jumlah_total',
+
+        // Jabatan Fungsional
+        'jumlah_asisten_ahli',
+        'jumlah_lektor',
+        'jumlah_lektor_kepala',
+        'jumlah_guru_besar',
+
+        // Mahasiswa
         'jumlah_mahasiswa',
+        'tahun_akademik',
+    ];
+
+    protected $casts = [
+        'jumlah_magister'       => 'integer',
+        'jumlah_doktor'         => 'integer',
+        'jumlah_total'          => 'integer',
+        'jumlah_asisten_ahli'   => 'integer',
+        'jumlah_lektor'         => 'integer',
+        'jumlah_lektor_kepala'  => 'integer',
+        'jumlah_guru_besar'     => 'integer',
+        'jumlah_mahasiswa'      => 'integer',
+        'tahun_akademik'        => 'integer',
+        'tgl_penetapan'         => 'date',
     ];
 
     public function user()
@@ -37,7 +61,7 @@ class ProfilProdi extends Model
 
     public function getRasioAttribute()
     {
-        $totalDtps = $this->jumlah_dtps_magister + $this->jumlah_dtps_doktor;
+        $totalDtps = $this->jumlah_total;
 
         if ($totalDtps === 0) {
             return 0;

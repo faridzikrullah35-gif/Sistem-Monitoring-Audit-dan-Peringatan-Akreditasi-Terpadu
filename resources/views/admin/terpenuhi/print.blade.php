@@ -202,21 +202,33 @@
         <tr>
             <td class="logo-cell" rowspan="3">
                 <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo">
-                <div style="font-size: 9px; font-weight: bold; margin-top: 3px;">UNIVERSITAS MUHAMMADIYAH BANJARMASIN</div>
+                <div style="font-size: 9px; font-weight: bold; margin-top: 3px;">
+                    UNIVERSITAS MUHAMMADIYAH BANJARMASIN
+                </div>
             </td>
+
             <th class="title" rowspan="3">
                 LAPORAN TERPENUHI<br>AUDIT INTERNAL UNIT KERJA
             </th>
+
             <td class="meta-label">No. Dokumen</td>
-            <td class="meta-val">UM.BJM-LPM-FORM.TRP-AMI-000</td>
+            <td class="meta-val">
+                {{ $noDokumen }}
+            </td>
         </tr>
+
         <tr>
             <td class="meta-label">Tanggal Terbit</td>
-            <td class="meta-val">{{ now()->format('d-m-Y') }}</td>
+            <td class="meta-val">
+                {{ $tanggalTerbit }}
+            </td>
         </tr>
+
         <tr>
             <td class="meta-label">No. Revisi</td>
-            <td class="meta-val">00</td>
+            <td class="meta-val">
+                {{ $noRevisi }}
+            </td>
         </tr>
     </table>
 

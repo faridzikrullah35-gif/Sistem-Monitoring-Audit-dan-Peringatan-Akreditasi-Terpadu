@@ -208,19 +208,30 @@
             <td class="logo-cell" rowspan="3">
                 <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo" />
             </td>
+
             <th class="title" rowspan="3">
-                LAPORAN OBSERVASI<br />AUDIT INTERNAL UNIT KERJA
+                LAPORAN OBSERVASI<br />
+                AUDIT INTERNAL UNIT KERJA
             </th>
+
             <td class="meta-label">No. Dokumen</td>
-            <td class="meta-val">UM.BJM-LPM-FORM.OBS-AMI-000</td>
+            <td class="meta-val">
+                {{ $noDokumen }}
+            </td>
         </tr>
+
         <tr>
             <td class="meta-label">Tanggal Terbit</td>
-            <td class="meta-val">{{ now()->format('d-m-Y') }}</td>
+            <td class="meta-val">
+                {{ $tanggalTerbit }}
+            </td>
         </tr>
+
         <tr>
             <td class="meta-label">No. Revisi</td>
-            <td class="meta-val">00</td>
+            <td class="meta-val">
+                {{ $noRevisi }}
+            </td>
         </tr>
     </table>
 

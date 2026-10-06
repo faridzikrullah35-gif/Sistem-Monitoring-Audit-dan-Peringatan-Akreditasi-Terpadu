@@ -125,24 +125,54 @@
     <div class="form-group">
         <table class="static" rules="all" border="1px" style="width: 95%;">
             <tr>
-                <th rowspan="3"><img src="https://lpm.umbjm.ac.id/img/logo/a.png" height="70" width="75"></th>
-                <th class="tg-0pky" style="width: 65%">FORMULIR</th>
-                <td class="tg-0pky" style="width: 10%">No Dokumen</td>
-                <td class="tg-0pky" style="width: 1%">:</td>
-                <td class="tg-0pky" style="width: 25%">UM.BJM-LPM-FORM.OB-AMI-002</td>
+                <th rowspan="3">
+                    <img
+                        src="https://lpm.umbjm.ac.id/img/logo/a.png"
+                        height="70"
+                        width="75"
+                    >
+                </th>
+                <th class="tg-0pky" style="width: 65%">
+                    FORMULIR
+                </th>
+                <td class="tg-0pky" style="width: 10%">
+                    No Dokumen
+                </td>
+                <td class="tg-0pky" style="width: 1%">
+                    :
+                </td>
+                <td class="tg-0pky" style="width: 25%">
+                    {{ $settingHeaderCetak?->no_dokumen ?? '-' }}
+                </td>
             </tr>
             <tr>
                 <td class="tg-0pky" rowspan="2">
-                    <b><center>OBSERVASI</center></b>
+                    <b>
+                        <center>
+                            OBSERVASI
+                        </center>
+                    </b>
                 </td>
-                <td class="tg-0pky">Tanggal Terbit</td>
-                <td class="tg-0pky">:</td>
-                <td class="tg-0pky">{{ now()->format('d-m-Y') }}</td>
+                <td class="tg-0pky">
+                    Tanggal Terbit
+                </td>
+                <td class="tg-0pky">
+                    :
+                </td>
+                <td class="tg-0pky">
+                    {{ $settingHeaderCetak?->tanggal_terbit?->format('d-m-Y') ?? '-' }}
+                </td>
             </tr>
             <tr>
-                <td class="tg-0pky">No. Revisi</td>
-                <td class="tg-0pky">:</td>
-                <td class="tg-0pky">00</td>
+                <td class="tg-0pky">
+                    No. Revisi
+                </td>
+                <td class="tg-0pky">
+                    :
+                </td>
+                <td class="tg-0pky">
+                    {{ $settingHeaderCetak?->no_revisi ?? '-' }}
+                </td>
             </tr>
         </table>
     </div>

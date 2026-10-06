@@ -448,6 +448,234 @@ window.deleteProfileProdi = (id, tableId) => {
 
 };
 
+window.deleteSetting = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data setting header cetak ini?',
+        () => executeDelete({
+            url: `/admin/setting-header-cetak/delete/${id}`,
+            method: 'DELETE',
+            tableId: '#tableSettingContainer',
+        })
+    );
+};
+
+window.deleteRole = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Jika role dihapus, semua user dengan role ini akan kehilangan data & akses. Yakin ingin menghapus role ini?',
+        () => executeDelete({
+            url: `/admin/kelola-roles/${id}`,
+            method: 'DELETE',
+            tableId: '#roleTableContainer',
+        })
+    );
+};
+
+window.deleteContent = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Apakah Anda yakin ingin menghapus konten ini?',
+        () => executeDelete({
+            url: `/admin/setting-profile/${id}`,
+            method: 'DELETE',
+            tableId: '#tentangKamiTableContainer',
+        })
+    );
+};
+
+window.deleteStruktur = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Apakah Anda yakin ingin menghapus data struktur organisasi ini?',
+        () => executeDelete({
+            url: `/admin/setting-struktur/${id}`,
+            method: 'DELETE',
+            tableId: '#strukturTableContainer',
+        })
+    );
+};
+
+window.deleteProfileFakultas = (id, tableId) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data Profil Fakultas ini?',
+        () => executeDelete({
+            url: `/fakultas/identitas-fakultas/vmts/${id}`,
+            method: 'DELETE',
+            tableId: tableId,
+        })
+    );
+};
+
+window.deleteRip = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data RIP ini?',
+        () => executeDelete({
+            url: `/fakultas/identitas-fakultas/dokumen/${id}`,
+            method: 'DELETE',
+            tableId: '#ripTableContainer',
+        })
+    );
+};
+
+window.deleteRenop = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data RENOP ini?',
+        () => executeDelete({
+            url: `/fakultas/identitas-fakultas/dokumen/${id}`,
+            method: 'DELETE',
+            tableId: '#renopTableContainer',
+        })
+    );
+};
+
+window.deleteMou = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data MoU ini?',
+        () => executeDelete({
+            url: `/fakultas/identitas-fakultas/dokumen/${id}`,
+            method: 'DELETE',
+            tableId: '#mouTableContainer',
+        })
+    );
+};
+
+window.deleteMahasiswa = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data mahasiswa ini?',
+        () => executeDelete({
+            url: `/prodi/profile-pd-dikti/${id}`,
+            method: 'DELETE',
+            tableId: '#mahasiswaTableBody',
+        })
+    );
+};
+
+window.deleteRasio = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data rasio ini?',
+        () => executeDelete({
+            url: `/prodi/profile-pd-dikti/rasio/${id}`,
+            method: 'DELETE',
+            tableId: '#rasioTableBody',
+        })
+    );
+};
+
+window.deleteLulusan = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data lulusan ini?',
+        () => executeDelete({
+            url: `/prodi/profile-pd-dikti/lulusan/${id}`,
+            method: 'DELETE',
+            tableId: '#lulusanTableBody',
+        })
+    );
+};
+
+window.deleteDosenProdi = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data dosen ini?',
+        () => executeDelete({
+            url: `/prodi/profile-sdm/dosen/${id}`,
+            method: 'DELETE',
+            tableId: '#sdmdosenTableContainer',
+        })
+    );
+};
+
+window.deleteTendikProdi = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data tenaga kependidikan ini?',
+        () => executeDelete({
+            url: `/prodi/profile-sdm/tendik/${id}`,
+            method: 'DELETE',
+            tableId: '#sdmtendikTableContainer',
+        })
+    );
+};
+
+window.deleteHakAkses = (id, fakultas, deleteUrl) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        `Yakin ingin menghapus setting hak akses fakultas "${fakultas}" ini?`,
+        () => executeDelete({
+            url: deleteUrl,
+            method: 'DELETE',
+            tableId: '#tableFakultasContainer',
+        })
+    );
+};
+
+window.deleteMahasiswa = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data mahasiswa ini?',
+        () => executeDelete({
+            url: `/fakultas/profile-pd-dikti/${id}`,
+            method: 'DELETE',
+            tableId: '#mahasiswaTableBody',
+        })
+    );
+};
+
+window.deleteRasioFakultas = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data rasio ini?',
+        () => executeDelete({
+            url: `/fakultas/profile-pd-dikti/rasio/${id}`,
+            method: 'DELETE',
+            tableId: '#rasioTableBody',
+        })
+    );
+};
+
+window.deleteLulusanFakultas = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data lulusan ini?',
+        () => executeDelete({
+            url: `/fakultas/profile-pd-dikti/lulusan/${id}`,
+            method: 'DELETE',
+            tableId: '#lulusanTableBody',
+        })
+    );
+};
+
+window.deleteDosenFakultas = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data dosen ini?',
+        () => executeDelete({
+            url: `/fakultas/profile-sdm/dosen/${id}`,
+            method: 'DELETE',
+            tableId: '#dosenTableBody',
+        })
+    );
+};
+
+window.deleteTendik = (id) => {
+    confirmDelete(
+        'Konfirmasi Hapus',
+        'Yakin ingin menghapus data tendik ini?',
+        () => executeDelete({
+            url: `/fakultas/profile-sdm/tendik/${id}`,
+            method: 'DELETE',
+            tableId: '#tendikTableBody',
+        })
+    );
+};
+
 // ============================================================
 // DOM INIT (SIMPLIFIED)
 // ============================================================

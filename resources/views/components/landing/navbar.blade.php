@@ -19,8 +19,7 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="#beranda" class="active">Beranda</a></li>
             <li><a href="#tentang">Profil</a></li>
-            <li><a href="#berita">Berita</a></li>
-            <li><a href="#dokumen">Dokumen</a></li>
+            <li><a href="#struktur">Struktur Organisasi</a></li>
             <li><a href="#kontak">Kontak</a></li>
             <li>
                 @auth
@@ -41,7 +40,7 @@
                     @endif
                 @else
                     <a href="{{ route('login') }}" class="btn-login">
-                        <i class="fas fa-sign-in-alt"></i> Login Sistem SIMANTAP
+                        <i class="fas fa-sign-in-alt"></i> Login SIMANTAP
                     </a>
                 @endauth
             </li>

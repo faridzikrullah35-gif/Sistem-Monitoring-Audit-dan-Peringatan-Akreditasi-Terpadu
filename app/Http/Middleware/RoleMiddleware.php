@@ -11,16 +11,42 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // cek login
+        // =====================================================
+        // CEK LOGIN
+        // =====================================================
         if (!Auth::check()) {
             return redirect('/login');
         }
 
-        // cek role
-        if (!in_array(auth()->user()->role, $roles)) {
-            abort(403, 'Anda tidak memiliki akses.');
+        $user = Auth::user();
+
+        // =====================================================
+        // KHUSUS AKSES ADMIN
+        // =====================================================
+        // Admin asli:
+        // role = admin
+        //
+        // Admin LPM:
+        // role = unit_kerja
+        // unit = LPM
+        //
+        // Keduanya boleh mengakses route dengan:
+        // role:admin
+        // =====================================================
+        if (in_array('admin', $roles) && $user->isAdminAccess()) {
+            return $next($request);
         }
 
-        return $next($request);
+        // =====================================================
+        // ROLE NORMAL
+        // =====================================================
+        if (in_array($user->role, $roles)) {
+            return $next($request);
+        }
+
+        // =====================================================
+        // TIDAK MEMILIKI AKSES
+        // =====================================================
+        abort(403, 'Anda tidak memiliki akses.');
     }
 }

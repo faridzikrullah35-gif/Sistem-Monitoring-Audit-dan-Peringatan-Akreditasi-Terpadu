@@ -203,7 +203,7 @@ flatpickr(".datepicker", {
 
 @stack('modals')
 
-</body>
 @stack('scripts')
 
+</body>
 </html>

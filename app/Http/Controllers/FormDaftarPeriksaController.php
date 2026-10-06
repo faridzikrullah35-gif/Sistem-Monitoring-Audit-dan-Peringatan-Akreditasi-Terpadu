@@ -18,6 +18,7 @@ use App\Models\Auditiee;
 use App\Models\User;
 use App\Models\AksesPertanyaanProdi;
 use App\Models\AksesPertanyaanUnit;
+use App\Models\SettingHeaderCetak;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -133,7 +134,10 @@ class FormDaftarPeriksaController extends Controller
         $user = auth()->user();
         $userId = auth()->id();
         $tahunAkademikId = $request->tahun_akademik_id;
-
+        // SETTING HEADER CETAK
+        $settingHeaderCetak = SettingHeaderCetak::where('auditor_id', $userId)
+            ->where('role', $user->role)
+            ->first();
         // =======================
         // DATA AUDIT PERIKSA
         // =======================
@@ -153,7 +157,7 @@ class FormDaftarPeriksaController extends Controller
                 });
             });
         })
-        ->orderBy('id', 'desc')
+        ->orderBy('id', 'asc')
         ->get();
 
         $lokasi_audit = implode(' - ', array_filter([
@@ -271,6 +275,7 @@ class FormDaftarPeriksaController extends Controller
             'leadAuditorNidn',
             'kabalai',
             'kepalaLPM',
+            'settingHeaderCetak',
         ));
     }
 

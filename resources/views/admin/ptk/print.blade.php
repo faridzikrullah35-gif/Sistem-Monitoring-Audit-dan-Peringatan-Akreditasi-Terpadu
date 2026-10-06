@@ -1,111 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>LAPORAN KETIDAKSESUAIAN (PTK)</title>
-    <style>
-        /* ===== GLOBAL FONT: Aptos Display ===== */
+    <style type="text/css">
+        /* ===== GLOBAL FONT ===== */
         * {
             font-family: 'Aptos Display', 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-size: 13px;
             margin: 20px;
-            line-height: 1.4;
-            color: #000;
+            padding: 0;
+            background: #fff;
+            color: #1a1a1a;
         }
 
-        .ncr-container {
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        /* Header Table Style */
-        .header-table {
+        /* ===== TABEL UTAMA ===== */
+        .table-main {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-        .header-table td,
-        .header-table th {
             border: 1px solid #000;
-            padding: 6px;
-            vertical-align: middle;
-        }
-        .header-table .title {
-            font-weight: bold;
-            text-align: center;
-            font-size: 15px;
-            text-transform: uppercase;
-        }
-        .header-table .logo-cell {
-            width: 15%;
-            text-align: center;
-        }
-        .header-table .logo-cell img {
-            max-height: 60px;
-        }
-        .header-table .meta-label {
-            font-size: 11px;
-            width: 15%;
-        }
-        .header-table .meta-val {
-            font-size: 11px;
-            width: 25%;
+            font-size: 13px;
         }
 
-        /* Body Content Table Style */
-        .content-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: -1px;
-        }
-        .content-table td,
-        .content-table th {
+        .table-main td,
+        .table-main th {
             border: 1px solid #000;
-            padding: 8px;
+            padding: 8px 10px;
             vertical-align: top;
+            line-height: 1.5;
         }
 
-        .bg-light {
-            background-color: #f3f4f6;
-            font-weight: bold;
+        .table-main .label {
+            font-weight: 700;
+            width: 15%;
         }
 
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            padding: 0 10px;
-        }
-        .sig-box {
+        .table-main .colon {
+            width: 1%;
             text-align: center;
-            width: 200px;
-        }
-        .sig-space {
-            height: 50px;
+            font-weight: 700;
         }
 
-        /* ===== Rich text styling ===== */
-        .rich-text {
-            max-width: 100%;
-            word-wrap: break-word;
+        .table-main .value {
+            width: 34%;
         }
+
+        /* ===== HEADER FORM ===== */
+        .table-header {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .table-header td,
+        .table-header th {
+            border: 1px solid #000;
+            padding: 8px 10px;
+            vertical-align: middle;
+            line-height: 1.5;
+        }
+
+        .table-header .header-title {
+            font-weight: 700;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .table-header .label-doc {
+            font-weight: 700;
+            text-align: center;
+            width: 15%;
+        }
+
+        .table-header .value-doc {
+            width: 40%;
+            padding: 8px 12px;
+        }
+
+        .table-header .logo-cell {
+            text-align: center;
+            vertical-align: middle;
+            width: 15%;
+        }
+
+        .table-header .logo-cell img {
+            max-height: 70px;
+            width: auto;
+        }
+
+        /* ===== RICH TEXT ===== */
         .rich-text p {
             margin: 0 0 4px 0;
         }
         .rich-text ul,
         .rich-text ol {
+            margin: 0 0 4px 0;
             padding-left: 20px;
-            margin: 4px 0;
         }
         .rich-text li {
             margin-bottom: 2px;
         }
         .rich-text strong {
-            font-weight: bold;
+            font-weight: 700;
         }
         .rich-text em {
             font-style: italic;
@@ -116,8 +119,8 @@
         .rich-text h1,
         .rich-text h2,
         .rich-text h3 {
-            font-weight: bold;
-            margin: 6px 0 4px 0;
+            font-weight: 700;
+            margin: 4px 0;
         }
         .rich-text table {
             border-collapse: collapse;
@@ -129,196 +132,257 @@
             border: 1px solid #000;
             padding: 4px 6px;
         }
-        .rich-text table th {
-            background: #f0f0f0;
+        .rich-text {
+            word-wrap: break-word;
+            white-space: normal;
         }
 
-        @media print {
-            body {
-                margin: 15px;
-            }
-            .no-print {
-                display: none;
-            }
-            .page-break {
-                page-break-after: always;
-            }
+        /* ===== PAGE BREAK ===== */
+        .page-break {
+            page-break-before: always;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 2px dashed #ccc;
         }
 
+        .page-break:first-of-type {
+            page-break-before: auto;
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 16px;
+            color: #6c757d;
+        }
+
+        /* ===== NO PRINT (Tombol) ===== */
         .no-print {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
+            padding: 20px;
         }
+
         .no-print button {
-            padding: 8px 20px;
+            padding: 10px 24px;
             background: #2563eb;
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            margin: 0 8px;
         }
+
         .no-print button:hover {
             background: #1d4ed8;
         }
+
         .no-print button:last-child {
             background: #6b7280;
         }
+
         .no-print button:last-child:hover {
             background: #4b5563;
+        }
+
+        /* ===== PRINT STYLE ===== */
+        @media print {
+            body {
+                margin: 10px 15px;
+                padding: 0;
+            }
+
+            .table-main td,
+            .table-main th,
+            .table-header td,
+            .table-header th {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .table-header .header-title {
+                font-size: 14px;
+            }
+
+            .page-break {
+                page-break-before: always;
+                border-top: none;
+                margin-top: 0;
+                padding-top: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    {{-- ==================== HEADER (SEKALI) ==================== --}}
-    <table class="header-table">
+    @php
+        $noDokumen = 'UM.BJM-LPM-FORM.NCR-AMI-000';
+        $tanggalTerbit = now()->format('d-m-Y');
+        $revisi = '00';
+    @endphp
+
+    {{-- ============================================================ --}}
+    {{-- HEADER FORM --}}
+    {{-- ============================================================ --}}
+    <table class="table-header">
         <tr>
-            <td class="logo-cell" rowspan="3">
+            <td class="logo-cell" rowspan="4">
                 <img src="https://lpm.umbjm.ac.id/img/logo/a.png" alt="Logo">
-                <div style="font-size: 9px; font-weight: bold; margin-top: 3px;">UNIVERSITAS MUHAMMADIYAH BANJARMASIN</div>
             </td>
-            <th class="title" rowspan="3">
-                FORMULIR<br>LAPORAN KETIDAKSESUAIAN (PTK)
-            </th>
-            <td class="meta-label">No. Dokumen</td>
-            <td class="meta-val">UM.BJM-LPM-FORM.NCR-AMI-000</td>
+            <td class="header-title" colspan="3">
+                FORMULIR LAPORAN KETIDAKSESUAIAN (PTK)
+            </td>
         </tr>
         <tr>
-            <td class="meta-label">Tanggal Terbit</td>
-            <td class="meta-val">{{ now()->format('d-m-Y') }}</td>
+            <td class="label-doc">No Dokumen</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $noDokumen }}</td>
         </tr>
         <tr>
-            <td class="meta-label">No. Revisi</td>
-            <td class="meta-val">00</td>
+            <td class="label-doc">Tanggal Terbit</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $tanggalTerbit }}</td>
+        </tr>
+        <tr>
+            <td class="label-doc">No. Revisi</td>
+            <td style="width:2%; text-align:center; font-weight:700; padding:8px 2px;">:</td>
+            <td class="value-doc">{{ $revisi }}</td>
         </tr>
     </table>
 
-    {{-- ==================== LOOP PER NCR ==================== --}}
-    @forelse($items as $index => $row)
-        <div class="ncr-container {{ !$loop->last ? 'page-break' : '' }}">
-
-            {{-- Content NCR --}}
-            <table class="content-table">
+    {{-- ============================================================ --}}
+    {{-- LOOP NCR ITEMS --}}
+    {{-- ============================================================ --}}
+    @foreach($items as $index => $row)
+        <div class="{{ $loop->first ? '' : 'page-break' }}">
+            <table class="table-main">
+                {{-- BARIS 1: No NCR & Tanggal Audit --}}
                 <tr>
-                    <td style="width: 15%; font-weight: bold;">No NCR</td>
-                    <td style="width: 35%;">: {{ $row->no_ncr }}</td>
-                    <td style="width: 15%; font-weight: bold;">Tanggal Audit</td>
-                    <td style="width: 35%;">: {{ $row->tanggal_audit }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">Klausul/Dokumen</td>
-                    <td>: {{ $row->klausul }}</td>
-                    <td style="font-weight: bold;">Divisi/Lokasi</td>
-                    <td>: {{ $row->bagian }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">Auditor</td>
-                    <td>: {{ $row->auditor }}</td>
-                    <td style="font-weight: bold;">Auditee</td>
-                    <td>: {{ $row->auditee }}</td>
+                    <td class="label"><b>No NCR</b></td>
+                    <td class="colon">:</td>
+                    <td class="value"><b>{{ $row->no_ncr ?? '-' }}</b></td>
+                    <td class="label"><b>Tanggal Audit</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $row->tanggal_audit ?? '-' }}</td>
                 </tr>
 
-                {{-- ===== URAIAN KETIDAKSESUAIAN (Rich Text) ===== --}}
+                {{-- BARIS 2: Klausul/Dokumen & Divisi/Lokasi --}}
                 <tr>
-                    <td colspan="4" class="bg-light" style="text-transform: uppercase;">Uraian Ketidaksesuaian</td>
+                    <td class="label"><b>Klausul/Dokumen</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $row->klausul ?? '-' }}</td>
+                    <td class="label"><b>Divisi/Lokasi</b></td>
+                    <td class="colon">:</td>
+                    <td class="value">{{ $row->bagian ?? '-' }}</td>
                 </tr>
+
+                {{-- BARIS 3: Auditor & Auditee --}}
                 <tr>
-                    <td colspan="4" style="min-height: 80px; padding-bottom: 20px;">
-                        <div style="float: right; font-weight: bold; border: 1px solid #000; padding: 3px 8px; font-size: 11px;">
-                            KATEGORI TEMUAN: {{ strtoupper($row->status_kategori) }}
-                        </div>
-                        <div style="clear: both; margin-top: 5px;">
-                            @if($row->macam_temuan)
-                                <div class="rich-text">{!! $row->macam_temuan !!}</div>
-                            @else
-                                -
-                            @endif
-                        </div>
+                    <td class="label" style="vertical-align:top;"><b>Auditor</b></td>
+                    <td class="colon" style="vertical-align:top;">:</td>
+                    <td style="vertical-align:top;">{{ $row->auditor ?? '-' }}</td>
+                    <td class="label" style="vertical-align:top;"><b>Auditee</b></td>
+                    <td class="colon" style="vertical-align:top;">:</td>
+                    <td style="vertical-align:top;">{{ $row->auditee ?? '-' }}</td>
+                </tr>
+
+                {{-- BARIS 4: Uraian Ketidaksesuaian & Kategori Temuan --}}
+                <tr>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>URAIAN KETIDAKSESUAIAN</b><br>
+                        @if($row->macam_temuan)
+                            <div class="rich-text">{!! $row->macam_temuan !!}</div>
+                        @else
+                            -
+                        @endif
+                    </td>
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>KATEGORI TEMUAN :</b>
+                        <b>{{ strtoupper($row->status_kategori ?? '-') }}</b>
                     </td>
                 </tr>
 
-                {{-- ===== FAKTOR PENYEBAB & TINDAKAN KOREKSI (Rich Text) ===== --}}
+                {{-- BARIS 5: Faktor Penyebab & Tindakan Koreksi --}}
                 <tr>
-                    <td colspan="2" class="bg-light" style="width: 50%;">URAIAN FAKTOR PENYEBAB KETIDAKSESUAIAN:</td>
-                    <td colspan="2" class="bg-light" style="width: 50%;">TINDAKAN KOREKSI:</td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="height: 90px;">
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>URAIAN FAKTOR PENYEBAB KETIDAKSESUAIAN :</b><br>
                         @if($row->faktor_penyebab)
                             <div class="rich-text">{!! $row->faktor_penyebab !!}</div>
                         @else
                             -
                         @endif
                     </td>
-                    <td colspan="2">
+                    <td colspan="3" style="padding:10px; vertical-align:top;">
+                        <b>TINDAKAN KOREKSI :</b><br>
                         @if($row->tindakan_koreksi)
                             <div class="rich-text">{!! $row->tindakan_koreksi !!}</div>
                         @else
                             -
                         @endif
-                        <div style="margin-top: 25px; font-size: 11px; font-weight: bold;">
-                            Tanggal Target Perbaikan: <span style="text-decoration: underline;">{{ $row->tanggal_target }}</span>
-                        </div>
+                        <br>
+                        <b>Tanggal Target Perbaikan :</b><br>
+                        {{ $row->tanggal_target ?? '-' }}
                     </td>
                 </tr>
 
-                {{-- ===== TINDAKAN PENCEGAHAN (Rich Text) ===== --}}
+                {{-- BARIS 6: Tindakan Pencegahan --}}
                 <tr>
-                    <td colspan="4" class="bg-light">TINDAKAN PENCEGAHAN:</td>
-                </tr>
-                <tr>
-                    <td colspan="4" style="height: 70px;">
+                    <td colspan="6" style="padding:10px; vertical-align:top;">
+                        <b>TINDAKAN PENCEGAHAN :</b><br>
                         @if($row->tindakan_pencegahan)
                             <div class="rich-text">{!! $row->tindakan_pencegahan !!}</div>
                         @else
                             -
                         @endif
-                        <div style="margin-top: 15px; font-size: 11px;">
-                            <strong>Tanggal Verifikasi:</strong> {{ $row->tanggal_verifikasi ?? '-' }}
-                        </div>
                     </td>
                 </tr>
 
-                {{-- VERIFIKASI AKHIR & TANDA TANGAN --}}
+                {{-- BARIS 7: Status --}}
                 <tr>
-                    <td colspan="4" class="bg-light" style="text-align: center; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
-                        Verifikasi Pelaksanaan Tindakan Koreksi dan Pencegahan
+                    <td class="label"><b>Status</b></td>
+                    <td class="colon">:</td>
+                    <td class="value" colspan="4">
+                        <b>{{ $row->status ?? '-' }}</b>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="4">
-                        <div style="margin-bottom: 35px;">
-                            <strong>Status Saat Ini:</strong> <span style="text-transform: uppercase; font-weight: bold;">{{ $row->status }}</span>
-                        </div>
 
-                        <div class="signature-section">
-                            <div class="sig-box">
-                                <div>Auditor,</div>
-                                <div class="sig-space"></div>
-                                <div style="text-decoration: underline; font-weight: bold;">(............................................)</div>
-                            </div>
-                            <div class="sig-box">
-                                <div>Auditee,</div>
-                                <div class="sig-space"></div>
-                                <div style="text-decoration: underline; font-weight: bold;">(............................................)</div>
-                            </div>
-                        </div>
+                {{-- BARIS 8: Tanda Tangan Auditee --}}
+                <tr>
+                    <td colspan="6" style="padding:10px; text-align:center; vertical-align:middle;">
+                        <b>Auditee</b>
+                        <br><br><br><br>
+                        <span style="text-decoration:underline;">(............................................)</span>
                     </td>
                 </tr>
             </table>
-
         </div>
-    @empty
-        <div style="text-align:center; padding:50px; border: 1px dashed #ccc;">
-            <h3>Tidak ada data Laporan Ketidaksesuaian (PTK) yang tersedia.</h3>
-        </div>
-    @endforelse
+    @endforeach
 
-    {{-- TOMBOL CETAK --}}
+    {{-- ============================================================ --}}
+    {{-- EMPTY STATE --}}
+    {{-- ============================================================ --}}
+    @if($items->isEmpty())
+        <div class="empty-state">
+            <p>Tidak ada data NCR untuk tahun akademik yang dipilih.</p>
+        </div>
+    @endif
+
+    {{-- ============================================================ --}}
+    {{-- TOMBOL CETAK & TUTUP --}}
+    {{-- ============================================================ --}}
     <div class="no-print">
         <button onclick="window.print()">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
@@ -335,10 +399,13 @@
         </button>
     </div>
 
-    <script>
+    {{-- ============================================================ --}}
+    {{-- AUTO PRINT --}}
+    {{-- ============================================================ --}}
+    <script type="text/javascript">
         window.onload = function() {
             window.print();
-        }
+        };
     </script>
 
 </body>

@@ -1,7 +1,10 @@
 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
 
+    {{-- Tahun Akademik --}}
     <div>
-        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Tahun Akademik</label>
+        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
+            Tahun Akademik
+        </label>
         <select id="filter-tahun"
                 class="dropdown-arrow w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-sky-500">
             <option value="">Pilih Tahun Akademik</option>
@@ -11,8 +14,11 @@
         </select>
     </div>
 
+    {{-- Unit --}}
     <div>
-        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Unit</label>
+        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
+            Unit
+        </label>
         <select id="filter-unit"
                 class="dropdown-arrow w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-sky-500">
             <option value="">Pilih Unit</option>
@@ -22,18 +28,18 @@
         </select>
     </div>
 
+    {{-- Subunit (DEPENDEN) --}}
     <div>
-        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Subunit</label>
+        <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">
+            Subunit
+        </label>
         <select id="filter-subunit"
                 class="dropdown-arrow w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:focus:ring-sky-500">
             <option value="">Pilih Subunit</option>
-            @foreach($subUnits as $sub)
-                <option value="{{ $sub }}">{{ $sub }}</option>
-            @endforeach
         </select>
     </div>
 
-    {{-- Tombol Reset & Cetak (muncul bersama) --}}
+    {{-- Tombol Reset & Cetak --}}
     <div class="flex items-end gap-2">
         <button type="button" id="btn-reset-filter"
                 class="hidden w-full rounded-lg bg-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
@@ -63,6 +69,37 @@ document.addEventListener('DOMContentLoaded', function () {
     const printBtn = document.getElementById('btn-print');
     const tableContainer = document.getElementById('table-container');
 
+    // ==========================================
+    // DATA SUBUNIT PER UNIT (dari server)
+    // ==========================================
+    const subUnitData = @json($subUnitsByUnit);
+    
+    // Simpan semua subunit untuk fallback reset
+    const allSubUnits = @json($subUnits);
+
+    // ==========================================
+    // FUNGSI UPDATE SUBUNIT
+    // ==========================================
+    function updateSubunitOptions(selectedUnit = null) {
+        // Clear current options
+        subunit.innerHTML = '<option value="">Pilih Subunit</option>';
+        
+        // HANYA tampilkan subunit jika ada unit yang dipilih
+        if (selectedUnit && subUnitData[selectedUnit]) {
+            const subunits = subUnitData[selectedUnit];
+            subunits.forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub;
+                option.textContent = sub;
+                subunit.appendChild(option);
+            });
+        }
+        // Jika tidak ada unit yang dipilih, subunit tetap kosong
+    }
+
+    // ==========================================
+    // FUNGSI LAINNYA
+    // ==========================================
     function getFilters() {
         return {
             tahun_akademik_id: tahun.value,
@@ -82,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Update URL print setiap kali filter berubah (biar cetak pakai filter terbaru)
     function updatePrintUrl() {
         const params = new URLSearchParams(getFilters()).toString();
         printBtn.href = `{{ route('hasil-audit.ptk.print') }}?${params}`;
@@ -98,13 +134,31 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => console.error('AJAX Error:', err));
     }
 
-    // Event listener untuk setiap filter
-    [tahun, unit, subunit].forEach(el => {
-        el.addEventListener('change', function () {
-            toggleButtons();
-            updatePrintUrl();
-            fetchData();
-        });
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    
+    // Unit change -> update subunit
+    unit.addEventListener('change', function () {
+        const selectedUnit = this.value;
+        updateSubunitOptions(selectedUnit);
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
+    });
+
+    // Tahun change
+    tahun.addEventListener('change', function () {
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
+    });
+
+    // Subunit change
+    subunit.addEventListener('change', function () {
+        toggleButtons();
+        updatePrintUrl();
+        fetchData();
     });
 
     // Reset button
@@ -112,12 +166,17 @@ document.addEventListener('DOMContentLoaded', function () {
         tahun.value = '';
         unit.value = '';
         subunit.value = '';
+        updateSubunitOptions(null); // Subunit jadi kosong
         toggleButtons();
         updatePrintUrl();
         fetchData();
     });
 
-    // Inisialisasi awal (cek apakah ada filter dari URL)
+    // ==========================================
+    // INISIALISASI AWAL
+    // ==========================================
+    // Subunit KOSONG (karena unit belum dipilih)
+    updateSubunitOptions(null);
     toggleButtons();
     updatePrintUrl();
 });
