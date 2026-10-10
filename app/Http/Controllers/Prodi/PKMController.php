@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class PKMController extends Controller
 {
@@ -530,5 +532,64 @@ class PKMController extends Controller
                 'message' => 'Terjadi kesalahan saat mengekspor data PKM.',
             ], 500);
         }
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA PKM (milik user sendiri, dengan filter)
+     * ==========================================================
+     */
+    public function printPkm(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Anda harus login terlebih dahulu.');
+        }
+
+        // ==================== FILTER DARI QUERY STRING ====================
+        $filterTahun  = $request->query('tahun_akademik');
+        $filterTingkat = $request->query('tingkat');
+
+        $query = ProdiPKM::where('users_id', $user->id);
+
+        if ($filterTahun) {
+            $query->where('tahun_akademik', $filterTahun);
+        }
+
+        if ($filterTingkat) {
+            $query->where('tingkat', $filterTingkat);
+        }
+
+        $pkm = $query->orderBy('id', 'asc')->get();
+
+        // ==================== HEADER CETAK (global) ====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ==================== INFO PRODI ====================
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        // ==================== INFO FILTER ====================
+        $filterParts = [];
+        if ($filterTahun)  $filterParts[] = "Tahun Akademik: {$filterTahun}";
+        if ($filterTingkat) $filterParts[] = "Tingkat: {$filterTingkat}";
+        $filterInfo = !empty($filterParts) ? implode(' | ', $filterParts) : null;
+
+        return view('print.prodi.pkm', compact(
+            'pkm',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+            'filterInfo',
+        ));
     }
 }

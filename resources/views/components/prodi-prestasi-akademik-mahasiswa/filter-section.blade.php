@@ -542,5 +542,33 @@ window.refreshPrestasiTable = function() {
         location.reload();
     });
 };
+
+// ============================================================
+//  HANDLE PRINT PRESTASI (dengan filter aktif)
+// ============================================================
+window.handlePrintPrestasi = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari state
+    const state = window.paginationState || {};
+    const filterTahun   = state.filters?.tahun_akademik || '';
+    const filterTingkat = state.filters?.tingkat || '';
+    const filterWaktu   = state.filters?.waktu_perolehan || '';
+
+    // Base URL print
+    const baseUrl = '{{ route("prodi.prestasi-akademik-mahasiswa.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterTahun)   params.append('tahun_akademik', filterTahun);
+    if (filterTingkat) params.append('tingkat', filterTingkat);
+    if (filterWaktu)   params.append('waktu_perolehan', filterWaktu);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

@@ -595,7 +595,28 @@ Route::middleware(['auth', 'role:prodi,unit_kerja'])
 
     Route::get('/dashboard', [DashboardController::class, 'prodi'])
         ->name('dashboard');
-    
+
+    // ==================== PRINT DOKUMEN PRODI ====================
+    Route::get('/identitas-prodi/mou/print', [ProfileProdiController::class, 'printMou'])->name('identitas-prodi.mou.print');
+    // ==================== PRINT MAHASISWA ====================
+    Route::get('/identitas-prodi/mahasiswa/print', [ProfileProdiController::class, 'printMahasiswa'])->name('identitas-prodi.mahasiswa.print');
+    // ==================== PRINT PD DIKTI ====================
+    Route::get('/profile-pd-dikti/mahasiswa/print', [ProdiProfilePdDiktiController::class, 'printMahasiswa'])->name('profile-pd-dikti.mahasiswa.print');
+    Route::get('/profile-pd-dikti/lulusan/print', [ProdiProfilePdDiktiController::class, 'printLulusan'])->name('profile-pd-dikti.lulusan.print');
+    // ==================== PRINT SDM PRODI ====================
+    Route::get('/profile-sdm/dosen/print', [ProfileSdmController::class, 'printDosen'])->name('profile-sdm.dosen.print');
+    Route::get('/profile-sdm/tendik/print', [ProfileSdmController::class, 'printTendik'])->name('profile-sdm.tendik.print');
+    // ==================== PRINT PENELITIAN ====================
+    Route::get('/penelitian/print', [PenelitianController::class, 'printPenelitian'])->name('penelitian.print');
+    // ==================== PRINT PUBLIKASI ILMIAH ====================
+    Route::get('/publikasi-ilmiah/print', [PublikasiIlmiahController::class, 'printPublikasi'])->name('publikasi-ilmiah.print');
+    // ==================== PRINT PKM ====================
+    Route::get('/pkm/print', [PKMController::class, 'printPkm'])->name('pkm.print');
+    // ==================== PRINT PRESTASI AKADEMIK MAHASISWA ====================
+    Route::get('/prestasi-akademik-mahasiswa/print', [PrestasiAkademikMahasiswaController::class, 'printPrestasi'])->name('prestasi-akademik-mahasiswa.print');
+    // ==================== PRINT INOVASI ====================
+    Route::get('/inovasi/print', [InovasiController::class, 'printInovasi'])->name('inovasi.print');
+
     Route::get('/notifications', [DashboardController::class, 'getAuditeeNotifications'])
         ->name('notifications');
 
@@ -898,6 +919,40 @@ Route::middleware(['auth', 'role:fakultas'])
     // Dashboard Fakultas
     Route::get('/dashboard', [DashboardController::class, 'fakultas'])
         ->name('dashboard');
+
+    // ==================== PRINT SDM DOSEN FAKULTAS ====================
+    Route::get('/profile-sdm/dosen/print', [FakultasProfileSdmController::class, 'printDosen'])
+        ->name('profile-sdm.dosen.print');
+    // ==================== PRINT SDM TENDIK FAKULTAS ====================
+    Route::get('/profile-sdm/tendik/print', [FakultasProfileSdmController::class, 'printTendik'])
+        ->name('profile-sdm.tendik.print');
+    // ==================== PRINT PD DIKTI — MAHASISWA FAKULTAS ====================
+    Route::get('/profile-pd-dikti/mahasiswa/print', [FakultasProfilePdDiktiController::class, 'printMahasiswa'])
+        ->name('profile-pd-dikti.mahasiswa.print');
+    // ==================== PRINT PD DIKTI — LULUSAN FAKULTAS ====================
+    Route::get('/profile-pd-dikti/lulusan/print', [FakultasProfilePdDiktiController::class, 'printLulusan'])
+        ->name('profile-pd-dikti.lulusan.print');
+    // ==================== PRINT IDENTITAS FAKULTAS — MOU FAKULTAS ====================
+    Route::get('/identitas-fakultas/mou/print', [ProfileFakultasController::class, 'printMou'])
+        ->name('identitas-fakultas.mou.print');
+    // ==================== PRINT JUMLAH MAHASISWA FAKULTAS ====================
+    Route::get('/identitas-fakultas/mahasiswa/print', [ProfileFakultasController::class, 'printMahasiswa'])
+        ->name('identitas-fakultas.mahasiswa.print');
+    // ==================== PRINT PENELITIAN FAKULTAS ====================
+    Route::get('/penelitian/print', [FakultasPenelitianController::class, 'print'])
+        ->name('penelitian.print');
+    // ==================== PRINT PUBLIKASI ILMIAH FAKULTAS ====================
+    Route::get('/publikasi-ilmiah/print', [FakultasPublikasiIlmiahController::class, 'print'])
+        ->name('publikasi-ilmiah.print');
+    // ==================== PRINT PKM FAKULTAS ====================
+    Route::get('/pkm/print', [FakultasPkmController::class, 'print'])
+        ->name('pkm.print');
+    // ==================== PRINT INOVASI FAKULTAS ====================
+    Route::get('/inovasi/print', [FakultasInovasiController::class, 'print'])
+        ->name('inovasi.print');
+    // ==================== PRINT PRESTASI AKADEMIK MAHASISWA FAKULTAS ====================
+    Route::get('/prestasi-akademik-mahasiswa/print', [FakultasPrestasiAkademikMahasiswaController::class, 'print'])
+        ->name('prestasi-akademik-mahasiswa.print');
 
     Route::get('/notifications', [DashboardController::class, 'getFakultasNotifications'])
         ->name('notifications');

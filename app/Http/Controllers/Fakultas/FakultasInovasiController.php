@@ -7,6 +7,8 @@ use App\Models\ProdiInovasi;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class FakultasInovasiController extends Controller
 {
@@ -98,6 +100,70 @@ class FakultasInovasiController extends Controller
             'filterProdi',
             'filterTahun',
             'filterJenis'
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA INOVASI (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function print(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // Filter
+        $filterProdi = $request->query('filter_prodi');
+        $filterTahun = $request->query('filter_tahun_akademik');
+        $filterJenis = $request->query('filter_jenis_inovasi');
+
+        $prodiFilterIds = $filterProdi ? [(int) $filterProdi] : $prodiUserIds;
+
+        $inovasi = ProdiInovasi::with('user')
+            ->whereIn('users_id', $prodiFilterIds)
+            ->when($filterTahun, fn($q) => $q->where('tahun_akademik', $filterTahun))
+            ->when($filterJenis, fn($q) => $q->where('jenis_inovasi', $filterJenis))
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // Info Fakultas
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // Info Filter
+        $filterParts = [];
+        if ($filterProdi) {
+            $namaProdi = $prodi->firstWhere('id', (int) $filterProdi);
+            $filterParts[] = "Prodi: " . ($namaProdi->sub_unit ?? $namaProdi->name ?? '-');
+        }
+        if ($filterTahun) $filterParts[] = "Tahun Akademik: {$filterTahun}";
+        if ($filterJenis) $filterParts[] = "Jenis Inovasi: {$filterJenis}";
+        $filterInfo = !empty($filterParts) ? implode(' | ', $filterParts) : null;
+
+        return view('print.fakultas.inovasi', compact(
+            'inovasi',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
         ));
     }
 }

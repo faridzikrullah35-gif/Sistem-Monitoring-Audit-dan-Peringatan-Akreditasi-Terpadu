@@ -13,6 +13,8 @@ use App\Models\ProdiDataLulusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class FakultasProfilePdDiktiController extends Controller
 {
@@ -663,5 +665,145 @@ class FakultasProfilePdDiktiController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA MAHASISWA (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function printMahasiswa(Request $request)
+    {
+        $user   = Auth::user();
+        $userId = Auth::id();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // filter_source: fakultas | all | prodi-{id}
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        $mahasiswa = collect();
+        if ($filterSource === 'fakultas') {
+            $mahasiswa = FakultasDataMahasiswa::with('user')
+                ->where('users_id', $userId)
+                ->orderBy('id', 'asc')->get();
+        } elseif ($filterSource === 'all') {
+            $mahasiswa = ProdiDataMahasiswa::with('user')
+                ->whereIn('users_id', $prodiUserIds)
+                ->orderBy('id', 'asc')->get();
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $mahasiswa = ProdiDataMahasiswa::with('user')
+                ->where('users_id', $pid)
+                ->orderBy('id', 'asc')->get();
+        }
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // Info Filter
+        $filterInfo = null;
+        if ($filterSource === 'fakultas') {
+            $filterInfo = 'Data Fakultas';
+        } elseif ($filterSource === 'all') {
+            $filterInfo = 'Semua Prodi';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $p = $prodi->firstWhere('id', $pid);
+            $filterInfo = 'Prodi: ' . ($p->sub_unit ?? $p->name ?? '-');
+        }
+
+        return view('print.fakultas.pd-dikti-mahasiswa', compact(
+            'mahasiswa',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA LULUSAN (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function printLulusan(Request $request)
+    {
+        $user   = Auth::user();
+        $userId = Auth::id();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        $lulusan = collect();
+        if ($filterSource === 'fakultas') {
+            $lulusan = FakultasDataLulusan::with('user')
+                ->where('users_id', $userId)
+                ->orderBy('id', 'asc')->get();
+        } elseif ($filterSource === 'all') {
+            $lulusan = ProdiDataLulusan::with('user')
+                ->whereIn('users_id', $prodiUserIds)
+                ->orderBy('id', 'asc')->get();
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $lulusan = ProdiDataLulusan::with('user')
+                ->where('users_id', $pid)
+                ->orderBy('id', 'asc')->get();
+        }
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        $filterInfo = null;
+        if ($filterSource === 'fakultas') {
+            $filterInfo = 'Data Fakultas';
+        } elseif ($filterSource === 'all') {
+            $filterInfo = 'Semua Prodi';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $p = $prodi->firstWhere('id', $pid);
+            $filterInfo = 'Prodi: ' . ($p->sub_unit ?? $p->name ?? '-');
+        }
+
+        return view('print.fakultas.pd-dikti-lulusan', compact(
+            'lulusan',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
+        ));
     }
 }

@@ -37,6 +37,26 @@
 
         
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+            <div class="mb-4 flex items-center justify-end">
+                <a href="#"
+                id="btnPrintSdmDosenFakultas"
+                onclick="return handlePrintSdmDosenFakultas(event)"
+                class="inline-flex items-center justify-center px-4 py-2.5
+                    bg-white hover:bg-gray-50
+                    dark:bg-gray-800 dark:hover:bg-gray-700
+                    border border-gray-300 dark:border-gray-600
+                    text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg
+                    transition-colors
+                    focus:outline-none focus:ring-2 focus:ring-gray-400
+                    focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Dosen
+                </a>
+            </div>
+
             <?php if (isset($component)) { $__componentOriginaldefe2445042cdba83bec13e7bd0da32b = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginaldefe2445042cdba83bec13e7bd0da32b = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.fakultas-sdm.table-data-dosen','data' => ['dosenFakultas' => $dosenFakultas,'dosenProdi' => $dosenProdi,'prodi' => $prodi]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -61,6 +81,26 @@
 
         
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
+            <div class="mb-4 flex items-center justify-end">
+                <a href="#"
+                id="btnPrintSdmTendikFakultas"
+                onclick="return handlePrintSdmTendikFakultas(event)"
+                class="inline-flex items-center justify-center px-4 py-2.5
+                    bg-white hover:bg-gray-50
+                    dark:bg-gray-800 dark:hover:bg-gray-700
+                    border border-gray-300 dark:border-gray-600
+                    text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg
+                    transition-colors
+                    focus:outline-none focus:ring-2 focus:ring-gray-400
+                    focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                    <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Tendik
+                </a>
+            </div>
+
             <?php if (isset($component)) { $__componentOriginal89c2f5ecd7b63aeda98358088b15888e = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal89c2f5ecd7b63aeda98358088b15888e = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.fakultas-sdm.table-data-tendik','data' => ['tendikFakultas' => $tendikFakultas,'tendikProdi' => $tendikProdi,'prodi' => $prodi]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>

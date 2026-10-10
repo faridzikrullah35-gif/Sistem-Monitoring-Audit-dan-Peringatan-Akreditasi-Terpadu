@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class PublikasiIlmiahController extends Controller
 {
@@ -311,5 +313,56 @@ class PublikasiIlmiahController extends Controller
                 'regex:/^\d{4}\/\d{4}$|^\d{4}-\d{4}$/', // Format: 2024/2025 atau 2024-2025
             ],
         ]);
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA PUBLIKASI ILMIAH (milik user sendiri)
+     * ==========================================================
+     */
+    public function printPublikasi(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Anda harus login terlebih dahulu.');
+        }
+
+        // ==================== FILTER DARI QUERY STRING ====================
+        $filterTahun = $request->query('tahun_akademik');
+
+        $query = ProdiPublikasiIlmiah::where('users_id', $user->id);
+
+        if ($filterTahun) {
+            $query->where('tahun_akademik', $filterTahun);
+        }
+
+        $publikasi = $query->orderBy('id', 'asc')->get();
+
+        // ==================== HEADER CETAK ====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ==================== INFO PRODI ====================
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        // ==================== INFO FILTER ====================
+        $filterInfo = $filterTahun ? "Tahun Akademik: {$filterTahun}" : null;
+
+        return view('print.prodi.publikasi-ilmiah', compact(
+            'publikasi',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+            'filterInfo',
+        ));
     }
 }

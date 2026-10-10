@@ -377,5 +377,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.tendikPaginationState.filter = 'fakultas';
     renderTendikPagination();
 });
+
+// ============================================================
+//  HANDLE PRINT SDM TENDIK FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintSdmTendikFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const state = window.tendikPaginationState || {};
+    const filterSource = state.filter || 'fakultas';
+
+    const baseUrl = '<?php echo e(route("fakultas.profile-sdm.tendik.print")); ?>';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 <?php $__env->stopPush(); ?><?php /**PATH F:\Project-2\audit-app\resources\views/components/fakultas-sdm/table-data-tendik.blade.php ENDPATH**/ ?>

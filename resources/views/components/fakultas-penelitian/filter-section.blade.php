@@ -180,5 +180,32 @@
         applyFilterPenelitian();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT PENELITIAN FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPenelitianFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari select element
+    const filterProdi   = document.getElementById('filterProdiPenelitian')?.value   || '';
+    const filterTahun   = document.getElementById('filterTahunPenelitian')?.value   || '';
+    const filterTingkat = document.getElementById('filterTingkatPenelitian')?.value || '';
+
+    // Base URL print
+    const baseUrl = '{{ route("fakultas.penelitian.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterProdi)   params.append('filter_prodi', filterProdi);
+    if (filterTahun)   params.append('filter_tahun_akademik', filterTahun);
+    if (filterTingkat) params.append('filter_tingkat', filterTingkat);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

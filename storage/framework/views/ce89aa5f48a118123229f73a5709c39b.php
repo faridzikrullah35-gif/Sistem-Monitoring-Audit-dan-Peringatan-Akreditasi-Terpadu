@@ -111,23 +111,6 @@ unset($__defined_vars, $__key, $__value); ?>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
-                
-                <label for="filterWaktuPrestasi" class="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
-                    Waktu:
-                </label>
-                <select
-                    id="filterWaktuPrestasi"
-                    class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-500 min-w-[130px]"
-                >
-                    <option value="">Semua Waktu</option>
-                    <?php $__currentLoopData = $waktuList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $waktu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($waktu); ?>" <?php echo e((string) $filterWaktu === (string) $waktu ? 'selected' : ''); ?>>
-                            <?php echo e($waktu); ?>
-
-                        </option>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </select>
-
                 <button
                     type="button"
                     onclick="resetFilterPrestasi()"
@@ -242,5 +225,29 @@ unset($__defined_vars, $__key, $__value); ?>
         applyFilterPrestasi();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT PRESTASI FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPrestasiFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const filterProdi   = document.getElementById('filterProdiPrestasi')?.value || '';
+    const filterTahun   = document.getElementById('filterTahunPrestasi')?.value || '';
+    const filterTingkat = document.getElementById('filterTingkatPrestasi')?.value || '';
+    const filterWaktu   = document.getElementById('filterWaktuPrestasi')?.value || '';
+
+    const baseUrl = '<?php echo e(route("fakultas.prestasi-akademik-mahasiswa.print")); ?>';
+
+    const params = new URLSearchParams();
+    if (filterProdi)   params.append('filter_prodi', filterProdi);
+    if (filterTahun)   params.append('filter_tahun_akademik', filterTahun);
+    if (filterTingkat) params.append('filter_tingkat', filterTingkat);
+    if (filterWaktu)   params.append('filter_waktu_perolehan', filterWaktu);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 <?php $__env->stopPush(); ?><?php /**PATH F:\Project-2\audit-app\resources\views/components/fakultas-prestasi-akademik-mahasiswa/filter-section.blade.php ENDPATH**/ ?>

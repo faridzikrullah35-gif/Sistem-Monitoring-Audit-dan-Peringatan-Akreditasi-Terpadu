@@ -7,6 +7,8 @@ use App\Models\ProdiPKM;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class FakultasPkmController extends Controller
 {
@@ -99,6 +101,85 @@ class FakultasPkmController extends Controller
             'filterTahun',
             'filterTingkat',
             'filterMahasiswa'
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA PKM (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function print(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Anda harus login terlebih dahulu.');
+        }
+
+        // ===================== Daftar Prodi di fakultas ini =====================
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // ===================== Filter dari query string =====================
+        $filterProdi     = $request->query('filter_prodi');
+        $filterTahun     = $request->query('filter_tahun_akademik');
+        $filterTingkat   = $request->query('filter_tingkat');
+        $filterMahasiswa = $request->query('filter_melibatkan_mahasiswa');
+
+        $prodiFilterIds = $filterProdi ? [(int) $filterProdi] : $prodiUserIds;
+
+        // ===================== Query =====================
+        $query = ProdiPKM::with('user')
+            ->whereIn('users_id', $prodiFilterIds)
+            ->when($filterTahun, fn($q) => $q->where('tahun_akademik', $filterTahun))
+            ->when($filterTingkat, fn($q) => $q->where('tingkat', $filterTingkat))
+            ->when($filterMahasiswa !== null && $filterMahasiswa !== '', function ($q) use ($filterMahasiswa) {
+                $q->where('melibatkan_mahasiswa', filter_var($filterMahasiswa, FILTER_VALIDATE_BOOLEAN));
+            })
+            ->orderBy('id', 'asc');
+
+        $pkm = $query->get();
+
+        // ===================== Header Cetak =====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ===================== Info Fakultas =====================
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // ===================== Info Filter =====================
+        $filterParts = [];
+        if ($filterProdi) {
+            $namaProdi = $prodi->firstWhere('id', (int) $filterProdi);
+            $filterParts[] = "Prodi: " . ($namaProdi->sub_unit ?? $namaProdi->name ?? '-');
+        }
+        if ($filterTahun)   $filterParts[] = "Tahun Akademik: {$filterTahun}";
+        if ($filterTingkat) $filterParts[] = "Tingkat: {$filterTingkat}";
+        if ($filterMahasiswa !== null && $filterMahasiswa !== '') {
+            $filterParts[] = "Melibatkan Mahasiswa: " . (filter_var($filterMahasiswa, FILTER_VALIDATE_BOOLEAN) ? 'Ya' : 'Tidak');
+        }
+        $filterInfo = !empty($filterParts) ? implode(' | ', $filterParts) : null;
+
+        return view('print.fakultas.pkm', compact(
+            'pkm',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
         ));
     }
 }

@@ -222,5 +222,32 @@ unset($__defined_vars, $__key, $__value); ?>
         applyFilterPublikasi();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT PUBLIKASI FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPublikasiFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari select element
+    const filterProdi = document.getElementById('filterProdiPublikasi')?.value || '';
+    const filterTahun = document.getElementById('filterTahunPublikasi')?.value || '';
+    const filterJenis = document.getElementById('filterJenisPublikasi')?.value || '';
+
+    // Base URL print
+    const baseUrl = '<?php echo e(route("fakultas.publikasi-ilmiah.print")); ?>';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterProdi) params.append('filter_prodi', filterProdi);
+    if (filterTahun) params.append('filter_tahun_akademik', filterTahun);
+    if (filterJenis) params.append('filter_jenis_publikasi', filterJenis);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 <?php $__env->stopPush(); ?><?php /**PATH F:\Project-2\audit-app\resources\views/components/fakultas-publikasi-ilmiah/filter-section.blade.php ENDPATH**/ ?>

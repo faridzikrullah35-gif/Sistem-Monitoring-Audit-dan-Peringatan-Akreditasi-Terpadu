@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class PrestasiAkademikMahasiswaController extends Controller
 {
@@ -554,5 +556,62 @@ class PrestasiAkademikMahasiswaController extends Controller
                 'message' => 'Terjadi kesalahan saat mengekspor data Prestasi Akademik Mahasiswa.',
             ], 500);
         }
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA PRESTASI AKADEMIK MAHASISWA (dengan filter)
+     * ==========================================================
+     */
+    public function printPrestasi(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Anda harus login terlebih dahulu.');
+        }
+
+        // ==================== FILTER DARI QUERY STRING ====================
+        $filterTahun   = $request->query('tahun_akademik');
+        $filterTingkat = $request->query('tingkat');
+        $filterWaktu   = $request->query('waktu_perolehan');
+
+        $query = ProdiPrestasiAkademikMahasiswa::where('users_id', $user->id);
+
+        if ($filterTahun)   $query->where('tahun_akademik', $filterTahun);
+        if ($filterTingkat) $query->where('tingkat', $filterTingkat);
+        if ($filterWaktu)   $query->where('waktu_perolehan', $filterWaktu);
+
+        $prestasi = $query->orderBy('id', 'asc')->get();
+
+        // ==================== HEADER CETAK ====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ==================== INFO PRODI ====================
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        // ==================== INFO FILTER ====================
+        $filterParts = [];
+        if ($filterTahun)   $filterParts[] = "Tahun Akademik: {$filterTahun}";
+        if ($filterTingkat) $filterParts[] = "Tingkat: {$filterTingkat}";
+        if ($filterWaktu)   $filterParts[] = "Waktu Perolehan: {$filterWaktu}";
+        $filterInfo = !empty($filterParts) ? implode(' | ', $filterParts) : null;
+
+        return view('print.prodi.prestasi-akademik-mahasiswa', compact(
+            'prestasi',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+            'filterInfo',
+        ));
     }
 }

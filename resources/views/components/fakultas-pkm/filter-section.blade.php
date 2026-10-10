@@ -201,5 +201,34 @@
         applyFilterPkm();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT PKM FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPkmFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari select element
+    const filterProdi     = document.getElementById('filterProdiPkm')?.value || '';
+    const filterTahun     = document.getElementById('filterTahunPkm')?.value || '';
+    const filterTingkat   = document.getElementById('filterTingkatPkm')?.value || '';
+    const filterMahasiswa = document.getElementById('filterMahasiswaPkm')?.value ?? '';
+
+    // Base URL print
+    const baseUrl = '{{ route("fakultas.pkm.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterProdi)     params.append('filter_prodi', filterProdi);
+    if (filterTahun)     params.append('filter_tahun_akademik', filterTahun);
+    if (filterTingkat)   params.append('filter_tingkat', filterTingkat);
+    if (filterMahasiswa !== '') params.append('filter_melibatkan_mahasiswa', filterMahasiswa);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

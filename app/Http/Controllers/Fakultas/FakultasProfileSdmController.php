@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Throwable;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class FakultasProfileSdmController extends Controller
 {
@@ -339,5 +341,166 @@ class FakultasProfileSdmController extends Controller
                 'message' => 'Gagal menghapus data tendik.',
             ], 500);
         }
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA DOSEN (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function printDosen(Request $request)
+    {
+        $user   = Auth::user();
+        $userId = Auth::id();
+
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        // ================= Daftar Prodi =================
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // ================= Filter dari query string =================
+        // source: fakultas | all | prodi-{id}
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        // ================= Query =================
+        $query = collect();
+
+        if ($filterSource === 'fakultas') {
+            $query = FakultasDataDosen::with('user')
+                ->where('users_id', $userId)
+                ->orderBy('id', 'asc')
+                ->get();
+        } elseif ($filterSource === 'all') {
+            $query = ProdiDataDosen::with('user')
+                ->whereIn('users_id', $prodiUserIds)
+                ->orderBy('id', 'asc')
+                ->get();
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $query = ProdiDataDosen::with('user')
+                ->where('users_id', $pid)
+                ->orderBy('id', 'asc')
+                ->get();
+        }
+
+        $dosen = $query;
+
+        // ================= Header Cetak =================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ================= Info Fakultas =================
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // ================= Info Filter =================
+        $filterInfo = null;
+        if ($filterSource === 'fakultas') {
+            $filterInfo = 'Data Fakultas';
+        } elseif ($filterSource === 'all') {
+            $filterInfo = 'Semua Prodi';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $p = $prodi->firstWhere('id', $pid);
+            $filterInfo = 'Prodi: ' . ($p->sub_unit ?? $p->name ?? '-');
+        }
+
+        return view('print.fakultas.sdm-dosen', compact(
+            'dosen',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA TENDIK (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function printTendik(Request $request)
+    {
+        $user   = Auth::user();
+        $userId = Auth::id();
+
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        // ================= Daftar Prodi =================
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // ================= Filter =================
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        // ================= Query =================
+        $tendik = collect();
+
+        if ($filterSource === 'fakultas') {
+            $tendik = FakultasDataTendik::with('user')
+                ->where('users_id', $userId)
+                ->orderBy('id', 'asc')
+                ->get();
+        } elseif ($filterSource === 'all') {
+            $tendik = ProdiDataTendik::with('user')
+                ->whereIn('users_id', $prodiUserIds)
+                ->orderBy('id', 'asc')
+                ->get();
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $tendik = ProdiDataTendik::with('user')
+                ->where('users_id', $pid)
+                ->orderBy('id', 'asc')
+                ->get();
+        }
+
+        // ================= Header Cetak =================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ================= Info Fakultas =================
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // ================= Info Filter =================
+        $filterInfo = null;
+        if ($filterSource === 'fakultas') {
+            $filterInfo = 'Data Fakultas';
+        } elseif ($filterSource === 'all') {
+            $filterInfo = 'Semua Prodi';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $pid = (int) str_replace('prodi-', '', $filterSource);
+            $p = $prodi->firstWhere('id', $pid);
+            $filterInfo = 'Prodi: ' . ($p->sub_unit ?? $p->name ?? '-');
+        }
+
+        return view('print.fakultas.sdm-tendik', compact(
+            'tendik',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
+        ));
     }
 }

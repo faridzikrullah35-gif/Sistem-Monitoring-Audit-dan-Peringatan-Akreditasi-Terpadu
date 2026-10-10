@@ -465,6 +465,30 @@ window.refreshPenelitianTable = function() {
     });
 };
 
+// ============================================================
+//  HANDLE PRINT PENELITIAN (dengan filter aktif)
+// ============================================================
+window.handlePrintPenelitian = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari state
+    const state = window.penelitianPaginationState || {};
+    const filterTahun = state.filters?.tahun_akademik || '';
+
+    // Base URL print
+    const baseUrl = '{{ route("prodi.penelitian.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterTahun) params.append('tahun_akademik', filterTahun);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
+
 // Alias biar kompatibel dengan kode lama
 window.filterPenelitianTable = window.renderPenelitianPagination;
 </script>

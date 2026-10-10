@@ -26,19 +26,35 @@
 <?php unset($__componentOriginald07245451647f5715f9bac44fc38d4f4); ?>
 <?php endif; ?>
 
-    
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
-                Inovasi
-            </h1>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Inovasi</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Data inovasi dari program studi di bawah fakultas (read-only)
             </p>
         </div>
+
+        <div class="flex items-center gap-3">
+            <a href="#"
+               id="btnPrintInovasiFakultas"
+               onclick="return handlePrintInovasiFakultas(event)"
+               class="inline-flex items-center justify-center px-4 py-2.5
+                   bg-white hover:bg-gray-50
+                   dark:bg-gray-800 dark:hover:bg-gray-700
+                   border border-gray-300 dark:border-gray-600
+                   text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg
+                   transition-colors
+                   focus:outline-none focus:ring-2 focus:ring-gray-400
+                   focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                <svg class="w-5 h-5 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print
+            </a>
+        </div>
     </div>
 
-    
     <?php if (isset($component)) { $__componentOriginal040b95a1f1803a7175d76d46b5c62ca2 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal040b95a1f1803a7175d76d46b5c62ca2 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.fakultas-inovasi.filter-section','data' => ['inovasi' => $inovasi,'tahunList' => $tahunList,'jenisList' => $jenisList,'prodi' => $prodi,'filterProdi' => $filterProdi,'filterTahun' => $filterTahun,'filterJenis' => $filterJenis]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
@@ -60,7 +76,6 @@
 <?php unset($__componentOriginal040b95a1f1803a7175d76d46b5c62ca2); ?>
 <?php endif; ?>
 
-    
     <?php if (isset($component)) { $__componentOriginalf67d958ae29d58e3c5298be6a514b64c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalf67d958ae29d58e3c5298be6a514b64c = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.fakultas-inovasi.data-table','data' => ['inovasi' => $inovasi]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>

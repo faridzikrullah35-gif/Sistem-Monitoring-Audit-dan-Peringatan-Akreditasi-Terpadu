@@ -7,6 +7,8 @@ use App\Models\ProdiPrestasiAkademikMahasiswa;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class FakultasPrestasiAkademikMahasiswaController extends Controller
 {
@@ -108,6 +110,73 @@ class FakultasPrestasiAkademikMahasiswaController extends Controller
             'filterTahun',
             'filterTingkat',
             'filterWaktu'
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA PRESTASI AKADEMIK MAHASISWA (Fakultas) — dengan filter
+     * ==========================================================
+     */
+    public function print(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $prodi = User::with('profilProdi')
+            ->where('role', 'prodi')
+            ->where('unit', $user->unit)
+            ->orderBy('sub_unit')
+            ->get();
+
+        $prodiUserIds = $prodi->pluck('id')->toArray();
+
+        // Filter
+        $filterProdi   = $request->query('filter_prodi');
+        $filterTahun   = $request->query('filter_tahun_akademik');
+        $filterTingkat = $request->query('filter_tingkat');
+        $filterWaktu   = $request->query('filter_waktu_perolehan');
+
+        $prodiFilterIds = $filterProdi ? [(int) $filterProdi] : $prodiUserIds;
+
+        $prestasi = ProdiPrestasiAkademikMahasiswa::with('user')
+            ->whereIn('users_id', $prodiFilterIds)
+            ->when($filterTahun, fn($q) => $q->where('tahun_akademik', $filterTahun))
+            ->when($filterTingkat, fn($q) => $q->where('tingkat', $filterTingkat))
+            ->when($filterWaktu, fn($q) => $q->where('waktu_perolehan', $filterWaktu))
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // Info Fakultas
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        // Info Filter
+        $filterParts = [];
+        if ($filterProdi) {
+            $namaProdi = $prodi->firstWhere('id', (int) $filterProdi);
+            $filterParts[] = "Prodi: " . ($namaProdi->sub_unit ?? $namaProdi->name ?? '-');
+        }
+        if ($filterTahun)   $filterParts[] = "Tahun Akademik: {$filterTahun}";
+        if ($filterTingkat) $filterParts[] = "Tingkat: {$filterTingkat}";
+        if ($filterWaktu)   $filterParts[] = "Waktu Perolehan: {$filterWaktu}";
+        $filterInfo = !empty($filterParts) ? implode(' | ', $filterParts) : null;
+
+        return view('print.fakultas.prestasi-akademik-mahasiswa', compact(
+            'prestasi',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaFakultas',
+            'unit',
+            'filterInfo',
         ));
     }
 }

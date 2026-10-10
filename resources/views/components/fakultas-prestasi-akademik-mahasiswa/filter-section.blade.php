@@ -69,22 +69,6 @@
                     @endforeach
                 </select>
 
-                {{-- Filter Waktu Perolehan --}}
-                <label for="filterWaktuPrestasi" class="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
-                    Waktu:
-                </label>
-                <select
-                    id="filterWaktuPrestasi"
-                    class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:focus:border-blue-500 min-w-[130px]"
-                >
-                    <option value="">Semua Waktu</option>
-                    @foreach($waktuList as $waktu)
-                        <option value="{{ $waktu }}" {{ (string) $filterWaktu === (string) $waktu ? 'selected' : '' }}>
-                            {{ $waktu }}
-                        </option>
-                    @endforeach
-                </select>
-
                 <button
                     type="button"
                     onclick="resetFilterPrestasi()"
@@ -199,5 +183,29 @@
         applyFilterPrestasi();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT PRESTASI FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPrestasiFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const filterProdi   = document.getElementById('filterProdiPrestasi')?.value || '';
+    const filterTahun   = document.getElementById('filterTahunPrestasi')?.value || '';
+    const filterTingkat = document.getElementById('filterTingkatPrestasi')?.value || '';
+    const filterWaktu   = document.getElementById('filterWaktuPrestasi')?.value || '';
+
+    const baseUrl = '{{ route("fakultas.prestasi-akademik-mahasiswa.print") }}';
+
+    const params = new URLSearchParams();
+    if (filterProdi)   params.append('filter_prodi', filterProdi);
+    if (filterTahun)   params.append('filter_tahun_akademik', filterTahun);
+    if (filterTingkat) params.append('filter_tingkat', filterTingkat);
+    if (filterWaktu)   params.append('filter_waktu_perolehan', filterWaktu);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

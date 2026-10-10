@@ -429,5 +429,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.dosenPaginationState.filter = 'fakultas';
     renderDosenPagination();
 });
+
+// ============================================================
+//  HANDLE PRINT SDM DOSEN FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintSdmDosenFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const state = window.dosenPaginationState || {};
+    const filterSource = state.filter || 'fakultas';
+
+    const baseUrl = '<?php echo e(route("fakultas.profile-sdm.dosen.print")); ?>';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 <?php $__env->stopPush(); ?><?php /**PATH F:\Project-2\audit-app\resources\views/components/fakultas-sdm/table-data-dosen.blade.php ENDPATH**/ ?>

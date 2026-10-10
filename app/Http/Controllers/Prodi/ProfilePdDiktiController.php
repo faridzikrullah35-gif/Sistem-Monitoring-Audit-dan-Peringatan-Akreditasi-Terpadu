@@ -9,6 +9,8 @@ use App\Models\ProdiDataLulusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class ProfilePdDiktiController extends Controller
 {
@@ -236,5 +238,78 @@ class ProfilePdDiktiController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA MAHASISWA PD DIKTI (milik user sendiri)
+     * ==========================================================
+     */
+    public function printMahasiswa()
+    {
+        $userId = Auth::id();
+        $user   = Auth::user();
+
+        $mahasiswa = ProdiDataMahasiswa::with('user')
+            ->where('users_id', $userId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Header cetak (global)
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        return view('print.prodi.pd-dikti-mahasiswa', compact(
+            'mahasiswa',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA LULUSAN PD DIKTI (milik user sendiri)
+     * ==========================================================
+     */
+    public function printLulusan()
+    {
+        $userId = Auth::id();
+        $user   = Auth::user();
+
+        $lulusan = ProdiDataLulusan::with('user')
+            ->where('users_id', $userId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        return view('print.prodi.pd-dikti-lulusan', compact(
+            'lulusan',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+        ));
     }
 }

@@ -8,6 +8,20 @@
         <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">Jumlah Mahasiswa</h4>
 
         <div class="flex items-center gap-2">
+            {{-- Tombol Print --}}
+            <button
+                type="button"
+                onclick="handlePrintMahasiswaFakultas(event)"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-all duration-200"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print
+            </button>
+
+            {{-- Filter Prodi --}}
             <select
                 id="filterProdiMahasiswa"
                 class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
@@ -101,6 +115,24 @@ function filterMahasiswaByProdi(value) {
         infoLabel.textContent = selectedOpt ? selectedOpt.textContent : 'Prodi';
     }
 }
+
+// ============================================================
+//  HANDLE PRINT MAHASISWA (filter-aware)
+// ============================================================
+window.handlePrintMahasiswaFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const sel = document.getElementById('filterProdiMahasiswa');
+    const filterSource = sel ? sel.value : 'all';
+
+    const baseUrl = '{{ route("fakultas.identitas-fakultas.mahasiswa.print") }}';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     filterMahasiswaByProdi('all');

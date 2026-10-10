@@ -284,5 +284,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.lulusanPdState.filter = 'fakultas';
     renderLulusanPdPagination();
 });
+
+// ============================================================
+//  HANDLE PRINT PD DIKTI LULUSAN FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPdDiktiLulusan = function(event) {
+    if (event) event.preventDefault();
+
+    const state = window.lulusanPdState || {};
+    const filterSource = state.filter || 'fakultas';
+
+    const baseUrl = '{{ route("fakultas.profile-pd-dikti.lulusan.print") }}';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

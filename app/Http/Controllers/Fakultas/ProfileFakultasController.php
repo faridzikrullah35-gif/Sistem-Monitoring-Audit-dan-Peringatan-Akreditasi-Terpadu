@@ -19,6 +19,8 @@ use App\Http\Requests\Fakultas\StoreVmtsRequest;
 use App\Http\Requests\Fakultas\UpdateVmtsRequest;
 use App\Http\Requests\Fakultas\StoreDokumenRequest;
 use App\Http\Requests\Fakultas\UpdateDokumenRequest;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class ProfileFakultasController extends Controller
 {
@@ -548,5 +550,136 @@ class ProfileFakultasController extends Controller
             'jumlah_mahasiswa' => $jumlahMahasiswa,
             'rasio' => $rasio,
         ]);
+    }
+
+    /**
+     * ==========================================================
+     * PRINT MoU (Fakultas + Prodi) — dengan filter
+     * ==========================================================
+     */
+    public function printMou(Request $request)
+    {
+        $user   = Auth::user();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $prodi  = $this->daftarProdi();
+        $profilProdiIds = ProfilProdi::whereIn('user_id', $prodi->pluck('id')->toArray())
+            ->pluck('id')
+            ->toArray();
+
+        // filter_source: fakultas | all | prodi-{userId}
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        if ($filterSource === 'fakultas') {
+            $dokumen = $this->dokumenService->getByKategoriFakultas('MOU');
+            $judul   = 'DATA MoU / MoA FAKULTAS';
+        } elseif ($filterSource === 'all') {
+            $dokumen = DokumenProdi::with('profilProdi.user')
+                ->whereIn('profil_prodi_id', $profilProdiIds)
+                ->where('jenis', 'MOU')
+                ->orderBy('created_at', 'desc')->get();
+            $judul   = 'DATA MoU / MoA SEMUA PRODI';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $uid = (int) str_replace('prodi-', '', $filterSource);
+            $pid = ProfilProdi::where('user_id', $uid)->pluck('id')->toArray();
+            $dokumen = DokumenProdi::with('profilProdi.user')
+                ->whereIn('profil_prodi_id', $pid)
+                ->where('jenis', 'MOU')
+                ->orderBy('created_at', 'desc')->get();
+            $p = $prodi->firstWhere('id', $uid);
+            $judul   = 'DATA MoU / MoA PRODI ' . strtoupper($p->sub_unit ?? $p->name ?? '-');
+        } else {
+            $dokumen = collect();
+            $judul   = 'DATA MoU / MoA';
+        }
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        return view('print.fakultas.identitas-mou', compact(
+            'dokumen', 'judul',
+            'headerNoDokumen', 'headerTanggalTerbit', 'headerNoRevisi',
+            'namaFakultas', 'unit', 'filterSource',
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT JUMLAH MAHASISWA (Fakultas + Prodi) — dengan filter
+     * ==========================================================
+     */
+    public function printMahasiswa(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) abort(401, 'Anda harus login terlebih dahulu.');
+
+        $profil = $this->profil();
+        $prodi  = $this->daftarProdi();
+
+        $profilProdiData = ProfilProdi::with('user')
+            ->whereIn('user_id', $prodi->pluck('id')->toArray())
+            ->get();
+
+        $filterSource = $request->query('filter_source', 'fakultas');
+
+        $rows = collect();
+        if ($filterSource === 'fakultas') {
+            $rows->push([
+                'prodi'  => 'Fakultas',
+                'jumlah' => $profil->jumlah_mahasiswa ?? 0,
+                'tahun'  => $profil->tahun_akademik ?? '-',
+            ]);
+            $judul = 'DATA JUMLAH MAHASISWA FAKULTAS';
+            $filterInfo = 'Data Fakultas';
+        } elseif ($filterSource === 'all') {
+            foreach ($profilProdiData as $p) {
+                $rows->push([
+                    'prodi'  => optional($p->user)->sub_unit ?? '-',
+                    'jumlah' => $p->jumlah_mahasiswa ?? 0,
+                    'tahun'  => $p->tahun_akademik ?? '-',
+                ]);
+            }
+            $judul = 'DATA JUMLAH MAHASISWA SEMUA PRODI';
+            $filterInfo = 'Semua Prodi';
+        } elseif (str_starts_with($filterSource, 'prodi-')) {
+            $uid = (int) str_replace('prodi-', '', $filterSource);
+            $p = $profilProdiData->firstWhere('user_id', $uid);
+            if ($p) {
+                $rows->push([
+                    'prodi'  => optional($p->user)->sub_unit ?? '-',
+                    'jumlah' => $p->jumlah_mahasiswa ?? 0,
+                    'tahun'  => $p->tahun_akademik ?? '-',
+                ]);
+            }
+            $prodiModel = $prodi->firstWhere('id', $uid);
+            $judul = 'DATA JUMLAH MAHASISWA PRODI ' . strtoupper($prodiModel->sub_unit ?? $prodiModel->name ?? '-');
+            $filterInfo = 'Prodi: ' . ($prodiModel->sub_unit ?? $prodiModel->name ?? '-');
+        } else {
+            $judul = 'DATA JUMLAH MAHASISWA';
+            $filterInfo = null;
+        }
+
+        // Header Cetak
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y') : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        $namaFakultas = $user->name ?? '-';
+        $unit         = $user->unit ?? '-';
+
+        return view('print.fakultas.identitas-mahasiswa', compact(
+            'rows', 'judul', 'filterInfo',
+            'headerNoDokumen', 'headerTanggalTerbit', 'headerNoRevisi',
+            'namaFakultas', 'unit',
+        ));
     }
 }

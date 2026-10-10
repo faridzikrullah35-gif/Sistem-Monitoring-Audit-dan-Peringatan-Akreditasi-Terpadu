@@ -222,5 +222,27 @@ unset($__defined_vars, $__key, $__value); ?>
         applyFilterInovasi();
     };
 })();
+
+// ============================================================
+//  HANDLE PRINT INOVASI FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintInovasiFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const filterProdi = document.getElementById('filterProdiInovasi')?.value || '';
+    const filterTahun = document.getElementById('filterTahunInovasi')?.value || '';
+    const filterJenis = document.getElementById('filterJenisInovasi')?.value || '';
+
+    const baseUrl = '<?php echo e(route("fakultas.inovasi.print")); ?>';
+
+    const params = new URLSearchParams();
+    if (filterProdi) params.append('filter_prodi', filterProdi);
+    if (filterTahun) params.append('filter_tahun_akademik', filterTahun);
+    if (filterJenis) params.append('filter_jenis_inovasi', filterJenis);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 <?php $__env->stopPush(); ?><?php /**PATH F:\Project-2\audit-app\resources\views/components/fakultas-inovasi/filter-section.blade.php ENDPATH**/ ?>

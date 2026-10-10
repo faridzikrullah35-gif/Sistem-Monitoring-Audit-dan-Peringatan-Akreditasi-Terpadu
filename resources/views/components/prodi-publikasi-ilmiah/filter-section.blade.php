@@ -241,5 +241,28 @@ window.updateFilterOptionsPublikasi = function(tahunList) {
         filterSelect.value = '';
     }
 };
+
+// ============================================================
+//  HANDLE PRINT PUBLIKASI ILMIAH (dengan filter aktif)
+// ============================================================
+window.handlePrintPublikasi = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter tahun yang aktif dari DOM
+    const filterTahun = document.getElementById('filterTahunAkademik')?.value || '';
+
+    // Base URL print
+    const baseUrl = '{{ route("prodi.publikasi-ilmiah.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterTahun) params.append('tahun_akademik', filterTahun);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

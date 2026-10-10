@@ -336,5 +336,23 @@ document.addEventListener('DOMContentLoaded', function() {
     window.mahasiswaPdState.filter = 'fakultas';
     renderMahasiswaPdPagination();
 });
+
+// ============================================================
+//  HANDLE PRINT PD DIKTI MAHASISWA FAKULTAS (filter-aware)
+// ============================================================
+window.handlePrintPdDiktiMahasiswa = function(event) {
+    if (event) event.preventDefault();
+
+    const state = window.mahasiswaPdState || {};
+    const filterSource = state.filter || 'fakultas';
+
+    const baseUrl = '{{ route("fakultas.profile-pd-dikti.mahasiswa.print") }}';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

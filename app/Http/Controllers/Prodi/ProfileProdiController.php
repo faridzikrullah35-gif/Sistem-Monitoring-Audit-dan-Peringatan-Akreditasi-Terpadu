@@ -16,6 +16,9 @@ use App\Http\Requests\Prodi\StoreDokumenRequest;
 use App\Http\Requests\Prodi\UpdateDokumenRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\DokumenProdi;
+use App\Models\SettingHeaderCetak;
+use Carbon\Carbon;
 
 class ProfileProdiController extends Controller
 {
@@ -503,5 +506,82 @@ class ProfileProdiController extends Controller
         return $this->success(
             'Dokumen berhasil dihapus.'
         );
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DOKUMEN MoU (milik user sendiri)
+     * ==========================================================
+     */
+    public function printMou()
+    {
+        $user   = Auth::user();
+        $profil = $this->profil();
+
+        // Ambil dokumen MoU milik user login
+        $dokumenMou = DokumenProdi::where('profil_prodi_id', $profil->id)
+            ->where('jenis', 'MOU')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // ==================== HEADER CETAK (global) ====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ==================== INFO PRODI ====================
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        return view('print.prodi.mou', compact(
+            'dokumenMou',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+        ));
+    }
+
+    /**
+     * ==========================================================
+     * PRINT DATA JUMLAH MAHASISWA (milik user sendiri)
+     * ==========================================================
+     */
+    public function printMahasiswa()
+    {
+        $user   = Auth::user();
+        $profil = $this->profil();
+
+        // Ambil data mahasiswa dari profil prodi user login
+        $jumlahMahasiswa = $profil->jumlah_mahasiswa ?? 0;
+        $tahunAkademik   = $profil->tahun_akademik ?? '-';
+
+        // ==================== HEADER CETAK (global) ====================
+        $headerCetak = SettingHeaderCetak::latest('id')->first();
+
+        $headerNoDokumen     = $headerCetak?->no_dokumen ?? '-';
+        $headerTanggalTerbit = $headerCetak?->tanggal_terbit
+            ? Carbon::parse($headerCetak->tanggal_terbit)->format('d-m-Y')
+            : '-';
+        $headerNoRevisi      = $headerCetak?->no_revisi ?? '-';
+
+        // ==================== INFO PRODI ====================
+        $namaProdi = $user->name ?? '-';
+        $unit      = $user->unit ?? '-';
+
+        return view('print.prodi.mahasiswa', compact(
+            'jumlahMahasiswa',
+            'tahunAkademik',
+            'headerNoDokumen',
+            'headerTanggalTerbit',
+            'headerNoRevisi',
+            'namaProdi',
+            'unit',
+        ));
     }
 }

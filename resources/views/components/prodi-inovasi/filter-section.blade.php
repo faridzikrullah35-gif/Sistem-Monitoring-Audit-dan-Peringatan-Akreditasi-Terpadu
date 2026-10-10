@@ -507,5 +507,31 @@ window.refreshInovasiTable = function() {
         location.reload();
     });
 };
+
+// ============================================================
+//  HANDLE PRINT INOVASI (dengan filter aktif)
+// ============================================================
+window.handlePrintInovasi = function(event) {
+    if (event) event.preventDefault();
+
+    // Baca filter yang aktif dari state
+    const state = window.inovasiPaginationState || {};
+    const filterTahun = state.filters?.tahun_akademik || '';
+    const filterJenis = state.filters?.jenis_inovasi || '';
+
+    // Base URL print
+    const baseUrl = '{{ route("prodi.inovasi.print") }}';
+
+    // Bangun query string
+    const params = new URLSearchParams();
+    if (filterTahun) params.append('tahun_akademik', filterTahun);
+    if (filterJenis) params.append('jenis_inovasi', filterJenis);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+    // Buka tab baru
+    window.open(url, '_blank');
+    return false;
+};
 </script>
 @endpush

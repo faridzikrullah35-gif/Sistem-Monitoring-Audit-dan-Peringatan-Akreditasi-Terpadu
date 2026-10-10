@@ -26,6 +26,16 @@
                 <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Tambah
             </button>
+
+            <a href="#"
+            onclick="return handlePrintMouFakultas(event)"
+            class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print
+            </a>
         </div>
     </div>
 
@@ -282,6 +292,24 @@ function filterMouByProdi(value) {
         infoLabel.textContent = selectedOpt ? selectedOpt.textContent : 'Prodi';
     }
 }
+
+// ============================================================
+//  HANDLE PRINT MoU (filter-aware)
+// ============================================================
+window.handlePrintMouFakultas = function(event) {
+    if (event) event.preventDefault();
+
+    const sel = document.getElementById('filterProdiMou');
+    const filterSource = sel ? sel.value : 'fakultas';
+
+    const baseUrl = '{{ route("fakultas.identitas-fakultas.mou.print") }}';
+    const params = new URLSearchParams();
+    if (filterSource) params.append('filter_source', filterSource);
+
+    const url = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    window.open(url, '_blank');
+    return false;
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     filterMouByProdi('fakultas');
